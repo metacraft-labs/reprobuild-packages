@@ -26,6 +26,9 @@ package python3Source:
     "make"
     "pkg-config"
     "gcc >=11"
+    # The install mirror normalizes the interpreter's RPATH so libpython is
+    # found relative to the relocated source prefix.
+    "patchelf"
     ## Configure generates Makefile.pre through awk while source Readline is
     ## on the library path. Keep the helper on the source toolchain runtime.
     "gawk"
