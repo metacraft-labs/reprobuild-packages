@@ -24,7 +24,9 @@ package llvmSource:
     "python3 >=3.8"
 
   buildDeps:
-    discard
+    # GCC needs the target libc startup objects when CMake verifies the
+    # provisioned compiler and when LLVM links its shared runtime.
+    "glibc >=2.36"
 
   config:
     discard
