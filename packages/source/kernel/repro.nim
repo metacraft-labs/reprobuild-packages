@@ -222,6 +222,12 @@ package kernelSource:
     ## The host-side extract-cert helper is compiled even when module signing
     ## and trusted key embedding are disabled.
     "openssl >=3.0"
+    ## libelf's shared library uses these codecs internally. They must be
+    ## present while kbuild links the host-side objtool executable.
+    "zlib >=1.2"
+    "zstd >=1.5"
+    "xz >=5.4"
+    "bzip2 >=1.0"
     ##
     ## Deliberately NOT declared, because the ``build:`` block's
     ## configuration never reaches the code paths that would need them:
