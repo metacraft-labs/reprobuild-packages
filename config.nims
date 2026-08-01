@@ -14,3 +14,12 @@ if dirExists(libsRoot):
 let nimcryptoRoot = libsRoot / "nimcrypto"
 if fileExists(nimcryptoRoot / "nimcrypto" / "hash.nim"):
   switch("path", nimcryptoRoot)
+
+let blake3Headers = libsRoot / "blake3" / "src" / "blake3" / "vendor"
+let xxhashHeaders = libsRoot / "xxh3" / "src" / "xxh3" / "vendor"
+if fileExists(blake3Headers / "blake3.h") and
+    fileExists(xxhashHeaders / "xxhash.h"):
+  switch("define", "reproVendoredHash")
+  switch("passC", "-DREPRO_VENDORED_HASH")
+  switch("passC", "-I" & blake3Headers)
+  switch("passC", "-I" & xxhashHeaders)
