@@ -299,8 +299,12 @@ package gccSource:
       # tree under ``$out/bin/`` + ``$out/lib/`` + ``$out/libexec/``.
       shell "source_libs=$extracted/../../mpc/.repro/output/install/usr/lib:$extracted/../../mpfr/.repro/output/install/usr/lib:$extracted/../../gmp/.repro/output/install/usr/lib; cd $extracted/build && LD_LIBRARY_PATH=$source_libs make install"
       # GCC uses lib64 for x86_64 target runtimes. Publish stable lib
-      # aliases so declared library artifacts resolve consistently.
-      shell "mkdir -p $out/lib; for runtime in libgcc_s.so libgcc_s.so.1 libstdc++.so libstdc++.so.6 libgomp.so libgomp.so.1 libatomic.so libatomic.so.1; do test -e $out/lib64/$runtime; ln -sfn ../lib64/$runtime $out/lib/$runtime; done"
+      # aliases so declared library artifacts resolve consistently. The
+      # stage-one compiler also retains its pinned bootstrap libc development
+      # files in the prefix it already searches. This breaks the GCC/glibc
+      # bootstrap cycle without making every compiler consumer redeclare the
+      # bootstrap sysroot.
+      shell "mkdir -p $out/lib; for runtime in libgcc_s.so libgcc_s.so.1 libstdc++.so libstdc++.so.6 libgomp.so libgomp.so.1 libatomic.so libatomic.so.1; do test -e $out/lib64/$runtime; ln -sfn ../lib64/$runtime $out/lib/$runtime; done; bootstrap_lib=$(readlink -f $extracted/bootstrap-sysroot/lib); test -d $bootstrap_lib; for runtime in $bootstrap_lib/*.o $bootstrap_lib/*.a $bootstrap_lib/*.so $bootstrap_lib/*.so.*; do test -e $runtime || continue; name=$(basename $runtime); test -e $out/lib/$name || ln -s $runtime $out/lib/$name; done"
 
   executable "g++":
     ## ``$PREFIX/bin/g++`` — the canonical C++ compiler driver.
