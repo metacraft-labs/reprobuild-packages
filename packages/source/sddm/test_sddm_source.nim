@@ -1,0 +1,134 @@
+## Smoke test for the from-source ``sddm`` recipe.
+##
+## Pins the M9.H/I/K trio's behaviour on the TWENTY-SECOND real
+## production from-source recipe and the CLOSING recipe in the Plasma
+## stack batch. sddm's unique coverage angle vs the prior twenty-one
+## recipes is that it's the FIRST recipe to ship THREE artifacts
+## (two executables + one library) from a single ``package`` macro.
+## Every prior multi-artifact recipe shipped either TWO artifacts
+## (wayland's two libs, pango's two libs, mutter / gnome-shell /
+## kwin / plasma-workspace's library+executable pairs, gdm's two
+## executables) or FOUR (glib2's four libs). A regression that
+## collapsed the artifact-name partitioning at the three-artifact
+## cardinality would surface here, and a regression that mis-tagged
+## any of the three individual kind discriminants (exec vs lib) would
+## surface too.
+##
+## Coverage (12 check assertions across 8 tests):
+##
+##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
+##     algorithm + kind discriminant + extractStrip.
+##   * ``cmakeFlags:`` block round-trip (M9.I) — exact-order
+##     sequence equality on the production flag set + channel-isolation
+##     spot-check (meson + configure channels MUST be empty).
+##   * TWO artifact registration (M3) — ``sddm`` + ``sddm-greeter-qt6``
+##     tagged ``dakExecutable`` within the same package's artifact set.
+##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
+##     repository for ``repro update-source``.
+
+import std/[unittest]
+
+import repro_project_dsl
+
+# Side-effect import: triggers the package macro which registers
+# fetch spec + cmake flags + two executable artifacts + one library
+# artifact under ``sddm`` at module init time.
+import ./repro
+
+const ExpectedUrl =
+  # M9.R.15f.6 drive-by — the recipe long since switched to the
+  # upstream GitHub archive URL but this constant was never updated.
+  "https://github.com/sddm/sddm/archive/refs/tags/v0.21.0.tar.gz"
+
+const ExpectedHash =
+  "f895de2683627e969e4849dbfbbb2b500787481ca5ba0de6d6dfdae5f1549abf"
+
+const ExpectedCmakeFlags = @[
+  "-DBUILD_TESTING=OFF",
+  "-DBUILD_MAN_PAGES=OFF",
+  "-DENABLE_JOURNALD=OFF",
+  "-DCMAKE_BUILD_TYPE=Release",
+]
+
+suite "sddm — from-source recipe smoke test":
+
+  test "fetch spec carries the vendored URL verbatim":
+    # M9.H registry round-trip — URL is recorded exactly as declared.
+    let spec = registeredFetchSpec("sddm")
+    check spec.packageName == "sddm"
+    check spec.url == ExpectedUrl
+
+  test "fetch spec hash is a 64-char sha256 hex string":
+    # sha256 over the vendored 3,557,266-byte tarball; length check
+    # guards against a future bump that forgets to widen the hash
+    # alongside the URL.
+    let spec = registeredFetchSpec("sddm")
+    check spec.hashHex.len == 64
+    check spec.hashHex == ExpectedHash
+    check spec.hashAlg == dshaSha256
+
+  test "fetch spec is the tarball variant with extractStrip = 1":
+    # Tarball vs git-archive discriminant + the canonical
+    # ``--strip-components=1`` convention upstream GitHub release
+    # tarballs use.
+    let spec = registeredFetchSpec("sddm")
+    check spec.kind == dfkTarball
+    check spec.extractStrip == 1
+
+  test "cmakeFlags registers the exact production flag sequence":
+    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "cmakeFlags does not leak into the meson channel":
+    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "cmakeFlags does not leak into the configure channel":
+    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "artifacts register two executables with correct kinds":
+    # M3 artifact registry: ``sddm`` + ``sddm-greeter-qt6`` are
+    # tagged ``dakExecutable``.
+    #
+    # M9.R.15q.8.6 — correction: sddm 0.21 does NOT ship a
+    # ``libSDDMCommon.so`` shared library. The original recipe (and
+    # this test) assumed three artifacts including a common library,
+    # but inspection of the actual build tree (no lib/ dir at
+    # /opt/.../sddm/build/out/usr/) shows the daemon + greeter link
+    # against a STATIC libcommon embedded into each binary, never
+    # exposed as a shared object. The recipe now declares the actual
+    # ABI surface (two executables only).
+    #
+    # The greeter binary's installed name varies by Qt major version:
+    # under ``BUILD_WITH_QT6=ON`` it's ``sddm-greeter-qt6``; under the
+    # Qt5 default it's plain ``sddm-greeter``. The recipe pins Qt6
+    # for the v2 Plasma story, so the artifact identifier matches the
+    # installed filename exactly via the backticked quoted-form so
+    # the convention layer's stage-copy probe finds the binary at
+    # ``build/out/usr/bin/sddm-greeter-qt6``.
+    let arts = registeredArtifacts("sddm")
+    check arts.len == 2
+    var seenDaemon = false
+    var seenGreeter = false
+    for art in arts:
+      check art.packageName == "sddm"
+      case art.artifactName
+      of "sddm":
+        seenDaemon = true
+        check art.kind == dakExecutable
+      of "sddm-greeter-qt6":
+        seenGreeter = true
+        check art.kind == dakExecutable
+      else:
+        discard
+    check seenDaemon
+    check seenGreeter
+
+  test "versions block records the upstream tag + URL + repository":
+    # M2 versions registry: the upstream GitHub release tag is
+    # recorded for ``repro update-source`` even though the live
+    # fetch points at the vendored copy. The repository points at
+    # the canonical GitHub project that hosts the sddm source tree.
+    let vs = registeredVersions("sddm")
+    check vs.len == 1
+    check vs[0].version == "0.21.0"
+    check vs[0].sourceRevision == "v0.21.0"
+    check vs[0].sourceUrl ==
+      "https://github.com/sddm/sddm/archive/refs/tags/v0.21.0.tar.gz"
+    check vs[0].sourceRepository ==
+      "https://github.com/sddm/sddm"

@@ -1,0 +1,586 @@
+## Source-from-tarball kwin recipe — the TWENTIETH real from-source
+## production recipe to exercise the M9.H/I/K trio and the SECOND
+## recipe in the Plasma stack batch (kcoreaddons / kwin /
+## plasma-workspace / sddm).
+##
+## Prior nineteen from-source recipes — fourteen meson (dbus-broker,
+## libdrm, wayland, wlroots, sway, libxkbcommon, pixman, libinput,
+## cairo, pango, gdk-pixbuf, glib2, mutter, gnome-shell), one make
+## (linux-kernel), two CMake (json-c, kcoreaddons), two autotools
+## (expat, gdm) — collectively covered every M9.I flag-injection
+## channel and every artifact-kind permutation. kwin is the THIRD
+## CMake-driven recipe and the FIRST KWin compositor in the recipe
+## suite. The unique coverage angle for this recipe is that it's the
+## FIRST CMake recipe to ship BOTH a library AND an executable from
+## the same ``package`` macro (json-c shipped a library, kcoreaddons
+## shipped a library; this is the first CMake mixed-kind recipe). The
+## mutter/gnome-shell precedents are meson; this is the CMake-side
+## analogue, exercising the M3 artifact registry's mixed-kind
+## partitioning from the opposite build-system channel.
+##
+## ## Why kwin matters for the v1 desktop story
+##
+## kwin is the KDE Plasma Wayland compositor — the analogue of mutter
+## for the GNOME story. The standalone ``kwin_wayland`` binary is the
+## display-server process the user-session leader spawns to host
+## Wayland clients (the Plasma shell, all native + XWayland-bridged X11
+## clients). ``libkwin.so`` is the compositor library plasma-workspace
+## (NDE-K1's session leader) links against to register window-
+## management hooks + effect plugins. NDE-K1's manifest layer pins the
+## apt-jammy kwin .deb for v1 stubs; this from-source recipe lifts that
+## pin to a real ``kwin_wayland`` binary + ``libkwin.so`` library
+## artifact for the v2 Plasma story.
+##
+## ## sha256 strategy
+##
+## We vendor the upstream 6.2.5 .tar.xz at
+## ``recipes/packages/source/kwin/vendor/kwin-6.2.5.tar.xz`` and
+## reference it via a ``file://`` URL. The download.kde.org release URL
+## is recorded as ``sourceUrl`` in the ``versions:`` block for
+## documentation and future-bump purposes, but the live ``fetch:``
+## block points at the vendored copy so the convention layer's emitted
+## fetch action is offline-reproducible.
+##
+## ## Version choice — 6.2.5 (current upstream stable in the 6.2.x line)
+##
+## download.kde.org publishes KDE Plasma releases at
+## ``https://download.kde.org/stable/plasma/<x.y.z>/`` and 6.2.5 is the
+## current stable in the 6.2.x line as of mid-2026. The Plasma 6.2.x
+## series consumes the KF6 6.x frameworks ABI line that ``kcoreaddons``
+## 6.10.0 sits in, so the four Plasma-batch recipes stay in lockstep.
+##
+## sha256 = 5cc450a6e41105c8c49929b72550b331237f96aafb294690f4707bdc5f776848
+##  (computed locally over the vendored ``kwin-6.2.5.tar.xz``, 8,563,352
+##  bytes; downloaded once from the upstream URL recorded in
+##  ``versions:`` above).
+##
+## ## Build shape
+##
+## The c_cpp_cmake convention (M9.K) reads both the M9.H ``fetch:``
+## block and the M9.I ``cmakeFlags:`` block off this package's
+## registries and lowers them into:
+##
+##   1. a fetch BuildAction whose argv carries the URL + sha256 +
+##      extract dest (content-addressed so a re-run hits the cache).
+##   2. a ``cmake`` configure BuildAction that depends on the fetch
+##      action and passes every flag in ``cmakeFlags:`` to
+##      ``cmake -S <src> -B <build>``, in declared order.
+##   3. a ``ninja`` (or ``cmake --build``) compile BuildAction (M9.L).
+##   4. install/output collection actions for the library + executable
+##      artifacts (M9.L).
+##
+## M9.K only wires (1) + the flag-injection portion of (2). The
+## downstream ninja-spawn + install glue lands in M9.L; the recipe
+## records the artifacts via one ``library`` block + one
+## ``executable`` block so the M9.K artifact registry already knows
+## what shared object + binary to expect.
+##
+## ## Artifacts
+##
+## kwin's CMake build emits one shared library + one standalone binary:
+##
+##   * ``libkwin.so`` — the compositor library plasma-workspace links
+##                       against to register window-management hooks +
+##                       effect plugins (third-party kwin effects also
+##                       link against this for their UI plugin
+##                       contracts).
+##   * ``kwin_wayland`` — the standalone Wayland compositor binary that
+##                         hosts the Wayland display server + spawns
+##                         the user session. NDE-K1's
+##                         ``plasma.desktop`` Wayland session entry
+##                         ``Exec``s ``startplasma-wayland`` which
+##                         chain-execs into ``kwin_wayland`` for the
+##                         Wayland-side, but the binary itself is
+##                         exposed as ``kwin_wayland``.
+##
+## We register the library under the package-level identifier
+## ``libKWin`` (camelCased from the upstream SONAME ``kwin`` per the
+## json-c precedent — preserving the leading lib + the uppercase
+## ``KWin`` brand-casing, the same shape as ``libKF6CoreAddons``), and
+## the executable under ``kwinWayland`` (camelCased from the upstream
+## binary name ``kwin_wayland`` per the same convention).
+##
+## ## Configurables
+##
+## v1 ships NO configurables — the CMake options are hardcoded to the
+## modern-desktop baseline per the task brief:
+##
+##   * ``BUILD_TESTING=OFF``     — skip the upstream test suite to keep
+##                                  the build hermetic + fast.
+##   * ``KWIN_BUILD_TABBOX=OFF`` — skip the legacy task-switcher tab-box
+##                                  UI (modern Plasma uses the
+##                                  KWin-scripted task switcher
+##                                  instead).
+##   * ``KWIN_BUILD_X11=OFF``    — skip the X11/XWayland session
+##                                  support (the v1 Plasma story is
+##                                  pure-Wayland; the NDE-K1 spec
+##                                  pins only ``plasma.desktop``,
+##                                  not ``plasmax11.desktop``).
+##   * ``KWIN_BUILD_KCMS=OFF``   — skip the System Settings ``kcm``
+##                                  modules (the v1 minimal Plasma
+##                                  variant ships no Settings GUI;
+##                                  user-config is driven by NDE-K1's
+##                                  ``configFile`` emissions
+##                                  directly).
+##   * ``CMAKE_BUILD_TYPE=Release`` — release-mode optimisation;
+##                                  matches the sibling from-source
+##                                  recipes' ``--buildtype=release``
+##                                  meson option.
+##
+## Downstream configuration knobs would live here when the per-distro
+## variants need different strategies (e.g. an X11-supporting variant
+## that flips ``KWIN_BUILD_X11=ON`` for legacy bundles).
+
+import std/[os, strutils]
+
+import repro_project_dsl
+import repro_dsl_stdlib/constructors
+import repro_dsl_stdlib/types/package_result
+
+# ---------------------------------------------------------------------------
+# Package declaration
+# ---------------------------------------------------------------------------
+
+package kwin:
+  ## From-source kwin — twentieth M9.H/I/K production recipe and the
+  ## SECOND recipe in the Plasma stack batch. Third CMake-driven
+  ## recipe after json-c + kcoreaddons and the FIRST CMake recipe to
+  ## ship a library + an executable from the same ``package`` macro
+  ## (the mutter/gnome-shell precedents are meson; this is the
+  ## CMake-side analogue).
+  ##
+  ## Tier-2b c_cpp_cmake convention consumer: the convention layer
+  ## reads the ``fetch:`` block (registered via ``registeredFetchSpec``)
+  ## and the ``cmakeFlags:`` block (registered via
+  ## ``registeredBuildFlags`` on the ``"cmake"`` channel) and lowers
+  ## them into fetch + configure BuildActions wired with the right
+  ## URL + hash + flags. Library + executable artifact recipe.
+
+  versions:
+    ## Pinned upstream tag. ``sourceUrl`` records the canonical
+    ## download.kde.org release tarball URL so a future maintainer
+    ## running ``repro update-source`` can re-fetch from upstream; the
+    ## live ``fetch:`` block below points at the vendored copy for
+    ## deterministic offline test reproduction.
+    ##
+    ## ``sourceRepository`` points at the upstream KDE invent.kde.org
+    ## project --- kwin's canonical home.
+    "6.2.5":
+      sourceRevision = "v6.2.5"
+      sourceUrl = "https://download.kde.org/stable/plasma/6.2.5/kwin-6.2.5.tar.xz"
+      sourceRepository = "https://invent.kde.org/plasma/kwin"
+
+  fetch:
+    ## Vendored tarball (option 1 per the M9.K acceptance plan).
+    ## ``file://`` URL keeps the build deterministic when the network
+    ## is unavailable; the convention layer's argv carries this URL
+    ## verbatim so the engine's content-addressed cache fingerprint
+    ## stays stable across rebuilds.
+    ##
+    ## sha256 was computed over the vendored 8,563,352-byte tarball
+    ## downloaded once from the upstream URL recorded in
+    ## ``versions:`` above.
+    url: "https://download.kde.org/stable/plasma/6.2.5/kwin-6.2.5.tar.xz"
+    sha256: "5cc450a6e41105c8c49929b72550b331237f96aafb294690f4707bdc5f776848"
+    extractStrip: 1
+
+  nativeBuildDeps:
+    ## cmake is the build-system driver — the c_cpp_cmake convention's
+    ## configure action invokes ``cmake -S <src> -B <build>``.
+    ## kwin 6.x requires cmake 3.16 for the modern ECM + Qt6
+    ## ``find_package`` semantics the Plasma 6.x ABI line depends on.
+    "cmake >=3.16"
+    ## ninja is CMake's preferred backend on Linux — the compile action
+    ## invokes ``ninja`` (or ``cmake --build``) against the CMake build
+    ## directory.
+    "ninja >=1.10"
+    ## gcc is the host C/C++ toolchain — kwin is C++20.
+    "gcc >=11"
+    ## M9.R.15q.7.8 — kwin's CMake plugin build chain runs
+    ## ``python3 .../strip-metadata.py`` to strip Plasma plugin
+    ## ``metadata.json`` files to ``metadata.json.stripped`` at compile
+    ## time. Without python3 on PATH every plugin (fallapart /
+    ## backgroundcontrast / colorpicker / zoom / blur / ...) hits
+    ## ``env: 'python3': No such file or directory`` Error 127 and the
+    ## link step fails.
+    "python3"
+
+  buildDeps:
+    "extra-cmake-modules >=6.0"
+    ## kcoreaddons is the KF6 foundation library kwin links against
+    ## for KJob / KAboutData / KPluginFactory plumbing. The sibling
+    ## ``kcoreaddons`` recipe vendors 6.10.0 to match the KF6
+    ## 6.x ABI requirement.
+    "kcoreaddons >=6.0"
+    ## M9.R.15f.5 — kwin's CMakeLists explicitly find_package(KF6Config
+    ## REQUIRED), KF6I18n REQUIRED, KF6WidgetsAddons REQUIRED,
+    ## KF6XmlGui REQUIRED, etc.; the legacy ``kf6-base`` umbrella name
+    ## had no resolvable recipe. Replaced with the individual KF6
+    ## modules we ship as from-source recipes (the kwin from-source
+    ## convention layer probes for each via pkg-config at configure
+    ## time).
+    "kconfig >=6.0"
+    "ki18n >=6.0"
+    "kwidgetsaddons >=6.0"
+    "kxmlgui >=6.0"
+    "kservice >=6.0"
+    "kglobalaccel >=6.0"
+    "knotifications >=6.0"
+    "ksvg >=6.0"
+    "ksolid >=6.0"
+    "kio >=6.0"
+    "kded >=6.0"
+    "plasma-framework >=6.0"
+    ## wayland supplies the protocol scanner + libwayland-server kwin
+    ## uses for its Wayland compositor implementation. The sibling
+    ## ``wayland`` recipe vendors a compatible version.
+    "wayland >=1.20"
+    ## qt6-base supplies QtCore / QtGui / QtQml / QtQuick which the
+    ## modern kwin compositor (incl. the QML-based effect runtime)
+    ## consumes. 6.6 is the minimum the Plasma 6.2.x line targets.
+    "qt6-base >=6.6"
+    ## qt6-tools supplies the lupdate/lrelease/qhelpgenerator tooling
+    ## ECM's per-module find_package(Qt6 ... LinguistTools) probe
+    ## requires at configure time even when translations are disabled.
+    "qt6-tools >=6.6"
+    ## qt6-declarative supplies Qt6Qml + Qt6Quick the QML-based effect
+    ## runtime + Plasma's QtQuick-driven UI consume.
+    "qt6-declarative >=6.6"
+    ## qt6-wayland supplies Qt6WaylandClient for kwin's Wayland client
+    ## glue (find_package(Qt6 ... COMPONENTS WaylandClient REQUIRED)).
+    "qt6-wayland >=6.6"
+    ## qt6-svg supplies the Qt6Svg dependency kwin's QML scene loader
+    ## consumes for vector icons.
+    "qt6-svg >=6.6"
+    ## M9.R.15q.5.10 — kwin 6.2.5's CMakeLists.txt:60 declares
+    ## ``find_package(Qt6 ... COMPONENTS ... Core5Compat ...)``.
+    ## qt6-5compat ships ``libQt6Core5Compat.so``.
+    "qt6-5compat >=6.8"
+    ## M9.R.15q.5.10 — kwin 6.2.5's CMakeLists.txt:60 declares
+    ## ``find_package(Qt6 ... COMPONENTS ... Sensors ...)`` for
+    ## auto-rotation on convertible / tablet form factors.
+    ## qt6-sensors ships ``libQt6Sensors.so``.
+    "qt6-sensors >=6.8"
+    ## libdrm is the kernel DRM client library kwin's DRM backend uses
+    ## to drive direct-rendering on tty consoles. The sibling
+    ## ``libdrm`` recipe vendors a compatible version.
+    "libdrm >=2.4"
+    ## libinput is the input-event library kwin uses to handle
+    ## evdev / libinput-mediated keyboard / mouse / touchpad / tablet
+    ## events on the Wayland session.
+    "libinput >=1.20"
+    ## libxkbcommon is the keyboard-keymap library kwin uses to handle
+    ## layout switching / hotkey binding / compose-key sequences.
+    "libxkbcommon >=1.5"
+    ## pixman is the software 2D rendering backend kwin's
+    ## compositor uses for fallback paths.
+    "pixman >=0.40"
+    ## M9.R.15q.4.5 — kwin's CMakeLists.txt requires:
+    ##  - KDecoration2 (server-side decoration framework)
+    ##  - KWayland (KDE Wayland client/server)
+    ##  - kscreenlocker (lock-screen daemon, KWIN_BUILD_SCREENLOCKER=ON)
+    ##  - kglobalacceld (global-shortcut daemon, KWIN_BUILD_GLOBALSHORTCUTS=ON)
+    ##  - libcanberra (event-sound)
+    ##  - libepoxy (GL dispatch)
+    ##  - libdisplay-info (EDID parser)
+    ##  - libei (emulated-input handling, optional but on)
+    ##  - mesa (gbm + EGL + GL fallbacks)
+    ##  - lcms2 (color management)
+    ##  - freetype + fontconfig (QPA plugin)
+    ##  - libsystemd (service watchdog)
+    ##  - dbus (DBus client library)
+    ##  - kactivities equivalent → plasma-activities
+    ##  - plasma-wayland-protocols (Plasma-specific Wayland XML)
+    ##  - wayland-protocols (upstream Wayland XML)
+    ## M9.R.15q.4.8 — kdecoration source recipe at 6.2.0 ships the
+    ## legacy KDecoration2 CMake namespace kwin 6.2.5 looks up via
+    ## find_package(KDecoration2). nixpkgs's
+    ## kdePackages.kdecoration is at 6.3+ which renamed to
+    ## KDecoration3 — incompatible.
+    "kdecoration"
+    "kwayland >=6.0"
+    "kscreenlocker >=6.0"
+    "kglobalacceld >=6.0"
+    "libcanberra"
+    "libepoxy >=1.3"
+    "libdisplay-info"
+    "libei"
+    "mesa >=23.3"
+    "lcms2"
+    "freetype >=2.10"
+    "fontconfig >=2.13"
+    "libsystemd"
+    "dbus >=1.14"
+    "plasma-activities >=6.2"
+    "plasma-wayland-protocols >=1.14"
+    "wayland-protocols >=1.36"
+    ## M9.R.15q.4.5 — additional KF6 components kwin's find_package
+    ## line declares: KF6 COMPONENTS Auth ColorScheme IdleTime
+    ## Declarative KCMUtils NewStuff Package; we have sibling source
+    ## recipes for all of these (kauth, kcolorscheme, kidletime,
+    ## kdeclarative, kcmutils, knewstuff, kpackage, kirigami) so the
+    ## resolver picks them up via the sibling path.
+    "kauth >=6.0"
+    "kcolorscheme >=6.0"
+    "kidletime >=6.0"
+    ## M9.R.15q.5.11 — kwin 6.2.5's top-level CMakeLists.txt:85 declares
+    ## ``find_package(KF6 ... COMPONENTS ... WindowSystem ...)`` which
+    ## is the always-required KF6 component list (separate from the
+    ## KCMS-gated list at line 104). kwindowsystem is the sibling
+    ## from-source recipe.
+    "kwindowsystem >=6.0"
+    ## M9.R.15q.5.11 — kwin's CMakeLists.txt also declares Crash +
+    ## DBusAddons + GlobalAccel + GuiAddons + I18n + Service + Svg
+    ## as KF6 components. Add the missing siblings.
+    "kcrash >=6.0"
+    "kdbusaddons >=6.0"
+    "kglobalaccel >=6.0"
+    "kguiaddons >=6.0"
+    "ki18n >=6.0"
+    "kservice >=6.0"
+    "ksvg >=6.0"
+    "kconfig >=6.0"
+    "kcoreaddons >=6.0"
+    "kwidgetsaddons >=6.0"
+    ## M9.R.15q.5.11.b — kwindowsystem was built with KWINDOWSYSTEM_X11=ON
+    ## so its CMake Config does ``find_dependency(X11)`` at consumer
+    ## time. cmake's ``FindX11`` looks for X11/X.h (xorgproto) + libX11
+    ## + libxcb on the standard system paths; since we're in a
+    ## hermetic nix-shell, we thread the X11 client libs onto kwin's
+    ## env via the M9.R.14e search-path channels (same shape
+    ## kwindowsystem itself uses).
+    "xorgproto"
+    "libx11"
+    "libxcb"
+    "libxau"
+    "libxdmcp"
+    "xcb-util-keysyms"
+    "xcb-util-wm"
+    "libxext"
+    "libxfixes"
+    "libxrender"
+    ## M9.R.15q.6.6 — kwin's src/cursor.cpp:33 unconditionally declares
+    ## ``#include <xcb/xcb_cursor.h>`` (NOT gated on KWIN_BUILD_X11), so
+    ## the xcb-util-cursor headers must be on the C include path even
+    ## when X11 client glue is disabled. xcb-util-cursor ships
+    ## ``libxcb-cursor.so`` + the ``xcb/xcb_cursor.h`` header.
+    "xcb-util-cursor"
+    ## M9.R.15q.5.12 — kwin 6.2.5's CMakeLists.txt:340 declares
+    ## ``pkg_check_modules(libxcvt>=0.1.1 REQUIRED)`` for the DRM
+    ## backend's modeline-fallback computation. libxcvt is a nix-stub.
+    "libxcvt"
+    ## M9.R.15q.5.12 — libepoxy.pc declares ``Requires: gl``, so
+    ## pkg-config recursively probes for ``gl.pc`` (libglvnd's desktop
+    ## OpenGL pkg-config file). The ``gl`` nix-stub points at
+    ## ``nixpkgs#libglvnd``'s gl.pc.
+    "gl"
+    ## M9.R.15q.5.8 — kdeclarative + kcmutils + knewstuff are
+    ## conditionally required ONLY when KWIN_BUILD_KCMS=ON (see kwin
+    ## upstream CMakeLists.txt:104). With KWIN_BUILD_KCMS=OFF (which
+    ## the cacheVars below set) these are NOT looked up and so the
+    ## from-source auto-recurse should not need to build them. We keep
+    ## kpackage + kirigami because the QML side of kwin's effects
+    ## still uses them.
+    "kpackage >=6.0"
+    "kirigami >=6.0"
+    ## hwdata (RUNTIME) for monitor vendor-ID mapping.
+    "hwdata"
+
+  config:
+    ## No prefix lifted from `cmakeFlags:`; flags inlined in the `build:` block.
+    discard
+  executable kwinWayland:
+    ## ``/usr/bin/kwin_wayland`` — the standalone Wayland compositor
+    ## binary kwin ships. Hosts the Wayland display server + runs the
+    ## user-session compositor for Plasma sessions. NDE-K1's
+    ## ``plasma.desktop`` Wayland session entry chain-execs into this
+    ## via ``startplasma-wayland``. v1 records the artifact only; the
+    ## per-artifact build body lands in M9.L when the convention's
+    ## ninja-spawn + install-glue closes.
+    discard
+
+  library libKWin:
+    ## ``libkwin.so`` — the compositor library plasma-workspace links
+    ## against to register window-management hooks + effect plugins.
+    ## Third-party kwin effects also link against this for their UI
+    ## plugin contracts. v1 records the artifact only.
+    discard
+
+  build:
+    ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
+    setCurrentOwningPackageOverride("kwin")
+    try:
+      # M9.R.15q.6.5 — global -I flags for libwayland, libwayland-server
+      # (used by Qt6's qt6_generate_wayland_protocol_client_sources auto-
+      # generated <protocol>-protocol.c which #include's wayland-util.h)
+      # and Qt6 prefix dirs used by some kwin sub-targets (killer, aurorae
+      # plugins, kpackage plugins) whose CMakeLists do NOT add wayland-
+      # client to target_link_libraries. Per-target target_include_dirs is
+      # the upstream-correct fix but requires patching kwin's source;
+      # plumbing the include via CMAKE_{C,CXX}_FLAGS is a stop-gap that
+      # threads the include path globally without touching the recipe-eval
+      # vendored source tree.
+      let waylandInc = dependencyInstallMirrorRoot("wayland") &
+        "/usr/include"
+      let qt6CoreInc = dependencyInstallMirrorRoot("qt6-base") &
+        "/usr/include"
+      let qt6DeclInc = dependencyInstallMirrorRoot("qt6-declarative") &
+        "/usr/include"
+      # M9.R.15q.7.5 — kwin's src/cursor.cpp:33 unconditionally
+      # ``#include <xcb/xcb_cursor.h>`` (NOT gated on KWIN_BUILD_X11).
+      # xcb-util-cursor's tool stub IS resolved but its include dir
+      # (.../include) is not added to the kwin CMakeLists target's
+      # target_include_dirs because the upstream CMakeLists conditions
+      # the find_package on KWIN_BUILD_X11=ON. Plumb the dir globally
+      # via CMAKE_{C,CXX}_FLAGS isystem just like wayland/qt6 above.
+      # Resolves nix-store path via walkPattern (same pattern as
+      # libdisplay-info / wayland-protocols resolution below).
+      var xcbCursorInc = ""
+      for store in walkPattern("/nix/store/*xcb-util-cursor*-dev"):
+        let p = store / "include"
+        if dirExists(p):
+          xcbCursorInc = p
+          break
+      var globalIncFlags = "-isystem " & waylandInc &
+        " -isystem " & qt6CoreInc &
+        " -isystem " & qt6DeclInc
+      if xcbCursorInc.len > 0:
+        globalIncFlags.add(" -isystem " & xcbCursorInc)
+      # M9.R.15q.7.7 — libinput.so DT_NEEDED references libmtdev.so.1 +
+      # libevdev.so.2 which live in nix-store mtdev/libevdev prefixes.
+      # The from-source libinput recipe does not propagate those rpaths
+      # via its install-mirror, so the linker emits "libmtdev.so.1: not
+      # found" warnings and ld then fails on libkwin.so.6.2.5. Stop-gap:
+      # walkPattern + -Wl,-rpath-link on the per-recipe link.
+      var linkRpathDirs: seq[string] = @[]
+      for store in walkPattern("/nix/store/*mtdev-*"):
+        let p = store / "lib"
+        if dirExists(p) and fileExists(p / "libmtdev.so.1"):
+          linkRpathDirs.add(p)
+          break
+      for store in walkPattern("/nix/store/*libevdev-*"):
+        let p = store / "lib"
+        if dirExists(p) and fileExists(p / "libevdev.so.2"):
+          linkRpathDirs.add(p)
+          break
+      var linkFlags = ""
+      for d in linkRpathDirs:
+        if linkFlags.len > 0: linkFlags.add(" ")
+        linkFlags.add("-Wl,-rpath-link," & d & " -L" & d)
+      let opts = @[
+        "BUILD_TESTING=OFF",
+        "KWIN_BUILD_TABBOX=OFF",
+        "KWIN_BUILD_X11=OFF",
+        "KWIN_BUILD_KCMS=OFF",
+        # M9.R.15q.4.7 — disable optional kwin subsystems whose deps
+        # ship under nix as runtime daemons without CMake config
+        # files (kglobalacceld has no KGlobalAccelDConfig.cmake).
+        # Re-enable later if we ship the matching from-source recipe.
+        "KWIN_BUILD_GLOBALSHORTCUTS=OFF",
+        "KWIN_BUILD_NOTIFICATIONS=OFF",
+        "KWIN_BUILD_SCREENLOCKER=OFF",
+        "KWIN_BUILD_RUNNERS=OFF",
+        "CMAKE_BUILD_TYPE=Release",
+        # M9.R.15q.6.5 — global -I flags for libwayland + Qt6 (see above).
+        "CMAKE_C_FLAGS=" & globalIncFlags,
+        "CMAKE_CXX_FLAGS=" & globalIncFlags,
+        # M9.R.15q.7.7 — link-time rpath-link for libinput's transitive
+        # DT_NEEDED (libmtdev + libevdev).
+        "CMAKE_EXE_LINKER_FLAGS=-Wl,--copy-dt-needed-entries " & linkFlags,
+        "CMAKE_SHARED_LINKER_FLAGS=-Wl,--copy-dt-needed-entries " & linkFlags,
+      ]
+      # M9.R.15q.6.3 — explicit PKG_CONFIG_PATH_FOR_TARGET injection.
+      #
+      # The nix pkg-config-wrapper consults PKG_CONFIG_PATH_FOR_TARGET
+      # (NOT PKG_CONFIG_PATH) when NIX_PKG_CONFIG_WRAPPER_TARGET_TARGET_*
+      # is set, which it always is inside a nix-shell. The M9.R.14e.3
+      # search-path channels DO populate PKG_CONFIG_PATH_FOR_TARGET via
+      # the from-source resolver, but for kwin's 70+ dep graph some
+      # entries are dropped before reaching the configure action's env
+      # — the symptom is "wayland-scanner / wayland-protocols /
+      # libdisplay-info: No package found" even though each dep's tool
+      # identity has the right pkgConfigSearchList. Threading the
+      # known-good paths explicitly via extraEnv bypasses that channel.
+      #
+      # Discovered at recipe-eval time so the recipe is portable across
+      # hosts: walks the sibling source-recipe install mirrors. Both
+      # the wayland-protocols + libdisplay-info paths live in
+      # /nix/store/*-*-{wayland-protocols,libdisplay-info}/ (nix stubs),
+      # which we glob via a single shell expansion.
+      var pkgCfgDirs: seq[string] = @[]
+      let recipeRoot = getEnv("REPROBUILD_RECIPE_ROOT",
+        "/opt/repro/reprobuild/recipes/packages/source")
+      # Sibling from-source pkg-config dirs.
+      for sib in walkDir(recipeRoot, relative = false):
+        if sib.kind == pcDir:
+          let p = sib.path / ".repro" / "output" / "install" / "usr" / "lib" / "pkgconfig"
+          if dirExists(p):
+            pkgCfgDirs.add(p)
+          let p64 = sib.path / ".repro" / "output" / "install" / "usr" / "lib64" / "pkgconfig"
+          if dirExists(p64):
+            pkgCfgDirs.add(p64)
+          let pShare = sib.path / ".repro" / "output" / "install" / "usr" / "share" / "pkgconfig"
+          if dirExists(pShare):
+            pkgCfgDirs.add(pShare)
+      # Nix-stub pkg-config dirs (wayland-protocols + libdisplay-info).
+      # /nix/store is huge (~33k entries) so walkDir is prohibitively slow;
+      # walkPattern only opens entries matching the glob.
+      for store in walkPattern("/nix/store/*-wayland-protocols-*"):
+        let n = extractFilename(store)
+        if n.endsWith(".drv") or n.endsWith(".tar.xz") or
+            n.endsWith(".tar.gz") or n.endsWith(".patch"):
+          continue
+        if not dirExists(store): continue
+        let pShare = store / "share" / "pkgconfig"
+        if dirExists(pShare):
+          pkgCfgDirs.add(pShare)
+        let pLib = store / "lib" / "pkgconfig"
+        if dirExists(pLib):
+          pkgCfgDirs.add(pLib)
+      for store in walkPattern("/nix/store/*-libdisplay-info-*"):
+        let n = extractFilename(store)
+        if n.endsWith(".drv") or n.endsWith(".tar.xz") or
+            n.endsWith(".tar.gz") or n.endsWith(".patch"):
+          continue
+        if not dirExists(store): continue
+        let pShare = store / "share" / "pkgconfig"
+        if dirExists(pShare):
+          pkgCfgDirs.add(pShare)
+        let pLib = store / "lib" / "pkgconfig"
+        if dirExists(pLib):
+          pkgCfgDirs.add(pLib)
+      let pkgCfgPath = pkgCfgDirs.join(":")
+      # M9.R.15q.7.1 — cap cmake's internal compile parallelism. cmake's
+      # bare ``--build --parallel`` defers to nproc on the host
+      # generator (ninja/make); on a 32-core 64 GiB WSL host that
+      # spawned 343 simultaneous cc1plus processes for kwin's
+      # template-heavy C++ during M9.R.15q.6/.7 reproducer runs and
+      # OOM-killed the WSL VM mid-compile (five back-to-back crashes
+      # observed during M9.R.15q.7).
+      #
+      # M9.R.15q.7.4 — pinning via CMAKE_BUILD_PARALLEL_LEVEL alone was
+      # insufficient: ninja ignores the env var and falls back to nproc
+      # (verified 13:14 WSL: 343 cc1plus spawned despite env=8). M9.R.15q.7.3
+      # adds the cmake_package constructor's opt-in ``--parallel <N>`` bake
+      # which the recipe activates via the same env-var entry below — when
+      # extraEnv carries ``CMAKE_BUILD_PARALLEL_LEVEL`` the buildArgv
+      # appends the numeric value, hard-capping ninja regardless of env-var
+      # honoring.
+      let env = @[
+        ("PKG_CONFIG_PATH_FOR_TARGET", pkgCfgPath),
+        ("PKG_CONFIG_PATH", pkgCfgPath),
+        ("CMAKE_BUILD_PARALLEL_LEVEL", "8"),
+      ]
+      let pkg = cmake_package(srcDir = "./src", cacheVars = opts,
+                              extraEnv = env, allowSourceWrites = true)
+      discard pkg.executable("kwinWayland")
+      discard pkg.library("libKWin")
+    finally:
+      clearCurrentOwningPackageOverride()
+
+  runtimeDeps:
+    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
+    ## DT_NEEDED inspection of the linked artifacts. Empty until
+    ## the M9.R.5b per-recipe pass populates per-output ELF
+    ## interrogation.
+    discard

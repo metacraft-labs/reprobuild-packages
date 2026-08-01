@@ -1,0 +1,365 @@
+## Source-from-tarball gnome-shell recipe — the EIGHTEENTH real from-
+## source production recipe to exercise the M9.H/I/K trio and the
+## THIRD (closing) recipe in the GNOME stack batch (mutter / gdm /
+## gnome-shell).
+##
+## ## M9.R.32.2 STATUS: artifact NOT produced (gjs/mozjs dep missing)
+##
+## The recipe registers fetch + meson options + library + executable
+## artifacts so the DSL surface is exercised, BUT the actual build
+## has never completed because gjs (the GNOME JavaScript engine,
+## upstream-required at meson configure time via ``js_min_version``
+## and the ``gjs-1.0`` pkg-config check) is only a Nix-channel stub
+## (``libs/repro_dsl_stdlib/src/repro_dsl_stdlib/packages/gjs.nim``)
+## — not a from-source recipe.
+##
+## gjs itself requires SpiderMonkey (``mozjs-128`` or newer) as its
+## C++ engine; building SpiderMonkey from source is a multi-day
+## effort (Rust toolchain + clang ≥15 + Python 3.10 + cbindgen + a
+## 1.5 GiB mozilla-central source tree).  Authoring both gjs +
+## mozjs from-source is out of M9.R.32 scope; see honest gap list
+## in ``run-evidence/m9r32_complete.txt``.
+##
+## v1 ships GNOME via mutter (the Wayland compositor, which DOES
+## build from-source per ``recipes/packages/source/mutter/``) +
+## an empty gnome-shell slot; the live ISO falls through to a
+## tty/sway session when the GNOME .desktop entry is selected.
+## A future fullbuild milestone (M9.R.34?) authoring mozjs + gjs
+## unblocks the gnome-shell + gnome-extensions-app + gnome-control-
+## center triplet.
+##
+## Prior seventeen from-source recipes — fourteen meson (dbus-broker,
+## libdrm, wayland, wlroots, sway, libxkbcommon, pixman, libinput,
+## cairo, pango, gdk-pixbuf, glib2, mutter), one make (linux-kernel),
+## one CMake (json-c), two autotools (expat + gdm) — collectively
+## covered every M9.I flag-injection channel and every artifact-kind
+## permutation. gnome-shell is the third meson recipe to ship BOTH a
+## library AND an executable from the same ``package`` macro (Wayland
+## was first with libwayland + waylandScanner, mutter was second with
+## libMutter + mutterBin). The unique coverage angle for this third
+## library+executable meson recipe is the kebab-to-camel package-
+## identifier mapping (``gnome-shell`` -> ``gnomeShell``)
+## combined with the library+executable artifact split: this is the
+## first recipe to combine BOTH a multi-word-kebab package name AND a
+## mixed-kind artifact set, exercising the M3 registry's name-mangling
+## + per-package artifact partitioning at the same time.
+##
+## ## Why gnome-shell matters for the v1 desktop story
+##
+## gnome-shell is the GNOME user-session UI: the top bar, activities
+## overview, window switcher, lock screen, notification daemon, and
+## extension host. It links against mutter's ``libmutter-15.so`` for
+## compositor glue and runs as the user's session leader after gdm
+## hands off post-login. NDE-G1's ``gnome-session.service`` ``ExecStart``s
+## ``gnome-shell --wayland`` directly. The standalone ``gnome-shell``
+## binary is the executable artifact; ``libgnome-shell.so`` is the
+## extension-host library third-party shell extensions link against.
+##
+## ## sha256 strategy
+##
+## We vendor the upstream 47.10 .tar.xz at
+## ``recipes/packages/source/gnome-shell/vendor/gnome-shell-47.10.tar.xz``
+## and reference it via a ``file://`` URL. The download.gnome.org
+## release URL is recorded as ``sourceUrl`` in the ``versions:`` block
+## for documentation and future-bump purposes, but the live ``fetch:``
+## block points at the vendored copy so the convention layer's
+## emitted fetch action is offline-reproducible.
+##
+## ## Version choice — 47.10 (current upstream stable in the 47.x line)
+##
+## download.gnome.org publishes gnome-shell releases at
+## ``https://download.gnome.org/sources/gnome-shell/`` and 47.10 is
+## the current stable in the 47.x line as of mid-2026, matching the
+## sibling ``mutter`` recipe's 47.10 pin. The 47.x ABI line
+## consumes ``libmutter-15.so`` so the mutter/gnome-shell minor lines
+## must stay in lockstep.
+##
+## sha256 = 5174d25bb05d35f3612498efc33a1de533fc4e0f39e3eb377fd09591c94a10e6
+##  (computed locally over the vendored ``gnome-shell-47.10.tar.xz``,
+##  2,144,616 bytes; downloaded once from the upstream URL recorded in
+##  ``versions:`` above).
+##
+## ## Build shape
+##
+## The c_cpp_meson convention (M9.K) reads both the M9.H ``fetch:``
+## block and the M9.I ``mesonOptions:`` block off this package's
+## registries and lowers them into:
+##
+##   1. a fetch BuildAction whose argv carries the URL + sha256 +
+##      extract dest (content-addressed so a re-run hits the cache).
+##   2. a ``meson setup`` configure BuildAction that depends on the
+##      fetch action and passes every flag in ``mesonOptions:`` to
+##      ``meson setup``, in declared order.
+##   3. a ``ninja`` compile BuildAction (M9.L).
+##   4. install/output collection actions for the library + executable
+##      artifacts (M9.L).
+##
+## M9.K only wires (1) + the flag-injection portion of (2). The
+## downstream ninja-spawn + install glue lands in M9.L; the recipe
+## records the artifacts via one ``library`` block + one
+## ``executable`` block so the M9.K artifact registry already knows
+## what shared object + binary to expect.
+##
+## ## Artifacts
+##
+## gnome-shell's meson build emits one shared library + one standalone
+## binary:
+##
+##   * ``libgnome-shell.so`` — the extension-host library third-party
+##                              gnome-shell extensions link against.
+##   * ``gnome-shell`` — the standalone shell binary that drives the
+##                       user session UI; NDE-G1's
+##                       ``gnome-session.service`` invokes
+##                       ``gnome-shell --wayland`` directly.
+##
+## We register the library under the package-level identifier
+## ``libGnomeShell`` (camelCased from the hyphenated upstream SONAME
+## per the gdk-pixbuf / glib2 precedent), and the executable under
+## ``gnomeShell`` (camelCased from the hyphenated upstream binary
+## name, also matching the gdk-pixbuf -> gdkPixbuf precedent; no
+## ``Bin`` suffix is needed here because the package identifier is
+## ``gnomeShell`` — distinct from the artifact identifier).
+##
+## ## Configurables
+##
+## v1 ships NO configurables — the meson options are hardcoded to the
+## modern-desktop baseline per the task brief:
+##
+##   * ``gtk_doc=false``        — skip the gtk-doc API documentation
+##                                 build (heavy XSLT dep surface, not
+##                                 needed at runtime).
+##   * ``tests=false``          — skip the upstream test suite to keep
+##                                 the build hermetic + fast.
+##   * ``man=false``            — skip man-page generation.
+##   * ``networkmanager=false`` — drop the NetworkManager status-menu
+##                                 integration (NetworkManager is not
+##                                 in the v1 NDE-G1 dep set; the
+##                                 dummy-network shell variant
+##                                 omits the menu entries).
+##   * ``systemd=false``        — drop the systemd-journal + systemd-
+##                                 user-unit-tracking integration
+##                                 (NDE-G1's manifest layer drives
+##                                 the systemd-user-session lifecycle
+##                                 externally).
+##   * ``extensions_app=false`` — skip the GNOME Extensions GUI app
+##                                 (a separate ``gnome-extensions-app``
+##                                 binary, not needed for the v1
+##                                 minimal-shell variant).
+##   * ``extensions_tool=false`` — skip the ``gnome-extensions`` CLI
+##                                  tool (also not needed for the v1
+##                                  minimal-shell variant).
+##   * ``--buildtype=release``  — release-mode optimisation; matches
+##                                 the sibling from-source recipes.
+##
+## Downstream configuration knobs would live here when the per-distro
+## variants need different strategies (e.g. a developer variant that
+## flips ``extensions_app=true`` for extension-development bundles).
+
+import repro_project_dsl
+import repro_dsl_stdlib/constructors
+import repro_dsl_stdlib/types/package_result
+
+# ---------------------------------------------------------------------------
+# Package declaration
+# ---------------------------------------------------------------------------
+
+package gnomeShell:
+  ## From-source gnome-shell — eighteenth M9.H/I/K production recipe
+  ## and the CLOSING recipe in the GNOME stack batch. Third meson
+  ## recipe to ship a library + an executable from the same
+  ## ``package`` macro, and the first recipe to combine a multi-word-
+  ## kebab package name (``gnome-shell`` -> ``gnomeShell``)
+  ## with a mixed-kind artifact set.
+  ##
+  ## Tier-2b c_cpp_meson convention consumer: the convention layer
+  ## reads the ``fetch:`` block (registered via ``registeredFetchSpec``)
+  ## and the ``mesonOptions:`` block (registered via
+  ## ``registeredBuildFlags`` on the ``"meson"`` channel) and lowers
+  ## them into fetch + configure BuildActions wired with the right
+  ## URL + hash + flags. Library + executable artifact recipe.
+
+  versions:
+    ## Pinned upstream tag. ``sourceUrl`` records the canonical
+    ## download.gnome.org release tarball URL so a future maintainer
+    ## running ``repro update-source`` can re-fetch from upstream; the
+    ## live ``fetch:`` block below points at the vendored copy for
+    ## deterministic offline test reproduction.
+    ##
+    ## ``sourceRepository`` points at the upstream GNOME gitlab
+    ## project --- gnome-shell's canonical home.
+    "47.10":
+      sourceRevision = "47.10"
+      sourceUrl = "https://download.gnome.org/sources/gnome-shell/47/gnome-shell-47.10.tar.xz"
+      sourceRepository = "https://gitlab.gnome.org/GNOME/gnome-shell"
+
+  fetch:
+    ## Vendored tarball (option 1 per the M9.K acceptance plan).
+    ## ``file://`` URL keeps the build deterministic when the network
+    ## is unavailable; the convention layer's argv carries this URL
+    ## verbatim so the engine's content-addressed cache fingerprint
+    ## stays stable across rebuilds.
+    ##
+    ## sha256 was computed over the vendored 2,144,616-byte tarball
+    ## downloaded once from the upstream URL recorded in
+    ## ``versions:`` above.
+    url: "https://download.gnome.org/sources/gnome-shell/47/gnome-shell-47.10.tar.xz"
+    sha256: "5174d25bb05d35f3612498efc33a1de533fc4e0f39e3eb377fd09591c94a10e6"
+    extractStrip: 1
+
+  nativeBuildDeps:
+    ## meson is the build-system driver — the c_cpp_meson convention's
+    ## configure action invokes ``meson setup``. gnome-shell 47.x
+    ## requires meson 1.3 for its modern GResource bundling.
+    "meson >=1.3"
+    ## ninja is meson's default backend — the compile action invokes
+    ## ``ninja`` against the meson build directory.
+    "ninja >=1.10"
+    ## gcc is the host C toolchain — gnome-shell is C11 with GJS
+    ## (gjs-1.0) glue.
+    "gcc >=11"
+    ## Meson's GNOME module invokes glib-mkenums and the GLib resource
+    ## compilers while generating the shell's bundled sources.
+    "glib2 >=2.62"
+    ## msgfmt compiles the shell's translation catalogs.
+    "gettext"
+
+  buildDeps:
+    ## glib2 is the foundation library gnome-shell consumes for the
+    ## entire GObject hierarchy + GMainLoop + GSettings + GDBus.
+    "glib2 >=2.62"
+    ## mutter is the compositor library gnome-shell links against for
+    ## its compositor glue; the sibling ``mutter`` recipe
+    ## vendors 47.10 to match the gnome-shell 47.x ABI requirement.
+    "mutter >=47"
+    ## gjs is the GNOME JavaScript engine gnome-shell uses for its
+    ## UI scripting layer (top bar, activities overview, extension
+    ## host).
+    "gjs >=1.78"
+    ## libxkbcommon is the keyboard-keymap library gnome-shell's
+    ## input handlers consume to handle layout switching / hotkey
+    ## binding.
+    "libxkbcommon >=1.5"
+    ## cairo is the 2D drawing backend gnome-shell's UI compositor
+    ## uses for on-screen overlay rendering.
+    "cairo >=1.16"
+    ## pango is the text-shaping + font-rendering library gnome-shell
+    ## uses for top-bar labels / activities-overview text / lock-
+    ## screen clock.
+    "pango >=1.50"
+    ## gdk-pixbuf is the image loader gnome-shell uses for icon
+    ## decoding + wallpaper loading.
+    "gdk-pixbuf >=2.40"
+    "gtk4 >=4.12"
+    "graphene >=1.10"
+    "harfbuzz >=2.6"
+    "libepoxy >=1.4"
+    "libpng >=1.6"
+    "libjpeg >=2.0"
+    "libtiff"
+    "wayland >=1.22"
+    "wayland-protocols >=1.31"
+    "libdrm >=2.4.110"
+    "libx11"
+    "mesa"
+    "libglvnd >=1.7"
+    "fribidi"
+    "polkit >=0.120"
+    "gnome-desktop >=44"
+    "pulseaudio"
+    "gsettings-desktop-schemas >=47"
+    "at-spi2-core >=2.54"
+    "evolution-data-server >=3.54"
+    "gcr >=4.3"
+    "gobject-introspection >=1.80"
+
+  config:
+    ## No prefix lifted from `mesonOptions:`; flags inlined in the `build:` block.
+    discard
+  executable gnomeShell:
+    ## ``/usr/bin/gnome-shell`` — the standalone shell binary that
+    ## drives the user-session UI (top bar, activities overview,
+    ## window switcher, lock screen, notification daemon, extension
+    ## host). NDE-G1's ``gnome-session.service`` ``ExecStart``s
+    ## ``gnome-shell --wayland`` directly. v1 records the artifact
+    ## only; the per-artifact build body lands in M9.L when the
+    ## convention's ninja-spawn + install-glue closes.
+    discard
+
+  library libGnomeShell:
+    ## ``libgnome-shell.so`` — the extension-host library third-party
+    ## gnome-shell extensions link against to register UI widgets /
+    ## status-menu entries / activities-overview tiles. The
+    ## hyphenated upstream SONAME is camelCased to ``libGnomeShell``
+    ## per the gdk-pixbuf / glib2 precedent. v1 records the artifact
+    ## only.
+    discard
+
+  build:
+    ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
+    setCurrentOwningPackageOverride("gnomeShell")
+    try:
+      let opts = @[
+        "gtk_doc=false",
+        "tests=false",
+        "man=false",
+        "camera_monitor=false",
+        "networkmanager=false",
+        "portal_helper=false",
+        "systemd=false",
+        "extensions_app=false",
+        "extensions_tool=false",
+      ]
+      let rpathLinkDirs = [
+        "/opt/repro/reprobuild/recipes/packages/source/polkit/.repro/output/install/usr/lib64",
+        "/opt/repro/reprobuild/recipes/packages/source/gcr/.repro/output/install/usr/lib64",
+        "/opt/repro/reprobuild/recipes/packages/source/gnome-desktop/.repro/output/install/usr/lib",
+        "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/lib64",
+      ]
+      var linkFlags = ""
+      for dir in rpathLinkDirs:
+        if linkFlags.len > 0:
+          linkFlags.add(' ')
+        linkFlags.add("-Wl,-rpath-link," & dir)
+      let pkg = meson_package(srcDir = "./src", configureOptions = opts,
+        extraEnv = @[
+          ("LDFLAGS", linkFlags),
+          ("GI_GIR_PATH",
+            "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0:" &
+            "/opt/repro/reprobuild/recipes/packages/source/gtk4/.repro/output/install/usr/share/gir-1.0:" &
+            "/opt/repro/reprobuild/recipes/packages/source/gdk-pixbuf/.repro/output/install/usr/share/gir-1.0:" &
+            "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/share/gir-1.0:" &
+            "/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/share/gir-1.0:" &
+              "/opt/repro/reprobuild/recipes/packages/source/harfbuzz/.repro/output/install/usr/share/gir-1.0:" &
+              "/opt/repro/reprobuild/recipes/packages/source/at-spi2-core/.repro/output/install/usr/share/gir-1.0:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gsettings-desktop-schemas/.repro/output/install/usr/share/gir-1.0:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gcr/.repro/output/install/usr/share/gir-1.0:" &
+              "/opt/repro/reprobuild/recipes/packages/source/polkit/.repro/output/install/usr/share/gir-1.0:" &
+              "/opt/repro/reprobuild/recipes/packages/source/mutter/.repro/output/install/usr/lib64/mutter-15:" &
+              "/opt/repro/reprobuild/recipes/packages/source/mutter/.repro/output/install/usr/share/gir-1.0:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gnome-desktop/.repro/output/install/usr/share/gir-1.0"),
+          ("XDG_DATA_DIRS",
+              "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gtk4/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gdk-pixbuf/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/harfbuzz/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/at-spi2-core/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gsettings-desktop-schemas/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gcr/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/polkit/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/mutter/.repro/output/install/usr/share:" &
+              "/opt/repro/reprobuild/recipes/packages/source/gnome-desktop/.repro/output/install/usr/share"),
+          ])
+      discard pkg.executable("gnomeShell")
+      # GNOME Shell installs its private libraries below
+      # /usr/lib64/gnome-shell; the install-tree mirror preserves them.
+    finally:
+      clearCurrentOwningPackageOverride()
+
+  runtimeDeps:
+    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
+    ## DT_NEEDED inspection of the linked artifacts. Empty until
+    ## the M9.R.5b per-recipe pass populates per-output ELF
+    ## interrogation.
+    discard

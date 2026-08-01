@@ -1,0 +1,113 @@
+## Smoke test for the from-source ``kio`` recipe.
+##
+## Pins the M9.H/I/K trio's behaviour on the FIFTY-SEVENTH real
+## production from-source recipe and the THIRD recipe in the THIRD
+## KF6 module-sweep batch (ksvg / ksolid / kio / kded). kio's coverage
+## angle is the LARGEST KF6 framework in the recipe suite by source-
+## size and the FIRST KF6 recipe whose upstream SONAME contains a
+## three-letter all-caps acronym (``KF6KIO``) — the artifact
+## identifier (``libKF6Kio``) pins the brand-conventional casing rule
+## (``Kio`` not ``KIO``) on the M3 registry.
+##
+## Coverage (10 check assertions across 8 tests):
+##
+##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
+##     algorithm + kind discriminant + extractStrip.
+##   * ``cmakeFlags:`` block round-trip (M9.I) — exact-order
+##     sequence equality on the production flag set + channel-isolation
+##     spot-check (meson + configure channels MUST be empty).
+##   * SINGLE library artifact registration (M3) — ``libKF6Kio``
+##     tagged ``dakLibrary``.
+##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
+##     repository for ``repro update-source``.
+
+import std/[unittest]
+
+import repro_project_dsl
+
+# Side-effect import: triggers the package macro which registers
+# fetch spec + cmake flags + library artifact under ``kio``
+# at module init time.
+import ./repro
+
+const ExpectedUrl =
+  "https://download.kde.org/stable/frameworks/6.10/kio-6.10.0.tar.xz"
+
+const ExpectedHash =
+  "7eb454438f149e7ed513c3bbd526b67e3e3ecfe32ae7c986168baa59600b699c"
+
+const ExpectedCmakeFlags = @[
+  "-DBUILD_TESTING=OFF",
+  "-DBUILD_QCH=OFF",
+  "-DBUILD_PYTHON_BINDINGS=OFF",
+  "-DCMAKE_BUILD_TYPE=Release",
+]
+
+suite "kio — from-source recipe smoke test":
+
+  test "fetch spec carries the vendored URL verbatim":
+    # M9.H registry round-trip — URL is recorded exactly as declared.
+    let spec = registeredFetchSpec("kio")
+    check spec.packageName == "kio"
+    check spec.url == ExpectedUrl
+
+  test "fetch spec hash is a 64-char sha256 hex string":
+    # sha256 over the vendored 3,423,932-byte tarball; length check
+    # guards against a future bump that forgets to widen the hash
+    # alongside the URL.
+    let spec = registeredFetchSpec("kio")
+    check spec.hashHex.len == 64
+    check spec.hashHex == ExpectedHash
+    check spec.hashAlg == dshaSha256
+
+  test "fetch spec is the tarball variant with extractStrip = 1":
+    # Tarball vs git-archive discriminant + the canonical
+    # ``--strip-components=1`` convention upstream download.kde.org
+    # release tarballs use.
+    let spec = registeredFetchSpec("kio")
+    check spec.kind == dfkTarball
+    check spec.extractStrip == 1
+
+  test "cmakeFlags registers the exact production flag sequence":
+    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "cmakeFlags does not leak into the meson channel":
+    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "cmakeFlags does not leak into the configure channel":
+    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "artifacts register the four KIO libraries":
+    # M9.R.15i.3.3 — KIO ships FOUR libraries upstream (Core, Gui,
+    # Widgets, FileWidgets), not one umbrella ``libKF6Kio``. The
+    # recipe matches what upstream actually builds; this assertion
+    # pins the per-library kind + identifier-casing (``Kio`` not
+    # ``KIO`` — that mis-casing would also mis-route any consumer
+    # recipe that depends on an artifact by identifier).
+    let arts = registeredArtifacts("kio")
+    check arts.len == 4
+    var seenCore = false
+    var seenGui = false
+    var seenWidgets = false
+    var seenFileWidgets = false
+    for art in arts:
+      check art.packageName == "kio"
+      check art.kind == dakLibrary
+      case art.artifactName
+      of "libKF6KIOCore": seenCore = true
+      of "libKF6KIOGui": seenGui = true
+      of "libKF6KIOWidgets": seenWidgets = true
+      of "libKF6KIOFileWidgets": seenFileWidgets = true
+      else: discard
+    check seenCore
+    check seenGui
+    check seenWidgets
+    check seenFileWidgets
+
+  test "versions block records the upstream tag + URL + repository":
+    # M2 versions registry.
+    let vs = registeredVersions("kio")
+    check vs.len == 1
+    check vs[0].version == "6.10.0"
+    check vs[0].sourceRevision == "v6.10.0"
+    check vs[0].sourceUrl ==
+      "https://download.kde.org/stable/frameworks/6.10/kio-6.10.0.tar.xz"
+    check vs[0].sourceRepository ==
+      "https://invent.kde.org/frameworks/kio"

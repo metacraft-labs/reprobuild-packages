@@ -1,0 +1,96 @@
+## Source-from-tarball LVM2 recipe — closes M9.R.27 Gap 4 (G4).
+##
+## LVM2 ships the logical-volume management suite (``lvcreate``,
+## ``vgcreate``, ``pvcreate``, ``lvs``, ``vgs``, ``pvs``) plus the
+## libdevmapper.so library (consumed by cryptsetup + parted).
+## autotools convention.
+##
+## Vendored at ``recipes/packages/source/lvm2/vendor/LVM2.2.03.30.tgz``.
+## sha256 = ad76abecb8dc887733e06c449cb9add04a3506f9f0780c128817a6e1a17cec05
+## (2,864,622 bytes).
+
+import repro_project_dsl
+import repro_dsl_stdlib/constructors
+import repro_dsl_stdlib/types/package_result
+
+package lvm2:
+  versions:
+    "2.03.30":
+      sourceRevision = "v2_03_30"
+      sourceUrl = "https://mirrors.kernel.org/sourceware/lvm2/LVM2.2.03.30.tgz"
+      sourceRepository = "https://sourceware.org/git/lvm2.git"
+
+  fetch:
+    url: "https://mirrors.kernel.org/sourceware/lvm2/LVM2.2.03.30.tgz"
+    sha256: "ad76abecb8dc887733e06c449cb9add04a3506f9f0780c128817a6e1a17cec05"
+    extractStrip: 1
+
+  nativeBuildDeps:
+    "autoconf"
+    "automake"
+    "libtool"
+    "make"
+    "gcc >=11"
+    "pkg-config"
+
+  buildDeps:
+    ## udev (libudev) for device hotplug integration.
+    "libudev"
+    ## util-linux for libblkid + libuuid.
+    "util-linux"
+    ## libaio for the bcache async-I/O fast path.
+    "libaio"
+
+  config:
+    discard
+  executable lvm:
+    discard
+  executable lvcreate:
+    discard
+  executable vgcreate:
+    discard
+  executable pvcreate:
+    discard
+  library libDevmapper:
+    discard
+  ## M9.R.29.11 — ``liblvm2cmd.so`` is only built with ``--enable-applib``
+  ## which we're not enabling (the v1 installer drives the lvm CLI
+  ## directly, no embedded API). Drop the artifact registration so the
+  ## stage-copy doesn't look for a library we never produced.
+
+  build:
+    setCurrentOwningPackageOverride("lvm2")
+    try:
+      let opts = @[
+        "--disable-static",
+        "--enable-shared",
+        # ReproOS invokes the LVM commands non-interactively. Disabling the
+        # optional shell removes its readline/termcap dependency.
+        "--disable-readline",
+        "--enable-udev_sync",
+        "--enable-udev_rules",
+        "--enable-pkgconfig",
+        "--disable-selinux",
+        "--disable-nls",
+      ]
+      # LVM's symbol-export generator invokes CC as a preprocessor but omits
+      # the standard compiler flag variables, so staged libc headers are not
+      # visible even though ordinary object compilation is configured.
+      let patches = @[
+        "sed -i " &
+          "'s|$(CC) -E -P $(INCLUDES) $(DEFS)|" &
+          "$(CC) -E -P $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $(DEFS)|' " &
+          "src/make.tmpl.in src/libdm/make.tmpl.in",
+      ]
+      let pkg = autotools_package(srcDir = "./src", configureOptions = opts,
+                                  srcPatches = patches)
+      discard pkg.executable("lvm")
+      discard pkg.executable("lvcreate")
+      discard pkg.executable("vgcreate")
+      discard pkg.executable("pvcreate")
+      discard pkg.library("libDevmapper")
+    finally:
+      clearCurrentOwningPackageOverride()
+
+  runtimeDeps:
+    discard

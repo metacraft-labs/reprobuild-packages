@@ -1,0 +1,116 @@
+## Smoke test for the from-source ``mesa`` recipe.
+##
+## Drives M9.R.15m.1 (the MAJOR OpenGL/EGL/GBM gap blocking kwin +
+## mutter compositors). Mesa is the canonical open-source 3D graphics
+## stack; this recipe ships libGL.so / libEGL.so / libGLESv2.so /
+## libgbm.so via a software-rasterizer-only meson build.
+##
+## Coverage:
+##
+##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
+##     algorithm + kind discriminant + extractStrip.
+##   * THREE library artifact registration (M3) — libEGL +
+##     libGLESv2 + libGbm, all tagged ``dakLibrary``. libGL is NOT
+##     declared: the v1 minimal config (glx=disabled, no libglvnd)
+##     does not produce a libGL.so — Qt6OpenGL links against
+##     libGLESv2 directly when libGL is absent.
+##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
+##     repository for ``repro update-source``.
+
+import std/[strutils, unittest]
+
+import repro_project_dsl
+
+# Side-effect import: triggers the package macro which registers
+# fetch spec + meson options + library artifacts under
+# ``mesa`` at module init time.
+import ./repro
+
+const ExpectedUrl =
+  "https://archive.mesa3d.org/mesa-24.0.9.tar.xz"
+
+const ExpectedHash =
+  "51aa686ca4060e38711a9e8f60c8f1efaa516baf411946ed7f2c265cd582ca4c"
+
+proc argByName(action: BuildActionDef; name: string): PublicCliArg =
+  for arg in action.call.arguments:
+    if arg.name == name:
+      return arg
+  raise newException(ValueError, "no argument named '" & name & "'")
+
+proc encodedValues(arg: PublicCliArg): seq[string] =
+  if arg.encodedValue.len == 0:
+    return @[]
+  arg.encodedValue.split("\x1f")
+
+suite "mesa — from-source recipe smoke test":
+
+  test "fetch spec carries the upstream URL verbatim":
+    let spec = registeredFetchSpec("mesa")
+    check spec.packageName == "mesa"
+    check spec.url == ExpectedUrl
+
+  test "fetch spec hash is a 64-char sha256 hex string":
+    let spec = registeredFetchSpec("mesa")
+    check spec.hashHex.len == 64
+    check spec.hashHex == ExpectedHash
+    check spec.hashAlg == dshaSha256
+
+  test "fetch spec is the tarball variant with extractStrip = 1":
+    let spec = registeredFetchSpec("mesa")
+    check spec.kind == dfkTarball
+    check spec.extractStrip == 1
+
+  test "library artifacts register all three shared objects":
+    let arts = registeredArtifacts("mesa")
+    check arts.len == 3
+    var seenEGL = false
+    var seenGLESv2 = false
+    var seenGbm = false
+    for art in arts:
+      check art.packageName == "mesa"
+      check art.kind == dakLibrary
+      case art.artifactName
+      of "libEGL":
+        seenEGL = true
+      of "libGLESv2":
+        seenGLESv2 = true
+      of "libGbm":
+        seenGbm = true
+      else:
+        discard
+    check seenEGL
+    check seenGLESv2
+    check seenGbm
+
+  test "M9.R.80 enables LLVM-backed llvmpipe":
+    let native = registeredNativeBuildDeps("mesa")
+    check "llvm-config" in native
+
+    resetBuildActionRegistry()
+    buildMesaSourcePackage()
+    var setupAction: BuildActionDef
+    var foundSetup = false
+    for action in registeredBuildActions():
+      if action.call.packageName == "meson" and
+          action.call.executableName == "mesonBin" and
+          action.call.subcommand == "setup":
+        setupAction = action
+        foundSetup = true
+        break
+    check foundSetup
+    if foundSetup:
+      let opts = setupAction.argByName("options").encodedValues()
+      check "llvm=enabled" in opts
+      check "shared-llvm=enabled" in opts
+      check not ("llvm=disabled" in opts)
+      check not ("shared-llvm=disabled" in opts)
+
+  test "versions block records the upstream tag + URL + repository":
+    let vs = registeredVersions("mesa")
+    check vs.len == 1
+    check vs[0].version == "24.0.9"
+    check vs[0].sourceRevision == "mesa-24.0.9"
+    check vs[0].sourceUrl ==
+      "https://archive.mesa3d.org/mesa-24.0.9.tar.xz"
+    check vs[0].sourceRepository == "https://gitlab.freedesktop.org/mesa/mesa"
