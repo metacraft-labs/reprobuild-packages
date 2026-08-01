@@ -41,7 +41,12 @@ package xkeyboardConfigSource:
   build:
     setCurrentOwningPackageOverride("xkeyboardConfigSource")
     try:
-      let pkg = meson_package(srcDir = "./src", configureOptions = @[])
+      let pkg = meson_package(
+        srcDir = "./src",
+        configureOptions = @[],
+        srcPatches = @[
+          "sed -i \"s/find_program('xsltproc', required: false)/find_program('xsltproc-disabled', required: false)/\" ./src/meson.build",
+        ])
       pkg.installTreeMirror()
     finally:
       clearCurrentOwningPackageOverride()
