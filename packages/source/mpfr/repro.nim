@@ -23,6 +23,10 @@ package mpfrSource:
     "libtool"
     "make"
     "gcc >=11"
+    ## configure's shell-compatibility probes repeatedly invoke expr and sed
+    ## while source GMP is on LD_LIBRARY_PATH.
+    "coreutils"
+    "sed"
 
   buildDeps:
     "gmp"
