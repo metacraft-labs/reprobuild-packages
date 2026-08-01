@@ -26,7 +26,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + Debian
 ##     source pool URL + repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -40,6 +40,8 @@ const ExpectedUrl =
 
 const ExpectedHash =
   "a13f8c9a7d93df3c85c66afd135f0296701d8d32f911991b7aa4273fdd6a42a3"
+
+const RecipeSource = staticRead("repro.nim")
 
 const ExpectedMesonOptions = @[
   "-Ddocumentation=false",
@@ -79,6 +81,8 @@ suite "libinputSource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "mesonOptions does not leak into the cmake channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
+  test "production install uses the portable library directory":
+    check "libdir=lib" in RecipeSource
   test "artifacts register one library plus one executable":
     # M3 artifact registry: ``libinput`` must be tagged ``dakLibrary``
     # while ``libinputBin`` must be tagged ``dakExecutable``. The

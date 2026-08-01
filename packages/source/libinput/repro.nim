@@ -235,6 +235,7 @@ package libinputSource:
     setCurrentOwningPackageOverride("libinputSource")
     try:
       let opts = @[
+        "libdir=lib",
         "documentation=false",
         "debug-gui=false",
         "tests=false",
