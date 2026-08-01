@@ -25,6 +25,7 @@ package perlSource:
 
   buildDeps:
     "linux-headers >=4.19"
+    "libxcrypt"
 
   executable perl:
     build:
