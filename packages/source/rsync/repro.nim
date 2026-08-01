@@ -19,6 +19,10 @@ package rsyncSource:
   nativeBuildDeps:
     "make"
     "gcc >=11"
+    ## configure.sh uses cp, rm, mkdir, ln, and sed while libacl is on the
+    ## runtime library path. Keep those helpers on the source toolchain.
+    "coreutils"
+    "sed"
 
   buildDeps:
     "libacl >=2.3"
