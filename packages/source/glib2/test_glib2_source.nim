@@ -42,13 +42,14 @@ const ExpectedHash =
   "05c2031f9bdf6b5aba7a06ca84f0b4aced28b19bf1b50c6ab25cc675277cbc3f"
 
 const ExpectedMesonConfigureOptions = @[
+  "libdir=lib",
   "tests=false",
   "documentation=false",
   "man-pages=disabled",
   "introspection=disabled",
+  "sysprof=disabled",
   "nls=disabled",
   "xattr=false",
-  "sysprof=disabled",
   "wrap_mode=nofallback",
 ]
 

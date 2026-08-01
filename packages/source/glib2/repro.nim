@@ -251,7 +251,6 @@ package glib2Source:
         "nls=disabled",
         "xattr=false",
         # Keep Meson setup from cloning fallback subprojects under ./src.
-        "sysprof=disabled",
         "wrap_mode=nofallback",
       ]
       let pkg = meson_package(srcDir = "./src", configureOptions = opts)
