@@ -43,7 +43,7 @@
 ## ## sha256 strategy
 ##
 ## The fetch URL points at the upstream ftp.gnu.org release tarball
-## ``gcc-14.2.0.tar.xz``. The sha256 was computed locally by
+## ``gcc-14.2.0.tar.gz``. The sha256 was computed locally by
 ## downloading the tarball from the canonical ftp.gnu.org release
 ## endpoint and running ``sha256sum`` over the bytes. nixpkgs's
 ## ``pkgs/development/compilers/gcc/14/default.nix`` pins gcc 14.x via
@@ -52,8 +52,7 @@
 ##
 ## ## Why gcc is NOT vendored
 ##
-## The ``gcc-14.2.0.tar.xz`` tarball weighs ~88 MB which is on the
-## edge of GitHub's 100-MB single-file ceiling. Per the kernel-recipe
+## The ``gcc-14.2.0.tar.gz`` tarball weighs ~160 MB. Per the kernel-recipe
 ## precedent (``recipes/packages/source/kernel/``), large vendor
 ## tarballs are NOT checked into the repo — the live ``fetch:`` block
 ## points at the upstream URL directly and a future vendoring pass
@@ -73,7 +72,7 @@
 ## ## Build execution
 ##
 ## gcc is the LARGEST package in the from-source corpus: the upstream
-## tarball weighs ~88 MB, the extracted tree is ~3.5 GB, the build
+## tarball weighs ~160 MB, the extracted tree is ~3.5 GB, the build
 ## consumes substantial disk and memory, and the
 ## ``--disable-bootstrap`` single-stage build is intentionally fixed
 ## at eight parallel jobs. The recipe executes the complete
@@ -186,12 +185,12 @@ package gccSource:
     ## at the canonical gcc.gnu.org git tree.
     "14.2.0":
       sourceRevision = "releases/gcc-14.2.0"
-      sourceUrl = "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
+      sourceUrl = "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz"
       sourceRepository = "https://gcc.gnu.org/git/gcc.git"
 
   fetch:
-    ## Live upstream URL. NOT vendored — the tarball weighs ~88 MB
-    ## (on the edge of GitHub's 100-MB single-file ceiling) so the
+    ## Live upstream URL. NOT vendored — the tarball weighs ~160 MB
+    ## (above GitHub's 100-MB single-file ceiling) so the
     ## kernel-recipe precedent applies: live URL, no vendor/ copy.
     ## A future R5 musl-tcc pass will host the bootstrap-critical
     ## archives on a reprobuild-managed mirror.
@@ -200,8 +199,8 @@ package gccSource:
     ## nixpkgs ships gcc 14.x via fetchurl + an SRI-hashed mirror URL
     ## so the cross-check holds when both fetch the same source
     ## bytes.
-    url: "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-    sha256: "a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9"
+    url: "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz"
+    sha256: "7d376d445f93126dc545e2c0086d0f647c3094aae081cdb78f42ce2bc25e7293"
     extractStrip: 1
 
   nativeBuildDeps:

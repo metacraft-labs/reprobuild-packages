@@ -196,10 +196,9 @@ package mesaSource:
     "bison"
     ## flex generates the GLSL preprocessor lexer.
     "flex"
-    ## llvm-config lets Mesa enable the llvmpipe software rasterizer.
-    ## Mesa's meson files query LLVM through llvm-config and then link
-    ## the produced DRI drivers against the LLVM libraries it reports.
-    "llvm-config"
+    ## The source LLVM package exposes llvm-config and the shared libLLVM
+    ## runtime used by Mesa's llvmpipe driver.
+    "llvm"
     ## gcc is the host C/C++ toolchain — mesa is C11 + C++17.
     "gcc >=11"
 
@@ -271,8 +270,4 @@ package mesaSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
-    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
-    ## DT_NEEDED inspection of the linked artifacts. Empty until
-    ## the M9.R.5b per-recipe pass populates per-output ELF
-    ## interrogation.
-    discard
+    "llvm"
