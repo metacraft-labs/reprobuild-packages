@@ -88,6 +88,8 @@
 ##                              (default is static-only without this
 ##                              flag).
 
+import std/os
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -199,12 +201,22 @@ package readlineSource:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
     setCurrentOwningPackageOverride("readlineSource")
     try:
+      let providerRoot = activeProviderProjectRoot()
+      let defaultSourceRoot =
+        if providerRoot.len > 0: parentDir(providerRoot)
+        else: "/opt/repro/reprobuild-packages/packages/source"
+      let sourceRoot = getEnv("REPRO_FROM_SOURCE_ROOT", defaultSourceRoot)
+      let ncursesLib = sourceRoot &
+        "/ncurses/.repro/output/install/usr/lib/libtinfow.so.6"
       let opts = @[
         "--disable-static",
         "--enable-shared",
       ]
       let patches = @[
-        "sed -i 's|^SHLIB_XLDFLAGS = @LDFLAGS@ @SHLIB_XLDFLAGS@$|SHLIB_XLDFLAGS = @LDFLAGS@ @SHLIB_XLDFLAGS@ -Wl,--no-as-needed /opt/repro/reprobuild/recipes/packages/source/ncurses/.repro/output/install/usr/lib/libtinfow.so.6 -Wl,--as-needed|' src/shlib/Makefile.in",
+        "sed -i 's|^SHLIB_XLDFLAGS = @LDFLAGS@ @SHLIB_XLDFLAGS@$|" &
+          "SHLIB_XLDFLAGS = @LDFLAGS@ @SHLIB_XLDFLAGS@ " &
+          "-Wl,--no-as-needed " & ncursesLib &
+          " -Wl,--as-needed|' src/shlib/Makefile.in",
       ]
       let pkg = autotools_package(
         srcDir = "./src",
