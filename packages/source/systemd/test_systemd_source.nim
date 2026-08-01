@@ -29,7 +29,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -43,6 +43,8 @@ const ExpectedUrl =
 
 const ExpectedHash =
   "14f6907eb5e289d8c39cbe1ef891ca54d8a0e3582c986a9ef5844b3f29add43b"
+
+const RecipeSource = staticRead("repro.nim")
 
 const ExpectedMesonOptions = @[
   "-Dmode=release",
@@ -92,6 +94,8 @@ suite "systemdSource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "mesonOptions does not leak into the configure channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
+  test "source patch skips test-only network class discovery":
+    check "network_testcases = []" in RecipeSource
   test "artifacts register four executables + two libraries with correct kinds":
     # M3 artifact registry: ``systemdInit`` + ``systemctl`` +
     # ``journalctl`` + ``systemdLogind`` are tagged ``dakExecutable``

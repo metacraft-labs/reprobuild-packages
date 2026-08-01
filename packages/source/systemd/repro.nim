@@ -346,6 +346,11 @@ package systemdSource:
       # canonical upstream value 0x1bf for the AL Phone Syncing key.
       let patches = @[
         "sed -i 's|^#define KEY_HANGUP_PHONE\\t0x1be.*|&\\n#define KEY_LINK_PHONE\\t\\t0x1bf\\t/* AL Phone Syncing */|' src/src/basic/linux/input-event-codes.h",
+        # The TEST-85 Meson file discovers Python test classes even when
+        # -Dtests=false. Running host sed with source-built libraries in
+        # LD_LIBRARY_PATH can load libacl against the wrong host glibc.
+        # No network test cases are needed in this production build.
+        "sed -i '13,17c\\network_testcases = []' src/test/TEST-85-NETWORK/meson.build",
       ]
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
                               extraEnv = env, srcPatches = patches)
