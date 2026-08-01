@@ -26,6 +26,7 @@ package mpfrSource:
     ## configure's shell-compatibility probes repeatedly invoke expr and sed
     ## while source GMP is on LD_LIBRARY_PATH.
     "coreutils"
+    "gawk"
     "sed"
 
   buildDeps:
