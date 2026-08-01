@@ -227,6 +227,9 @@ package waylandSource:
       # invoking meson with `-D-Dfoo=bar`. `--buildtype` is the same
       # — the typed tool exposes `buildtype:` as a separate flag.
       let opts = @[
+        # Avoid host-specific multiarch install paths so staged libraries
+        # and pkg-config metadata have a stable package interface.
+        "libdir=lib",
         "documentation=false",
         "dtd_validation=false",
         "libraries=true",

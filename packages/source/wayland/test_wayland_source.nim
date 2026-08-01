@@ -38,6 +38,7 @@ const ExpectedHash =
   "c065f040afdff3177680600f249727e41a1afc22fccf27222f15f5306faa1f03"
 
 const ExpectedMesonOptions = @[
+  "-Dlibdir=lib",
   "-Ddocumentation=false",
   "-Ddtd_validation=false",
   "-Dlibraries=true",
