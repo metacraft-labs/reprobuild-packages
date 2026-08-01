@@ -98,6 +98,9 @@ suite "systemdSource — from-source recipe smoke test":
     check "network_testcases = []" in RecipeSource
   test "native build dependencies include source-compatible sed":
     check "sed" in registeredNativeBuildDeps("systemdSource")
+    check "coreutils" in registeredNativeBuildDeps("systemdSource")
+  test "production install uses the portable library directory":
+    check "libdir=lib" in RecipeSource
   test "artifacts register four executables + two libraries with correct kinds":
     # M3 artifact registry: ``systemdInit`` + ``systemctl`` +
     # ``journalctl`` + ``systemdLogind`` are tagged ``dakExecutable``

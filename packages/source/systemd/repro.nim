@@ -204,6 +204,9 @@ package systemdSource:
     ## Declaring it prevents host /usr/bin/sed from loading the graph's
     ## source-built libacl against an incompatible host glibc.
     "sed"
+    ## The install-mirror action copies the completed install tree. Use
+    ## the source-built cp so it shares the graph's glibc ABI.
+    "coreutils"
 
   buildDeps:
     ## libcap supplies the POSIX capabilities library systemd consumes
@@ -301,6 +304,9 @@ package systemdSource:
         "portabled=false",
         "polkit=false",
         "pam=true",
+        # Avoid host multiarch defaults such as lib/x86_64-linux-gnu;
+        # artifact staging and the ReproOS rootfs consume usr/lib.
+        "libdir=lib",
         # M9.R.56.1 — explicitly pin the runtime paths systemd bakes
         # into libsystemd-core-257.so for its .mount / .automount /
         # .service unit machinery.  Without these, meson's
