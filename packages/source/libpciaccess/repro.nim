@@ -23,7 +23,9 @@ package libpciaccessSource:
     "pkg-config"
 
   buildDeps:
-    discard
+    ## Enables compressed pci.ids lookup without falling back to host CMake
+    ## discovery, which would mix host headers into the source toolchain.
+    "zlib"
 
   config:
     discard
