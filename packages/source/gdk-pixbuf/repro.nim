@@ -156,6 +156,7 @@ package gdkPixbufSource:
 
   nativeBuildDeps:
     "gobject-introspection"
+    "pkg-config"
     ## meson is the build-system driver — the c_cpp_meson convention's
     ## configure action invokes ``meson setup``. gdk-pixbuf 2.42
     ## requires meson 0.62 for the upstream build's option semantics.
