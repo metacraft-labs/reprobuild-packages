@@ -204,6 +204,11 @@ package libxkbcommonSource:
     ## ``enable-wayland`` flags — it's used to parse the keymap
     ## compose-tables data files at build time.
     "libxml2 >=2.9"
+    ## ICU is detected opportunistically for the export-keysyms build
+    ## helper. Declare it explicitly so a host pkg-config entry cannot
+    ## enable ICU without making its headers available to the selected
+    ## compiler.
+    "icu >=70"
     ## M9.R.15q.4.6 — X11 stdlib stubs required when enable-x11=true
     ## (see ``build:`` below). qt6-base's XCB plugin requires the
     ## libxkbcommon-x11 helper library, which is gated on enable-x11

@@ -75,6 +75,8 @@ suite "libxkbcommonSource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "mesonOptions does not leak into the cmake channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
+  test "ICU-backed build helper has an explicit source dependency":
+    check "icu >=70" in registeredBuildDeps("libxkbcommonSource")
   test "artifacts register one library plus one executable":
     # M3 artifact registry: ``libxkbcommon`` must be tagged
     # ``dakLibrary`` while ``xkbcli`` must be tagged ``dakExecutable``.
