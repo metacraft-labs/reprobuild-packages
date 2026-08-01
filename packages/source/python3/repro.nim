@@ -26,6 +26,9 @@ package python3Source:
     "make"
     "pkg-config"
     "gcc >=11"
+    ## Configure generates Makefile.pre through awk while source Readline is
+    ## on the library path. Keep the helper on the source toolchain runtime.
+    "gawk"
 
   buildDeps:
     "expat"
