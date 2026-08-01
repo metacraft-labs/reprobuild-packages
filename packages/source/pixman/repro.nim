@@ -176,6 +176,7 @@ package pixmanSource:
     setCurrentOwningPackageOverride("pixmanSource")
     try:
       let opts = @[
+        "libdir=lib",
         "tests=disabled",
         "demos=disabled",
       ]
