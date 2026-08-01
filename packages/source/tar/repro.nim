@@ -186,7 +186,10 @@ package tarSource:
         "--without-posix-acls",
         "--without-xattrs",
       ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      let pkg = autotools_package(
+        srcDir = "./src",
+        configureOptions = opts,
+        extraEnv = @[("FORCE_UNSAFE_CONFIGURE", "1")])
       discard pkg.executable("tar")
     finally:
       clearCurrentOwningPackageOverride()
