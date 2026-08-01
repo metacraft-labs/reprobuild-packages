@@ -250,10 +250,10 @@ package glib2Source:
         "sysprof=disabled",
         "nls=disabled",
         "xattr=false",
-        # Keep Meson setup from cloning fallback subprojects under ./src.
-        "wrap_mode=nofallback",
       ]
-      let pkg = meson_package(srcDir = "./src", configureOptions = opts)
+      # Keep Meson setup from cloning fallback subprojects under ./src.
+      let pkg = meson_package(srcDir = "./src", configureOptions = opts,
+                              wrapMode = "nofallback")
       discard pkg.library("libGlib2")
       discard pkg.library("libGObject")
       discard pkg.library("libGio")

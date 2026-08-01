@@ -50,7 +50,6 @@ const ExpectedMesonConfigureOptions = @[
   "sysprof=disabled",
   "nls=disabled",
   "xattr=false",
-  "wrap_mode=nofallback",
 ]
 
 proc argByName(action: BuildActionDef; name: string): PublicCliArg =
@@ -156,7 +155,8 @@ suite "glib2Source — from-source recipe smoke test":
     buildGlib2SourcePackage()
     let setupAction = findMesonSetupAction()
     let opts = setupAction.argByName("options").encodedValues()
-    check "wrap_mode=nofallback" in opts
+    check "wrap_mode=nofallback" notin opts
+    check setupAction.argByName("wrapMode").encodedValue == "nofallback"
     check "sysprof=disabled" in opts
     check setupAction.readOnlyRoots == @["./src"]
     check "./src" notin setupAction.declaredOutputs
