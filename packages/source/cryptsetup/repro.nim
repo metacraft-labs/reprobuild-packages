@@ -33,6 +33,9 @@ package cryptsetupSource:
     "gcc >=11"
     "pkg-config"
     "gettext"
+    ## autopoint extracts gettext's versioned infrastructure archive.
+    ## Keep that subprocess on the source-built toolchain too.
+    "tar"
 
   buildDeps:
     ## libgcrypt is the default crypto backend.
