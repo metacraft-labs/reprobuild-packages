@@ -36,6 +36,7 @@ const ExpectedHash =
   "fc68f9d0ba2ea63c9432a299e14fea09fad7a8a66e8039fcd7802ca59f77b4f5"
 
 const ExpectedMesonOptions = @[
+  "-Dlibdir=lib",
   "-Dintel=disabled",
   "-Dradeon=disabled",
   "-Damdgpu=enabled",

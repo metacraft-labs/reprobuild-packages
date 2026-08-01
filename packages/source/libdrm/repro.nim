@@ -175,6 +175,11 @@ package libdrmSource:
     setCurrentOwningPackageOverride("libdrmSource")
     try:
       let opts = @[
+        # Keep the install tree independent of the host multiarch tuple.
+        # The package-result staging contract consumes libraries from
+        # $DESTDIR/usr/lib, and downstream pkg-config mirrors use the same
+        # stable location.
+        "libdir=lib",
         "intel=disabled",
         "radeon=disabled",
         "amdgpu=enabled",
