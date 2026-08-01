@@ -13,12 +13,12 @@ package python3Source:
   versions:
     "3.13.12":
       sourceRevision = "v3.13.12"
-      sourceUrl = "https://www.python.org/ftp/python/3.13.12/Python-3.13.12.tar.xz"
+      sourceUrl = "https://www.python.org/ftp/python/3.13.12/Python-3.13.12.tgz"
       sourceRepository = "https://github.com/python/cpython"
 
   fetch:
-    url: "https://www.python.org/ftp/python/3.13.12/Python-3.13.12.tar.xz"
-    sha256: "2a84cd31dd8d8ea8aaff75de66fc1b4b0127dd5799aa50a64ae9a313885b4593"
+    url: "https://www.python.org/ftp/python/3.13.12/Python-3.13.12.tgz"
+    sha256: "12e7cb170ad2d1a69aee96a1cc7fc8de5b1e97a2bdac51683a3db016ec9a2996"
     extractStrip: 1
 
   nativeBuildDeps:
