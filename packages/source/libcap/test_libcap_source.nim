@@ -51,6 +51,7 @@ const ExpectedMakeFlags = @[
   "lib=lib",
   "prefix=/usr",
   "GOLANG=no",
+  "PAM_CAP=no",
 ]
 
 suite "libcapSource — from-source recipe smoke test":

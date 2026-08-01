@@ -123,6 +123,9 @@
 ##   * ``GOLANG=no``         — skip the Go bindings build (heavy Go
 ##                              toolchain dependency surface, not
 ##                              needed at runtime).
+##   * ``PAM_CAP=no``        — skip the optional PAM module; this package
+##                              exposes libcap and capability utilities,
+##                              while PAM is provisioned independently.
 ##
 ## Downstream configuration knobs would live here when the per-distro
 ## variants need different strategies (e.g. a Go-edition variant that
@@ -242,6 +245,7 @@ package libcapSource:
         "lib=lib",
         "prefix=/usr",
         "GOLANG=no",
+        "PAM_CAP=no",
       ]
       # M9.R.15q.11.4 — libcap has NO ``configure`` script (raw
       # Makefile build); the autotools_package constructor's
