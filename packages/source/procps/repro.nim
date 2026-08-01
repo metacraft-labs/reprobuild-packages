@@ -118,6 +118,8 @@
 ##                               unit-state probes). Avoids a cyclic
 ##                               uses graph between systemd + procps.
 
+import std/os
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -195,6 +197,10 @@ package procpsSource:
     ## pkg-config is used by the autotools configure step to probe for
     ## ncurses (used by ``top``'s TUI).
     "pkg-config"
+    ## autoreconf invokes autopoint for the gettext macros still present in
+    ## configure.ac, even though the resulting build disables NLS.
+    "gettext"
+    "tar"
 
   buildDeps:
     ## top requires the wide-character ncurses headers and libraries.
@@ -249,12 +255,15 @@ package procpsSource:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
     setCurrentOwningPackageOverride("procpsSource")
     try:
+      let sourceRoot = getEnv("REPRO_FROM_SOURCE_ROOT",
+        "/opt/repro/reprobuild-packages/packages/source")
       let opts = @[
         "--disable-static",
         "--disable-nls",
         "--with-systemd=no",
         "LIBS=-ltinfow",
-        "NCURSES_CFLAGS=-I/opt/repro/reprobuild/recipes/packages/source/ncurses/.repro/output/install/usr/include",
+        "NCURSES_CFLAGS=-I" & sourceRoot &
+          "/ncurses/.repro/output/install/usr/include",
         "NCURSES_LIBS=-lncursesw",
       ]
       # procps's gettext po/ recursion expects configure to generate
