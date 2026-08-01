@@ -273,6 +273,7 @@ package procpsSource:
                                   configureOptions = opts,
                                   patchHardcodedFile = true,
                                   srcPatches = @[
+        "export gettext_datadir=\"${REPRO_FROM_SOURCE_ROOT:-$(dirname \"$PWD\")}/gettext/.repro/output/install/usr/share/gettext\"",
         "printf '4.0.5\\n' > ./src/.tarball-version",
         "sed -i '/^[[:space:]]*po[[:space:]]/d' ./src/Makefile.am",
       ])
