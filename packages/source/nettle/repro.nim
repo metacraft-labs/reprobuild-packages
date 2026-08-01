@@ -177,6 +177,8 @@ package nettleSource:
     ## configure repeatedly invokes expr while source GMP is on the runtime
     ## library path, so use the source-built coreutils implementation.
     "coreutils"
+    "gawk"
+    "sed"
     ## gcc is the host C toolchain — nettle is C99 with assembly
     ## fast-paths for the AES / SHA / Poly1305 / Curve25519 primitives.
     "gcc >=11"
