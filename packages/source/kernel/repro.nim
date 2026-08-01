@@ -219,14 +219,13 @@ package kernelSource:
     ## ``kernel/timeconst.bc`` script invokes to compute jiffies
     ## constants at build time. Required from 4.x onwards.
     "bc"
+    ## The host-side extract-cert helper is compiled even when module signing
+    ## and trusted key embedding are disabled.
+    "openssl >=3.0"
     ##
     ## Deliberately NOT declared, because the ``build:`` block's
     ## configuration never reaches the code paths that would need them:
     ##
-    ##   * ``openssl`` — only kbuild's certificate handling links libssl,
-    ##     and the config pass disables ``MODULE_SIG``,
-    ##     ``SYSTEM_TRUSTED_KEYS`` and ``SYSTEM_REVOCATION_KEYS``, so
-    ##     ``scripts/sign-file`` is never built or run.
     ##   * ``kmod`` — the ``repro_install`` target passes ``DEPMOD=true``,
     ##     so ``modules_install`` never shells out to ``depmod``.
     ##   * ``rsync`` — ``make headers_install`` is not part of the
@@ -288,9 +287,9 @@ package kernelSource:
         "KBUILD_BUILD_TIMESTAMP=@1577836800",
       ]
       let patches = @[
-        ## BTF is disabled for the boot image, so avoid running the optional
-        ## pahole version probe under the target library environment.
-        "sed -i 's|default $(shell,$(srctree)/scripts/pahole-version.sh $(PAHOLE))|default 0|' ./src/init/Kconfig",
+        ## BTF is disabled for the boot image, but Kconfig still asks the
+        ## helper for a version. Return a stable zero without launching pahole.
+        "printf '#!/bin/sh\\necho 0\\n' > ./src/scripts/pahole-version.sh",
         "make -C ./src ARCH=x86_64 defconfig",
         "./src/scripts/config --file ./src/.config --disable DEBUG_INFO --disable DEBUG_INFO_BTF --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT --disable MODULE_SIG --disable SYSTEM_TRUSTED_KEYS --disable SYSTEM_REVOCATION_KEYS --disable STACK_VALIDATION --disable UNWINDER_ORC --enable UNWINDER_FRAME_POINTER --enable BLK_DEV_INITRD --enable DEVTMPFS --enable DEVTMPFS_MOUNT --enable VIRTIO --enable VIRTIO_PCI --enable VIRTIO_BLK --enable VIRTIO_NET --enable VIRTIO_CONSOLE --enable DRM --enable DRM_VIRTIO_GPU --enable EXT4_FS --enable VFAT_FS --enable TMPFS --enable OVERLAY_FS --enable SQUASHFS --enable BLK_DEV_LOOP --enable EFI --enable EFI_STUB",
         "make -C ./src ARCH=x86_64 olddefconfig",
