@@ -6,8 +6,9 @@ import repro_project_dsl
 import repro_dsl_stdlib/packages/bash as bashInterface
 import repro_dsl_stdlib/packages/cmake as cmakeInterface
 import ../packages/interfaces/busybox/repro as busyboxInterface
+import ../packages/interfaces/patchelf/repro as patchelfInterface
 
-const PublishedPackages = ["bash", "busybox", "cmake"]
+const PublishedPackages = ["bash", "busybox", "cmake", "patchelf"]
 
 let packages = registeredPackages()
 var selected = packages.filterIt(
