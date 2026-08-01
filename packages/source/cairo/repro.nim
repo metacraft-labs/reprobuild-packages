@@ -162,6 +162,7 @@ package cairoSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "pkg-config"
     ## meson is the build-system driver — the c_cpp_meson convention's
     ## configure action invokes ``meson setup``. cairo 1.18 requires
     ## meson 0.64 for the ``--buildtype=release`` semantics it relies

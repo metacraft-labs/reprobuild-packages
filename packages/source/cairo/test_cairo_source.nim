@@ -74,6 +74,9 @@ suite "cairoSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
+  test "native build dependencies include pkg-config":
+    check "pkg-config" in registeredNativeBuildDeps("cairoSource")
+
   test "mesonOptions registers the exact production flag sequence":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "mesonOptions does not leak into the cmake channel":
