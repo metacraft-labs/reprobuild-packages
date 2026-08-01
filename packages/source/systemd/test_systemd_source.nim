@@ -96,6 +96,8 @@ suite "systemdSource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "source patch skips test-only network class discovery":
     check "network_testcases = []" in RecipeSource
+  test "native build dependencies include source-compatible sed":
+    check "sed" in registeredNativeBuildDeps("systemdSource")
   test "artifacts register four executables + two libraries with correct kinds":
     # M3 artifact registry: ``systemdInit`` + ``systemctl`` +
     # ``journalctl`` + ``systemdLogind`` are tagged ``dakExecutable``

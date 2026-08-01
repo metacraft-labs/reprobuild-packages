@@ -200,6 +200,10 @@ package systemdSource:
     ## python3 stub doesn't bundle jinja2 and meson setup aborts with
     ## "ERROR: python3 is missing modules: jinja2".
     "python3-with-modules"
+    ## Meson custom targets and systemd's generator scripts invoke sed.
+    ## Declaring it prevents host /usr/bin/sed from loading the graph's
+    ## source-built libacl against an incompatible host glibc.
+    "sed"
 
   buildDeps:
     ## libcap supplies the POSIX capabilities library systemd consumes
