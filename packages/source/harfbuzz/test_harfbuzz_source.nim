@@ -20,7 +20,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/unittest
 
 import repro_project_dsl
 
@@ -68,6 +68,9 @@ suite "harfbuzzSource — from-source recipe smoke test":
     let spec = registeredFetchSpec("harfbuzzSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
+
+  test "native build dependencies include pkg-config":
+    check "pkg-config" in registeredNativeBuildDeps("harfbuzzSource")
 
   test "mesonOptions registers the exact production flag sequence":
     check true  # M9.R.6.1: registry retired — assertion gutted

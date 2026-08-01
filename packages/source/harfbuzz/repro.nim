@@ -158,6 +158,7 @@ package harfbuzzSource:
 
   nativeBuildDeps:
     "gobject-introspection"
+    "pkg-config"
     ## meson is the build-system driver — the c_cpp_meson convention's
     ## configure action invokes ``meson setup``. harfbuzz 10.x requires
     ## meson 0.55 for the modern option semantics.
