@@ -4,7 +4,7 @@
 ## nix-store closure mirror; the from-source recipe owns its own
 ## install-mirror.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -15,6 +15,8 @@ const ExpectedUrl =
 
 const ExpectedHash =
   "f00ab8d42ad8b905296fab67e13b871f1a424839331516642100f82ad88127cd"
+
+const RecipeSource = staticRead("repro.nim")
 
 suite "libevdevSource — from-source recipe smoke test":
 
@@ -33,3 +35,6 @@ suite "libevdevSource — from-source recipe smoke test":
     let spec = registeredFetchSpec("libevdevSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
+
+  test "production install uses the portable library directory":
+    check "libdir=lib" in RecipeSource

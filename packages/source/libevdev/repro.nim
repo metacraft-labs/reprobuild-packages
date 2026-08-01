@@ -103,6 +103,7 @@ package libevdevSource:
     setCurrentOwningPackageOverride("libevdevSource")
     try:
       let opts = @[
+        "libdir=lib",
         "tests=disabled",
         "tools=disabled",
         "documentation=disabled",
