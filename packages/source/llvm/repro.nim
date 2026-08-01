@@ -40,6 +40,8 @@ package llvmSource:
       let opts = @[
         "CMAKE_BUILD_TYPE=Release",
         "CMAKE_INSTALL_LIBDIR=lib",
+        "CMAKE_C_COMPILER=gcc",
+        "CMAKE_CXX_COMPILER=g++",
         "BUILD_SHARED_LIBS=OFF",
         "LLVM_BUILD_LLVM_DYLIB=ON",
         "LLVM_LINK_LLVM_DYLIB=ON",
