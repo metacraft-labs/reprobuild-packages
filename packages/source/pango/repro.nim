@@ -143,6 +143,7 @@ package pangoSource:
 
   nativeBuildDeps:
     "gobject-introspection"
+    "pkg-config"
     ## meson is the build-system driver. Pango 1.56.4 declares
     ## ``meson_version: >=1.2.0`` in its upstream ``meson.build``.
     "meson >=1.2.0"
