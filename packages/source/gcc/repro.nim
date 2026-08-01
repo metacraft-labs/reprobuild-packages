@@ -304,7 +304,7 @@ package gccSource:
       # files in the prefix it already searches. This breaks the GCC/glibc
       # bootstrap cycle without making every compiler consumer redeclare the
       # bootstrap sysroot.
-      shell "mkdir -p $out/lib; for runtime in libgcc_s.so libgcc_s.so.1 libstdc++.so libstdc++.so.6 libgomp.so libgomp.so.1 libatomic.so libatomic.so.1; do test -e $out/lib64/$runtime; ln -sfn ../lib64/$runtime $out/lib/$runtime; done; bootstrap_lib=$(readlink -f $extracted/bootstrap-sysroot/lib); test -d $bootstrap_lib; for runtime in $bootstrap_lib/*.o $bootstrap_lib/*.a $bootstrap_lib/*.so $bootstrap_lib/*.so.*; do test -e $runtime || continue; name=$(basename $runtime); test -e $out/lib/$name || ln -s $runtime $out/lib/$name; done"
+      shell "mkdir -p $out/lib; for runtime in libgcc_s.so libgcc_s.so.1 libstdc++.so libstdc++.so.6 libgomp.so libgomp.so.1 libatomic.so libatomic.so.1; do test -e $out/lib64/$runtime; ln -sfn ../lib64/$runtime $out/lib/$runtime; done; bootstrap_lib=$(readlink -f $extracted/bootstrap-sysroot/lib); test -d $bootstrap_lib; for runtime in $bootstrap_lib/*.o $bootstrap_lib/*.a $bootstrap_lib/*.so $bootstrap_lib/*.so.*; do test -e $runtime || continue; name=$(basename $runtime); test -e $out/lib/$name || ln -s $runtime $out/lib/$name; done; for driver in gcc g++; do mv $out/bin/$driver $out/bin/$driver.real; printf '#!/bin/sh\nexec \"$(dirname \"$0\")/%s.real\" -Wl,--dynamic-linker=%s/ld-linux-x86-64.so.2 \"$@\"\n' \"$driver\" \"$bootstrap_lib\" > $out/bin/$driver; chmod +x $out/bin/$driver; done"
 
   executable "g++":
     ## ``$PREFIX/bin/g++`` — the canonical C++ compiler driver.
