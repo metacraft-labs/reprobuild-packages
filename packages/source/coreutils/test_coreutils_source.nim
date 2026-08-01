@@ -24,7 +24,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -38,6 +38,8 @@ const ExpectedUrl =
 
 const ExpectedHash =
   "cd328edeac92f6a665de9f323c93b712af1858bc2e0d88f3f7100469470a1b8a"
+
+const RecipeSource = staticRead("repro.nim")
 
 const ExpectedConfigureFlags = @[
   "--disable-static",
@@ -76,6 +78,8 @@ suite "coreutilsSource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "configureFlags does not leak into the cmake channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
+  test "root builds opt in through the upstream safety gate":
+    check "FORCE_UNSAFE_CONFIGURE" in RecipeSource
   test "artifacts register six executables all tagged dakExecutable":
     # M3 artifact registry: ls + cp + mv + rm + cat + echo are all
     # tagged ``dakExecutable``. coreutils's autotools build emits ~100

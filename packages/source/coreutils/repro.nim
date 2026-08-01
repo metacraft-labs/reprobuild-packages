@@ -223,7 +223,10 @@ package coreutilsSource:
         "--enable-no-install-program=kill,uptime,arch",
         "--without-selinux",
       ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      let pkg = autotools_package(
+        srcDir = "./src",
+        configureOptions = opts,
+        extraEnv = @[("FORCE_UNSAFE_CONFIGURE", "1")])
       discard pkg.executable("ls")
       discard pkg.executable("cp")
       discard pkg.executable("mv")
