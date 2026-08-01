@@ -12,6 +12,8 @@
 ## the autotools convention with ``skipConfigure = true`` (same shape
 ## as the duktape recipe in M9.R.26.3).
 
+import std/os
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -32,6 +34,7 @@ package gdiskSource:
     "make"
     "gcc >=11"
     "pkg-config"
+    "patchelf"
 
   buildDeps:
     ## ncurses for cgdisk's curses UI.
@@ -55,7 +58,11 @@ package gdiskSource:
   build:
     setCurrentOwningPackageOverride("gdiskSource")
     try:
-      let sourceRoot = "/opt/repro/reprobuild/recipes/packages/source"
+      let providerRoot = activeProviderProjectRoot()
+      let defaultSourceRoot =
+        if providerRoot.len > 0: parentDir(providerRoot)
+        else: "/opt/repro/reprobuild-packages/packages/source"
+      let sourceRoot = getEnv("REPRO_FROM_SOURCE_ROOT", defaultSourceRoot)
       let utilLinux = sourceRoot & "/util-linux/.repro/output/install/usr"
       let popt = sourceRoot & "/popt/.repro/output/install/usr"
       let ncurses = sourceRoot & "/ncurses/.repro/output/install/usr"
