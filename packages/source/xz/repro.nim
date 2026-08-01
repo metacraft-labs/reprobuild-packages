@@ -185,6 +185,9 @@ package xzSource:
     ## gettext provides ``libintl`` for the NLS message-catalog
     ## machinery xz's CLI uses for translated error messages.
     "gettext >=0.21"
+    ## The install mirror embeds a portable $ORIGIN path so the xz CLI
+    ## resolves the liblzma built in the same source package.
+    "patchelf"
 
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
