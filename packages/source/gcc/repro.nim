@@ -345,8 +345,7 @@ package gccSource:
     discard
 
   runtimeDeps:
-    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
-    ## DT_NEEDED inspection of the linked artifacts. Empty until
-    ## the M9.R.5b per-recipe pass populates per-output ELF
-    ## interrogation.
-    discard
+    ## GCC's collect2 driver searches PATH for the assembler and linker.
+    ## Keep the pinned binutils runtime in every compiler profile so a
+    ## downstream build cannot silently fall back to host /usr/bin/ld.
+    "binutils >=2.39"
