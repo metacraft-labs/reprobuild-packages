@@ -20,6 +20,7 @@ package llvmSource:
     "cmake >=3.20"
     "ninja >=1.10"
     "gcc >=11"
+    "binutils >=2.39"
     "python3 >=3.8"
 
   buildDeps:
