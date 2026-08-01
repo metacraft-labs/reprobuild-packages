@@ -75,7 +75,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libtool:
+package libtoolSource:
   ## From-source libtool — M9.N Batch D build-tool slice.
   ##
   ## Tier-2b from-source-autotools convention consumer: the
@@ -144,7 +144,7 @@ package libtool:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("libtool")
+    setCurrentOwningPackageOverride("libtoolSource")
     try:
       let opts = @[
         "--disable-static",

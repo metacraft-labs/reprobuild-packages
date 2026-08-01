@@ -48,7 +48,7 @@
 ## gettext releases are cut on ftp.gnu.org under tags of the form
 ## ``v<X>.<Y>.<Z>`` with monotonically-increasing minor versions.
 ## 0.22.5 is the current stable as of mid-2026 and pairs with glibc 2.39+
-## (sibling ``glibc`` recipe #38); anything ``>=0.21`` covers
+## (sibling ``glibcSource`` recipe #38); anything ``>=0.21`` covers
 ## the libintl ABI the v1 desktop's GTK / Qt consumers reach for.
 ##
 ## sha256 = fe10c37353213d78a5b83d48af231e005c4da84db5ce88037d88355938259640
@@ -130,7 +130,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gettext:
+package gettextSource:
   ## From-source GNU gettext — sixty-fifth M9.H/I/K production recipe.
   ## THE canonical GNU i18n / l10n toolchain on Linux; every translated
   ## menu item / button label / dialog title on the v1 desktop flows
@@ -230,7 +230,7 @@ package gettext:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("gettext")
+    setCurrentOwningPackageOverride("gettextSource")
     try:
       let opts = @[
         "--disable-static",

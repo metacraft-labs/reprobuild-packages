@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package accountsservice:
+package accountsserviceSource:
   versions:
     "23.13.9":
       sourceRevision = "23.13.9"
@@ -30,7 +30,7 @@ package accountsservice:
   library libaccountsservice:
     discard
   build:
-    setCurrentOwningPackageOverride("accountsservice")
+    setCurrentOwningPackageOverride("accountsserviceSource")
     try:
       let patches = @[
         "sed -i 's|^    VERSION_FROM_DIR_NAME=.*|    VERSION_FROM_DIR_NAME=23.13.9|' src/generate-version.sh",

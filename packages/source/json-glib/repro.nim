@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package jsonGlib:
+package jsonGlibSource:
   versions:
     "1.10.8":
       sourceRevision = "1.10.8"
@@ -30,7 +30,7 @@ package jsonGlib:
     discard
 
   build:
-    setCurrentOwningPackageOverride("jsonGlib")
+    setCurrentOwningPackageOverride("jsonGlibSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "introspection=disabled",

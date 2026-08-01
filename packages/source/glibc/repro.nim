@@ -137,7 +137,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package glibc:
+package glibcSource:
   ## From-source glibc — forty-second M9.H/I/K production recipe and
   ## the LARGEST single from-source artifact set (SEVEN artifacts:
   ## six libraries + one executable for the dynamic linker). Closes
@@ -257,7 +257,7 @@ package glibc:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("glibc")
+    setCurrentOwningPackageOverride("glibcSource")
     try:
       let opts = @[
         "--disable-werror",

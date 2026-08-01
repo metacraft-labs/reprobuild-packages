@@ -6,8 +6,8 @@
 ## layer that decides which devices map to which roles + how
 ## per-application audio streams get linked to outputs.
 ##
-## wireplumber joins ``alsaLib`` + ``pipewire`` +
-## ``networkManager`` in the network + audio infrastructure batch
+## wireplumber joins ``alsaLibSource`` + ``pipewireSource`` +
+## ``networkManagerSource`` in the network + audio infrastructure batch
 ## adding the four runtime daemons + libraries every modern desktop
 ## (sway / GNOME / Plasma) consumes.
 ##
@@ -119,7 +119,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package wireplumber:
+package wireplumberSource:
   ## From-source wireplumber — sixty-ninth M9.H/I/K production recipe.
   ## THE session/policy manager for pipewire: implements the
   ## Lua-scripted session-policy layer that decides device-to-role
@@ -215,7 +215,7 @@ package wireplumber:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("wireplumber")
+    setCurrentOwningPackageOverride("wireplumberSource")
     try:
       let opts = @[
         "doc=disabled",

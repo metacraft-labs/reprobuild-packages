@@ -15,7 +15,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package ksysguard:
+package ksysguardSource:
   versions:
     "6.2.5":
       sourceRevision = "v6.2.5"
@@ -91,7 +91,7 @@ package ksysguard:
     discard
 
   build:
-    setCurrentOwningPackageOverride("ksysguard")
+    setCurrentOwningPackageOverride("ksysguardSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

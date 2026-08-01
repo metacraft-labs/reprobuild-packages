@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``dejavuFonts`` recipe.
+## Smoke test for the from-source ``dejavuFontsSource`` recipe.
 ##
 ## Contract note (why this test does not read an installed font tree):
 ## the suite runs every ``build/test-bin/*`` binary from the repository
@@ -43,13 +43,13 @@ const
   ExpectedFontDir = "$(DESTDIR)/usr/share/fonts/truetype/dejavu"
   ExpectedFontCopy =
     "cp build/*.ttf $(DESTDIR)/usr/share/fonts/truetype/dejavu/"
-  Recipe = staticRead(currentSourcePath().parentDir / "repro.nim")
+  RecipeSource = staticRead(currentSourcePath().parentDir / "repro.nim")
 
 suite "DejaVu fonts source recipe":
 
   test "installs generated core font families":
-    let spec = registeredFetchSpec("dejavuFonts")
-    check spec.packageName == "dejavuFonts"
+    let spec = registeredFetchSpec("dejavuFontsSource")
+    check spec.packageName == "dejavuFontsSource"
     check spec.kind == dfkTarball
     check spec.url == ExpectedUrl
     check spec.hashAlg == dshaSha256
@@ -57,7 +57,7 @@ suite "DejaVu fonts source recipe":
     check spec.hashHex == ExpectedHash
     check spec.extractStrip == 1
 
-    let versions = registeredVersions("dejavuFonts")
+    let versions = registeredVersions("dejavuFontsSource")
     check versions.len == 1
     check versions[0].version == "2.37"
     check versions[0].sourceRevision == "version_2_37"
@@ -67,21 +67,21 @@ suite "DejaVu fonts source recipe":
     # FontForge generates the TTFs from the upstream SFD sources; make
     # drives the generated Makefile. Losing either dependency means no
     # font family is produced at all.
-    check registeredNativeBuildDeps("dejavuFonts") ==
+    check registeredNativeBuildDeps("dejavuFontsSource") ==
       @["make", "fontforge"]
-    check registeredBuildDeps("dejavuFonts").len == 0
-    check registeredRuntimeDeps("dejavuFonts").len == 0
+    check registeredBuildDeps("dejavuFontsSource").len == 0
+    check registeredRuntimeDeps("dejavuFontsSource").len == 0
 
-    let artifacts = registeredArtifacts("dejavuFonts")
+    let artifacts = registeredArtifacts("dejavuFontsSource")
     check artifacts.len == 1
-    check artifacts[0].packageName == "dejavuFonts"
+    check artifacts[0].packageName == "dejavuFontsSource"
     check artifacts[0].artifactName == "fonts"
     check artifacts[0].kind == dakFiles
 
     # The appended install rule is what lands DejaVuSans.ttf,
     # DejaVuSansMono.ttf and DejaVuSerif.ttf in the install tree.
-    check ExpectedFontDir in Recipe
-    check ExpectedFontCopy in Recipe
+    check ExpectedFontDir in RecipeSource
+    check ExpectedFontCopy in RecipeSource
     # The full-TTF target is required: upstream's default `all` target
     # builds only a subset and would not emit the mono/serif families.
-    check "all : full-ttf" in Recipe
+    check "all : full-ttf" in RecipeSource

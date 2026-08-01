@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xkbcomp:
+package xkbcompSource:
   versions:
     "1.4.7":
       sourceRevision = "xkbcomp-1.4.7"
@@ -42,7 +42,7 @@ package xkbcomp:
     discard
 
   build:
-    setCurrentOwningPackageOverride("xkbcomp")
+    setCurrentOwningPackageOverride("xkbcompSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[])
       discard pkg.executable("xkbcomp")

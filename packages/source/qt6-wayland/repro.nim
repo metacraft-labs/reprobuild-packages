@@ -98,7 +98,7 @@ import repro_dsl_stdlib/packages/system_tools
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6Wayland:
+package qt6WaylandSource:
   ## From-source qt6-wayland — M9.R.15p.1.1 KF6/Plasma blocker. Sibling
   ## to qt6-base, qt6-tools, qt6-declarative, qt6-svg, qt6-shadertools;
   ## shares the same 6.8.1 pin.
@@ -210,7 +210,7 @@ package qt6Wayland:
   build:
     ## M9.R.15p.1.1 — explicit `build:` block invoking the
     ## ``cmake_package(...)`` high-level constructor.
-    setCurrentOwningPackageOverride("qt6Wayland")
+    setCurrentOwningPackageOverride("qt6WaylandSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

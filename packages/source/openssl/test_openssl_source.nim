@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``openssl`` recipe.
+## Smoke test for the from-source ``opensslSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTIETH real production
 ## from-source recipe. openssl's unique coverage angle vs the prior
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two library artifacts under
-# ``openssl`` at module init time.
+# ``opensslSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -49,19 +49,19 @@ const ExpectedConfigureFlags = @[
   "--release",
 ]
 
-suite "openssl — from-source recipe smoke test":
+suite "opensslSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("openssl")
-    check spec.packageName == "openssl"
+    let spec = registeredFetchSpec("opensslSource")
+    check spec.packageName == "opensslSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 18,320,899-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("openssl")
+    let spec = registeredFetchSpec("opensslSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "openssl — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("openssl")
+    let spec = registeredFetchSpec("opensslSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -93,13 +93,13 @@ suite "openssl — from-source recipe smoke test":
     # collapsed the multi-artifact packages or dropped one of the
     # three would surface in the artifact-count + per-artifact name
     # pinning below.
-    let arts = registeredArtifacts("openssl")
+    let arts = registeredArtifacts("opensslSource")
     check arts.len == 3
     var seenBin = false
     var seenCrypto = false
     var seenSsl = false
     for art in arts:
-      check art.packageName == "openssl"
+      check art.packageName == "opensslSource"
       case art.artifactName
       of "openssl":
         seenBin = true
@@ -122,7 +122,7 @@ suite "openssl — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the openssl source
     # tree.
-    let vs = registeredVersions("openssl")
+    let vs = registeredVersions("opensslSource")
     check vs.len == 1
     check vs[0].version == "3.4.0"
     check vs[0].sourceRevision == "openssl-3.4.0"

@@ -5,7 +5,7 @@
 
 import repro_project_dsl
 
-package pythonSetuptools:
+package pythonSetuptoolsSource:
   versions:
     "80.9.0":
       sourceRevision = "80.9.0"

@@ -124,7 +124,7 @@ import repro_dsl_stdlib/packages/system_tools
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package meson:
+package mesonSource:
   ## From-source meson — M9.N Batch C build-tool slice.
   ##
   ## REGISTRATION-ONLY recipe: see the module doc-comment's "Honest
@@ -185,7 +185,7 @@ package meson:
     ## more shell actions registered) and emits one ``BuildActionDef``
     ## per shell line. ``$extracted`` resolves to ``<projectRoot>/src/``
     ## (where the fetch action extracted the tarball); ``$out`` resolves
-    ## to ``<projectRoot>/.repro/build/from-source-custom/meson/``
+    ## to ``<projectRoot>/.repro/build/from-source-custom/mesonSource/``
     ## (the per-package output root the stage-copy action probes for
     ## ``bin/meson``).
     build:

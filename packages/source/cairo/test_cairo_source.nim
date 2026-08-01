@@ -1,10 +1,10 @@
-## Smoke test for the from-source ``cairo`` recipe.
+## Smoke test for the from-source ``cairoSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TENTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots`` /
-## ``sway`` / ``linuxKernel`` / ``libxkbcommon`` /
-## ``pixman`` / ``libinput``). cairo's unique coverage
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
+## ``swaySource`` / ``linuxKernelSource`` / ``libxkbcommonSource`` /
+## ``pixmanSource`` / ``libinputSource``). cairo's unique coverage
 ## angle vs the prior nine is a single library artifact built from a
 ## ``.tar.xz`` (rather than ``.tar.gz``) tarball with a WIDE ``uses:``
 ## set (pixman + freetype + fontconfig + zlib + libpng) — the
@@ -30,7 +30,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + meson options + library artifact under ``cairo``
+# fetch spec + meson options + library artifact under ``cairoSource``
 # at module init time.
 import ./repro
 
@@ -47,19 +47,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "cairo — from-source recipe smoke test":
+suite "cairoSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("cairo")
-    check spec.packageName == "cairo"
+    let spec = registeredFetchSpec("cairoSource")
+    check spec.packageName == "cairoSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 32,578,804-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("cairo")
+    let spec = registeredFetchSpec("cairoSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "cairo — from-source recipe smoke test":
     # release tarballs use. cairo ships ``.tar.xz`` (rather than the
     # ``.tar.gz`` the prior siblings use); the discriminator must stay
     # tolerant of the ``.xz`` suffix.
-    let spec = registeredFetchSpec("cairo")
+    let spec = registeredFetchSpec("cairoSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,9 +85,9 @@ suite "cairo — from-source recipe smoke test":
     # code links into the same .so); a regression that mis-tagged
     # the artifact kind would mis-route the M9.L install path
     # (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("cairo")
+    let arts = registeredArtifacts("cairoSource")
     check arts.len == 1
-    check arts[0].packageName == "cairo"
+    check arts[0].packageName == "cairoSource"
     check arts[0].artifactName == "libcairo"
     check arts[0].kind == dakLibrary
 
@@ -97,7 +97,7 @@ suite "cairo — from-source recipe smoke test":
     # live fetch points at the vendored copy. The repository points
     # at the canonical freedesktop.org gitlab project that hosts the
     # cairo source tree.
-    let vs = registeredVersions("cairo")
+    let vs = registeredVersions("cairoSource")
     check vs.len == 1
     check vs[0].version == "1.18.4"
     check vs[0].sourceRevision == "1.18.4"

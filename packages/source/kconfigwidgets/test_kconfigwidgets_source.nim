@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kconfigwidgets`` recipe (M9.R.15j.4).
+## Smoke test for the from-source ``kconfigwidgetsSource`` recipe (M9.R.15j.4).
 
 import std/[unittest]
 
@@ -12,18 +12,18 @@ const ExpectedUrl =
 const ExpectedHash =
   "5cb17bcafaae3eefc144fb1014f14cb9998c9e13b714808d940ab20d9c0fb51c"
 
-suite "kconfigwidgets — from-source recipe smoke test":
+suite "kconfigwidgetsSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("kconfigwidgets")
+    let spec = registeredFetchSpec("kconfigwidgetsSource")
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("kconfigwidgets")
+    let spec = registeredFetchSpec("kconfigwidgetsSource")
     check spec.hashHex == ExpectedHash
 
   test "artifacts register libKF6ConfigWidgets":
-    let arts = registeredArtifacts("kconfigwidgets")
+    let arts = registeredArtifacts("kconfigwidgetsSource")
     check arts.len == 1
     check arts[0].artifactName == "libKF6ConfigWidgets"
     check arts[0].kind == dakLibrary

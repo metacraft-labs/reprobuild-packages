@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``gobjectIntrospection`` recipe
+## Smoke test for the from-source ``gobjectIntrospectionSource`` recipe
 ## (M9.R.15b).
 
 import std/[unittest]
@@ -13,33 +13,33 @@ const ExpectedUrl =
 const ExpectedHash =
   "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae"
 
-suite "gobjectIntrospection — from-source recipe smoke test":
+suite "gobjectIntrospectionSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("gobjectIntrospection")
-    check spec.packageName == "gobjectIntrospection"
+    let spec = registeredFetchSpec("gobjectIntrospectionSource")
+    check spec.packageName == "gobjectIntrospectionSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
-    let spec = registeredFetchSpec("gobjectIntrospection")
+    let spec = registeredFetchSpec("gobjectIntrospectionSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("gobjectIntrospection")
+    let spec = registeredFetchSpec("gobjectIntrospectionSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
   test "one library + two executable artifacts registered":
-    let arts = registeredArtifacts("gobjectIntrospection")
+    let arts = registeredArtifacts("gobjectIntrospectionSource")
     check arts.len == 4
     var seenGirepository = false
     var seenScanner = false
     var seenCompiler = false
     var seenIntrospect = false
     for art in arts:
-      check art.packageName == "gobjectIntrospection"
+      check art.packageName == "gobjectIntrospectionSource"
       case art.artifactName
       of "libGirepository":
         seenGirepository = true
@@ -61,7 +61,7 @@ suite "gobjectIntrospection — from-source recipe smoke test":
     check seenIntrospect
 
   test "versions block records the upstream tag + URL + repository":
-    let vs = registeredVersions("gobjectIntrospection")
+    let vs = registeredVersions("gobjectIntrospectionSource")
     check vs.len == 1
     check vs[0].version == "1.86.0"
     check vs[0].sourceRevision == "1.86.0"

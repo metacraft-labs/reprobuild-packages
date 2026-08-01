@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package fontUtil:
+package fontUtilSource:
   versions:
     "1.4.2":
       sourceRevision = "font-util-1.4.2"
@@ -33,7 +33,7 @@ package fontUtil:
     discard
 
   build:
-    setCurrentOwningPackageOverride("fontUtil")
+    setCurrentOwningPackageOverride("fontUtilSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[],
         patchHardcodedFile = true,

@@ -6,8 +6,8 @@
 ## compositor (sway / mutter / kwin_wayland) uses for desktop sharing +
 ## screen recording over portal interfaces.
 ##
-## pipewire joins ``alsaLib`` + ``wireplumber`` +
-## ``networkManager`` in the network + audio infrastructure batch
+## pipewire joins ``alsaLibSource`` + ``wireplumberSource`` +
+## ``networkManagerSource`` in the network + audio infrastructure batch
 ## adding the four runtime daemons + libraries every modern desktop
 ## (sway / GNOME / Plasma) consumes.
 ##
@@ -131,7 +131,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package pipewire:
+package pipewireSource:
   ## From-source pipewire — sixty-eighth M9.H/I/K production recipe.
   ## THE modern multimedia framework on Linux: replaces pulseaudio +
   ## jackd for audio AND provides the screen-capture transport every
@@ -244,7 +244,7 @@ package pipewire:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("pipewire")
+    setCurrentOwningPackageOverride("pipewireSource")
     try:
       let opts = @[
         "tests=disabled",

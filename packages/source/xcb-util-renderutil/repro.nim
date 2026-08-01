@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xcbUtilRenderutil:
+package xcbUtilRenderutilSource:
   versions:
     "0.3.10":
       sourceRevision = "xcb-util-renderutil-0.3.10"
@@ -26,7 +26,7 @@ package xcbUtilRenderutil:
   library libxcbRenderUtil:
     discard
   build:
-    setCurrentOwningPackageOverride("xcbUtilRenderutil")
+    setCurrentOwningPackageOverride("xcbUtilRenderutilSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

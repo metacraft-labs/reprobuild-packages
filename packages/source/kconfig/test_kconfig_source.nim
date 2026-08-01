@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kconfig`` recipe.
+## Smoke test for the from-source ``kconfigSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-SIXTH real
 ## production from-source recipe and the FIRST recipe in the KF6
@@ -31,7 +31,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + three library artifacts under
-# ``kconfig`` at module init time.
+# ``kconfigSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -47,19 +47,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "kconfig — from-source recipe smoke test":
+suite "kconfigSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("kconfig")
-    check spec.packageName == "kconfig"
+    let spec = registeredFetchSpec("kconfigSource")
+    check spec.packageName == "kconfigSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 349,400-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("kconfig")
+    let spec = registeredFetchSpec("kconfigSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -68,7 +68,7 @@ suite "kconfig — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("kconfig")
+    let spec = registeredFetchSpec("kconfigSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -86,12 +86,12 @@ suite "kconfig — from-source recipe smoke test":
     # would mis-route the M9.L install path (``lib/`` vs ``bin/``); a
     # regression that dropped one of the three would shrink the
     # registry below three entries.
-    let arts = registeredArtifacts("kconfig")
+    let arts = registeredArtifacts("kconfigSource")
     check arts.len == 2
     var seenCore = false
     var seenGui = false
     for art in arts:
-      check art.packageName == "kconfig"
+      check art.packageName == "kconfigSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libKF6ConfigCore": seenCore = true
@@ -106,7 +106,7 @@ suite "kconfig — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # canonical KDE invent.kde.org project that hosts the kconfig
     # source tree.
-    let vs = registeredVersions("kconfig")
+    let vs = registeredVersions("kconfigSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

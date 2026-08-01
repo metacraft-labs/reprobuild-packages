@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxfixes:
+package libxfixesSource:
   versions:
     "6.0.1":
       sourceRevision = "libXfixes-6.0.1"
@@ -24,7 +24,7 @@ package libxfixes:
   library libXfixes:
     discard
   build:
-    setCurrentOwningPackageOverride("libxfixes")
+    setCurrentOwningPackageOverride("libxfixesSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

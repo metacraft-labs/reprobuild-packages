@@ -26,8 +26,8 @@
 ## client+server, SSL), QtDBus (D-Bus binding used by Plasma's
 ## inter-service plumbing), QtSql (DB driver framework used by
 ## KConfigData + Plasma activities). Every KF6 module + every Plasma
-## component links against qt6-base; the sibling ``kcoreaddons``
-## and ``kwin`` recipes pin ``qt6-base >=6.6`` in their ``uses:``
+## component links against qt6-base; the sibling ``kcoreaddonsSource``
+## and ``kwinSource`` recipes pin ``qt6-base >=6.6`` in their ``uses:``
 ## blocks. The mutter + gnome-shell stack also picks up qt6-base
 ## transitively via the SDDM greeter QML runtime.
 ##
@@ -152,7 +152,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6Base:
+package qt6BaseSource:
   ## From-source qt6-base — twenty-sixth M9.H/I/K production recipe and
   ## SIXTH CMake-driven recipe (json-c, kcoreaddons, kwin,
   ## plasma-workspace, sddm precedents). FIRST recipe in the corpus to
@@ -229,25 +229,25 @@ package qt6Base:
     "glib2 >=2.62"
     ## libxkbcommon supplies the keyboard-keymap library QtGui's QPA
     ## Wayland backend uses for layout switching + compose-key handling.
-    ## The sibling ``libxkbcommon`` recipe vendors a compatible
+    ## The sibling ``libxkbcommonSource`` recipe vendors a compatible
     ## version.
     "libxkbcommon >=1.5"
     ## wayland supplies libwayland-client + the wayland-protocols
     ## scanner QtGui's QPA Wayland backend uses to draw on the
-    ## compositor display. The sibling ``wayland`` recipe vendors
+    ## compositor display. The sibling ``waylandSource`` recipe vendors
     ## a compatible version.
     "wayland >=1.20"
     ## freetype is the glyph rasteriser QtGui consumes for text-render
     ## fallback when the host fontconfig doesn't return a suitable
-    ## font. The sibling ``freetype`` recipe vendors 2.13.3.
+    ## font. The sibling ``freetypeSource`` recipe vendors 2.13.3.
     "freetype >=2.10"
     ## fontconfig is the font-discovery + matching layer QtGui consumes
     ## to resolve QFont(...) family-names to actual files on disk. The
-    ## sibling ``fontconfig`` recipe vendors 2.16.0.
+    ## sibling ``fontconfigSource`` recipe vendors 2.16.0.
     "fontconfig >=2.13"
     ## harfbuzz is the OpenType text-shaping engine QtGui consumes for
     ## complex-script rendering (Arabic, Hebrew, Devanagari, CJK). The
-    ## sibling ``harfbuzz`` recipe vendors 10.1.0.
+    ## sibling ``harfbuzzSource`` recipe vendors 10.1.0.
     "harfbuzz >=4.0"
     ## dbus is the D-Bus client library QtDBus binds to — the
     ## upstream libdbus-1 reference implementation; the sibling source
@@ -342,7 +342,7 @@ package qt6Base:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("qt6Base")
+    setCurrentOwningPackageOverride("qt6BaseSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

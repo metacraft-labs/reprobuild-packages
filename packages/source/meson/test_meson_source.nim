@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``meson`` recipe.
+## Smoke test for the from-source ``mesonSource`` recipe.
 ##
 ## Pins the M9.H/I + M3 registry behaviour on the M9.N Batch C
 ## build-tool slice. meson's unique coverage angles vs the prior 74
@@ -35,7 +35,7 @@ import std/[strutils, unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + one executable artifact under ``meson`` at module
+# fetch spec + one executable artifact under ``mesonSource`` at module
 # init time. No build-flag block on any channel — meson's upstream
 # install path takes no build-system flags.
 import ./repro
@@ -46,19 +46,19 @@ const ExpectedUrl =
 const ExpectedHash =
   "1eca49eb6c26d58bbee67fd3337d8ef557c0804e30a6d16bfdf269db997464de"
 
-suite "meson — from-source recipe smoke test":
+suite "mesonSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("meson")
-    check spec.packageName == "meson"
+    let spec = registeredFetchSpec("mesonSource")
+    check spec.packageName == "mesonSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the upstream 2,276,144-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("meson")
+    let spec = registeredFetchSpec("mesonSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -67,7 +67,7 @@ suite "meson — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("meson")
+    let spec = registeredFetchSpec("mesonSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,9 +85,9 @@ suite "meson — from-source recipe smoke test":
     # script that ``exec``s the bundled ``mesonbuild`` Python
     # package); auxiliary helpers (``meson-test-rust``, etc) are NOT
     # registered in v1.
-    let arts = registeredArtifacts("meson")
+    let arts = registeredArtifacts("mesonSource")
     check arts.len == 1
-    check arts[0].packageName == "meson"
+    check arts[0].packageName == "mesonSource"
     check arts[0].artifactName == "meson"
     check arts[0].kind == dakExecutable
 
@@ -95,7 +95,7 @@ suite "meson — from-source recipe smoke test":
     # M2 versions registry: the upstream GitHub release tag is recorded
     # for ``repro update-source``. The repository points at the
     # canonical github.com project that hosts the meson source tree.
-    let vs = registeredVersions("meson")
+    let vs = registeredVersions("mesonSource")
     check vs.len == 1
     check vs[0].version == "1.6.1"
     check vs[0].sourceRevision == "1.6.1"
@@ -110,12 +110,12 @@ suite "meson — from-source recipe smoke test":
     # ``mesonbuild`` Python package, write the wrapper script, and
     # make it executable. The from-source-custom convention consumes
     # the sequence verbatim.
-    let rows = registeredShellActions("meson")
+    let rows = registeredShellActions("mesonSource")
     check rows.len == 4
     # Declaration-order shape: every row attributes to the ``meson``
     # executable's artifact-scoped ``build:`` block.
     for r in rows:
-      check r.packageName == "meson"
+      check r.packageName == "mesonSource"
       check r.artifactName == "meson"
     # Commands round-trip verbatim including the ``$out`` / ``$extracted``
     # placeholders the from-source-custom convention substitutes at emit
@@ -132,9 +132,9 @@ suite "meson — from-source recipe smoke test":
     # artifact. Pins the runtime's id-synthesis contract from the
     # recipe side (the runtime acceptance lives in
     # ``libs/repro_project_dsl/tests/dsl_port/t_dsl_shell_action.nim``).
-    let rows = registeredShellActions("meson")
+    let rows = registeredShellActions("mesonSource")
     check rows.len == 4
-    check rows[0].id == "meson-meson-1"
-    check rows[1].id == "meson-meson-2"
-    check rows[2].id == "meson-meson-3"
-    check rows[3].id == "meson-meson-4"
+    check rows[0].id == "mesonSource-meson-1"
+    check rows[1].id == "mesonSource-meson-2"
+    check rows[2].id == "mesonSource-meson-3"
+    check rows[3].id == "mesonSource-meson-4"

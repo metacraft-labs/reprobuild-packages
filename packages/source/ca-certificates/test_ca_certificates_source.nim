@@ -10,11 +10,11 @@ const ExpectedUrl =
 const ExpectedHash =
   "3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
 
-suite "caCertificates source recipe":
+suite "caCertificatesSource source recipe":
 
   test "fetches the pinned Mozilla bundle as a data file":
-    let spec = registeredFetchSpec("caCertificates")
-    check spec.packageName == "caCertificates"
+    let spec = registeredFetchSpec("caCertificatesSource")
+    check spec.packageName == "caCertificatesSource"
     check spec.url == ExpectedUrl
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -22,19 +22,19 @@ suite "caCertificates source recipe":
     check spec.extractStrip == 0
 
   test "declares the data-only build closure":
-    check registeredNativeBuildDeps("caCertificates") == @["make"]
-    check registeredBuildDeps("caCertificates").len == 0
-    check registeredRuntimeDeps("caCertificates").len == 0
+    check registeredNativeBuildDeps("caCertificatesSource") == @["make"]
+    check registeredBuildDeps("caCertificatesSource").len == 0
+    check registeredRuntimeDeps("caCertificatesSource").len == 0
 
   test "registers the trust bundle as files":
-    let artifacts = registeredArtifacts("caCertificates")
+    let artifacts = registeredArtifacts("caCertificatesSource")
     check artifacts.len == 1
-    check artifacts[0].packageName == "caCertificates"
+    check artifacts[0].packageName == "caCertificatesSource"
     check artifacts[0].artifactName == "caBundle"
     check artifacts[0].kind == dakFiles
 
   test "records the immutable upstream revision":
-    let versions = registeredVersions("caCertificates")
+    let versions = registeredVersions("caCertificatesSource")
     check versions.len == 1
     check versions[0].version == "2026-07-16"
     check versions[0].sourceRevision == "2026-07-16"

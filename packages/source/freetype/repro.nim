@@ -17,7 +17,7 @@
 ## freetype is the font-glyph rasteriser the entire Linux desktop UI
 ## stack depends on: pango's font backend, fontconfig's font matcher,
 ## harfbuzz's complex-script shaper, cairo's font rendering, GTK +
-## Qt + every browser. The sibling ``pango`` recipe pins
+## Qt + every browser. The sibling ``pangoSource`` recipe pins
 ## ``freetype >=2.10`` in its ``uses:`` block, so this recipe is the
 ## upstream-source side of that dependency edge. fontconfig + harfbuzz
 ## are the other immediate downstream consumers landing in the same
@@ -118,7 +118,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package freetype:
+package freetypeSource:
   ## From-source freetype — twenty-third M9.H/I/K production recipe and
   ## THIRD autotools-driven recipe (expat + gdm precedents). The font
   ## rasteriser foundation that pango / harfbuzz / fontconfig / cairo /
@@ -197,7 +197,7 @@ package freetype:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("freetype")
+    setCurrentOwningPackageOverride("freetypeSource")
     try:
       let opts = @[
         "--disable-static",

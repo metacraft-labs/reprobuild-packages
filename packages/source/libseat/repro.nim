@@ -127,7 +127,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libseat:
+package libseatSource:
   ## From-source libseat — closes the M9.R.57 wlroots session gap.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -232,7 +232,7 @@ package libseat:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("libseat")
+    setCurrentOwningPackageOverride("libseatSource")
     try:
       let opts = @[
         # M9.R.58.2 — flip seatd backend + server ON. The from-source

@@ -6,7 +6,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gmp:
+package gmpSource:
   versions:
     "6.3.0":
       sourceRevision = "6.3.0"
@@ -35,7 +35,7 @@ package gmp:
     discard
 
   build:
-    setCurrentOwningPackageOverride("gmp")
+    setCurrentOwningPackageOverride("gmpSource")
     try:
       let opts = @[
         "--disable-static",

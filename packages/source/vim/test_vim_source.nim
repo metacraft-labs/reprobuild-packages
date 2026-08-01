@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``vim`` recipe.
+## Smoke test for the from-source ``vimSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-FIRST real
 ## production from-source recipe. vim's unique coverage angle vs the
@@ -29,7 +29,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + three executable artifacts under
-# ``vim`` at module init time.
+# ``vimSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -53,19 +53,19 @@ const ExpectedConfigureFlags = @[
   "--disable-acl",
 ]
 
-suite "vim — from-source recipe smoke test":
+suite "vimSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("vim")
-    check spec.packageName == "vim"
+    let spec = registeredFetchSpec("vimSource")
+    check spec.packageName == "vimSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 18,393,329-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("vim")
+    let spec = registeredFetchSpec("vimSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -74,14 +74,14 @@ suite "vim — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream github.com archive
     # tarballs use (``vim-<tag>/`` is the single top-level dir).
-    let spec = registeredFetchSpec("vim")
+    let spec = registeredFetchSpec("vimSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
   test "declares the terminal build and runtime closure":
-    check registeredBuildDeps("vim") == @["ncurses"]
-    check registeredRuntimeDeps("vim") == @["ncurses"]
-    let native = registeredNativeBuildDeps("vim")
+    check registeredBuildDeps("vimSource") == @["ncurses"]
+    check registeredRuntimeDeps("vimSource") == @["ncurses"]
+    let native = registeredNativeBuildDeps("vimSource")
     check "autoconf" in native
     check "automake" in native
     check "make" in native
@@ -107,13 +107,13 @@ suite "vim — from-source recipe smoke test":
     # collapsed the artifact-name partitioning at the three-artifact
     # cardinality would not produce three distinct entries with the
     # expected names below.
-    let arts = registeredArtifacts("vim")
+    let arts = registeredArtifacts("vimSource")
     check arts.len == 3
     var seenVim = false
     var seenVimdiff = false
     var seenVimtutor = false
     for art in arts:
-      check art.packageName == "vim"
+      check art.packageName == "vimSource"
       check art.kind == dakExecutable
       case art.artifactName
       of "vim":
@@ -133,7 +133,7 @@ suite "vim — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # canonical vim project on github.com.
-    let vs = registeredVersions("vim")
+    let vs = registeredVersions("vimSource")
     check vs.len == 1
     check vs[0].version == "9.1.1000"
     check vs[0].sourceRevision == "v9.1.1000"

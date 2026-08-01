@@ -6,7 +6,7 @@
 
 import repro_project_dsl
 
-package pythonJinja2:
+package pythonJinja2Source:
   versions:
     "3.1.6":
       sourceRevision = "3.1.6"

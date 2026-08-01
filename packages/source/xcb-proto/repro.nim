@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xcbProto:
+package xcbProtoSource:
   versions:
     "1.17.0":
       sourceRevision = "xcb-proto-1.17.0"
@@ -20,7 +20,7 @@ package xcbProto:
   config:
     discard
   build:
-    setCurrentOwningPackageOverride("xcbProto")
+    setCurrentOwningPackageOverride("xcbProtoSource")
     try:
       let pkg = autotools_package(srcDir = "./src")
       pkg.installTreeMirror()

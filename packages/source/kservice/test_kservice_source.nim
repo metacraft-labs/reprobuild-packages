@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kservice`` recipe.
+## Smoke test for the from-source ``kserviceSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-THIRD real
 ## production from-source recipe and the FIRST recipe in the SECOND
@@ -25,7 +25,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + cmake flags + library artifact under ``kservice``
+# fetch spec + cmake flags + library artifact under ``kserviceSource``
 # at module init time.
 import ./repro
 
@@ -42,19 +42,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "kservice — from-source recipe smoke test":
+suite "kserviceSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("kservice")
-    check spec.packageName == "kservice"
+    let spec = registeredFetchSpec("kserviceSource")
+    check spec.packageName == "kserviceSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,439,968-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("kservice")
+    let spec = registeredFetchSpec("kserviceSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -63,7 +63,7 @@ suite "kservice — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("kservice")
+    let spec = registeredFetchSpec("kserviceSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -78,15 +78,15 @@ suite "kservice — from-source recipe smoke test":
     # must be tagged ``dakLibrary``. A regression that mis-tagged the
     # artifact kind would mis-route the M9.L install path (``lib/`` vs
     # ``bin/``).
-    let arts = registeredArtifacts("kservice")
+    let arts = registeredArtifacts("kserviceSource")
     check arts.len == 1
-    check arts[0].packageName == "kservice"
+    check arts[0].packageName == "kserviceSource"
     check arts[0].artifactName == "libKF6Service"
     check arts[0].kind == dakLibrary
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry.
-    let vs = registeredVersions("kservice")
+    let vs = registeredVersions("kserviceSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

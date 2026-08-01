@@ -98,7 +98,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libdisplayInfo:
+package libdisplayInfoSource:
   ## From-source libdisplay-info — closes the M9.R.58 wlroots
   ## DRM-backend gap (paired with hwdata via M9.R.59.1).
   ##
@@ -196,7 +196,7 @@ package libdisplayInfo:
   build:
     ## M9.R.5b — explicit ``build:`` block. Calls the M9.R.2b
     ## high-level ``meson_package(...)`` constructor.
-    setCurrentOwningPackageOverride("libdisplayInfo")
+    setCurrentOwningPackageOverride("libdisplayInfoSource")
     try:
       let opts = @[
         # M9.R.57.4 — pin libdir=lib so libdisplay-info's install

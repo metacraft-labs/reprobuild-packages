@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``dbusBroker`` recipe.
+## Smoke test for the from-source ``dbusBrokerSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on a real production recipe (the
 ## FIRST from-source production recipe to consume the trio).
@@ -20,7 +20,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + executable artifacts under
-# ``dbusBroker`` at module init time.
+# ``dbusBrokerSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -39,19 +39,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "dbusBroker — from-source recipe smoke test":
+suite "dbusBrokerSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("dbusBroker")
-    check spec.packageName == "dbusBroker"
+    let spec = registeredFetchSpec("dbusBrokerSource")
+    check spec.packageName == "dbusBrokerSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 241,290-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("dbusBroker")
+    let spec = registeredFetchSpec("dbusBrokerSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -60,7 +60,7 @@ suite "dbusBroker — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream uses for GitHub
     # tag tarballs.
-    let spec = registeredFetchSpec("dbusBroker")
+    let spec = registeredFetchSpec("dbusBrokerSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -72,7 +72,7 @@ suite "dbusBroker — from-source recipe smoke test":
     # M3 artifact registry: BOTH ``dbusBroker`` and
     # ``dbusBrokerLaunch`` must be present so the convention layer's
     # install/output collection knows which binaries to harvest.
-    let arts = registeredArtifacts("dbusBroker")
+    let arts = registeredArtifacts("dbusBrokerSource")
     check arts.len == 2
     var seenBroker = false
     var seenLaunch = false
@@ -80,25 +80,25 @@ suite "dbusBroker — from-source recipe smoke test":
       if art.artifactName == "dbusBroker":
         seenBroker = true
         check art.kind == dakExecutable
-        check art.packageName == "dbusBroker"
+        check art.packageName == "dbusBrokerSource"
       elif art.artifactName == "dbusBrokerLaunch":
         seenLaunch = true
         check art.kind == dakExecutable
-        check art.packageName == "dbusBroker"
+        check art.packageName == "dbusBrokerSource"
     check seenBroker
     check seenLaunch
 
   test "declares the linked library closure":
-    check registeredBuildDeps("dbusBroker") ==
+    check registeredBuildDeps("dbusBrokerSource") ==
       @["expat", "systemd >=240"]
-    check registeredRuntimeDeps("dbusBroker") ==
+    check registeredRuntimeDeps("dbusBrokerSource") ==
       @["expat", "systemd >=240"]
 
   test "versions block records the upstream tag + URL":
     # M2 versions registry: the upstream GitHub tag is recorded for
     # ``repro update-source`` even though the live fetch points at the
     # vendored copy.
-    let vs = registeredVersions("dbusBroker")
+    let vs = registeredVersions("dbusBrokerSource")
     check vs.len == 1
     check vs[0].version == "36"
     check vs[0].sourceRevision == "refs/tags/v36"

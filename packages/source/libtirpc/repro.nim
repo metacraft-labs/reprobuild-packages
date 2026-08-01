@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libtirpc:
+package libtirpcSource:
   versions:
     "1.3.6":
       sourceRevision = "libtirpc-1-3-6"
@@ -40,7 +40,7 @@ package libtirpc:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libtirpc")
+    setCurrentOwningPackageOverride("libtirpcSource")
     try:
       let opts = @[
         "--disable-static",

@@ -114,7 +114,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kconfig:
+package kconfigSource:
   ## From-source kconfig — thirty-sixth M9.H/I/K production recipe and
   ## the FIRST recipe in the KF6 module-sweep batch (kconfig / ki18n /
   ## kwidgetsaddons / kxmlgui). Seventh CMake-driven recipe and the
@@ -177,7 +177,7 @@ package kconfig:
     "qt6-tools >=6.6"
     ## kcoreaddons is the KF6 foundation library kconfig's
     ## ``KConfigSkeleton`` consumes for KSharedConfig / KAboutData
-    ## plumbing. The sibling ``kcoreaddons`` recipe vendors a
+    ## plumbing. The sibling ``kcoreaddonsSource`` recipe vendors a
     ## compatible 6.x version.
     "kcoreaddons >=6.0"
     ## M9.R.15q.3.4 — qt6-declarative supplies Qt6Qml/Qt6Quick which
@@ -212,7 +212,7 @@ package kconfig:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kconfig")
+    setCurrentOwningPackageOverride("kconfigSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

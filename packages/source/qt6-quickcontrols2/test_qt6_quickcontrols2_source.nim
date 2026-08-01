@@ -1,4 +1,4 @@
-## Smoke test for the qt6QuickControls2 shim recipe.
+## Smoke test for the qt6QuickControls2Source shim recipe.
 ##
 ## M9.R.81 coverage: the shim declares its qt6-declarative dependency
 ## and consumes generated DEP_<name>_ROOT / OUT_MIRROR env vars rather
@@ -9,7 +9,7 @@ import std/[strutils, unittest]
 import repro_project_dsl
 
 # Side-effect import: registers the package, dependency declarations, and
-# build body helper under ``qt6QuickControls2``.
+# build body helper under ``qt6QuickControls2Source``.
 import ./repro
 
 proc findAction(id: string): BuildActionDef =
@@ -30,17 +30,17 @@ proc argValue(action: BuildActionDef; name: string): string =
       return arg.encodedValue
   ""
 
-suite "qt6QuickControls2 — shim recipe smoke test":
+suite "qt6QuickControls2Source — shim recipe smoke test":
 
   test "declares qt6-declarative as the sibling source dependency":
     check "qt6-declarative >=6.6" in
-      registeredBuildDeps("qt6QuickControls2")
+      registeredBuildDeps("qt6QuickControls2Source")
 
   test "shim action uses DEP_QT6_DECLARATIVE_ROOT and OUT_MIRROR":
     resetBuildActionRegistry()
     buildQt6QuickControls2SourcePackage()
 
-    let action = findAction("qt6QuickControls2.shim_stage")
+    let action = findAction("qt6QuickControls2Source.shim_stage")
     let command = action.argValue("command")
     check action.call.packageName == "sh"
     check action.call.executableName == "sh"
@@ -49,9 +49,9 @@ suite "qt6QuickControls2 — shim recipe smoke test":
     check not command.contains("../qt6-declarative/.repro/output/install")
 
     let qtdeclRoot = dependencyInstallMirrorRoot(
-      "qt6-declarative", "qt6QuickControls2")
+      "qt6-declarative", "qt6QuickControls2Source")
     let ownRoot = dependencyInstallMirrorRoot(
-      "qt6-quickcontrols2", "qt6QuickControls2")
+      "qt6-quickcontrols2", "qt6QuickControls2Source")
     check action.envValue("DEP_QT6_DECLARATIVE_ROOT") == qtdeclRoot
     check action.envValue("OUT_MIRROR") == ownRoot
     check qtdeclRoot & "/usr/lib/cmake/Qt6QuickControls2/Qt6QuickControls2Config.cmake" in

@@ -10,7 +10,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package phonon4qt6:
+package phonon4qt6Source:
   versions:
     "4.12.0":
       sourceRevision = "v4.12.0"
@@ -40,7 +40,7 @@ package phonon4qt6:
     discard
 
   build:
-    setCurrentOwningPackageOverride("phonon4qt6")
+    setCurrentOwningPackageOverride("phonon4qt6Source")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

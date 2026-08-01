@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kitemviews`` recipe (M9.R.15j.2).
+## Smoke test for the from-source ``kitemviewsSource`` recipe (M9.R.15j.2).
 
 import std/[unittest]
 
@@ -12,18 +12,18 @@ const ExpectedUrl =
 const ExpectedHash =
   "8b15ff5719ea65e9d0c722eea6412e312d05d9da49c872caf9d97d329d56d76d"
 
-suite "kitemviews — from-source recipe smoke test":
+suite "kitemviewsSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("kitemviews")
+    let spec = registeredFetchSpec("kitemviewsSource")
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("kitemviews")
+    let spec = registeredFetchSpec("kitemviewsSource")
     check spec.hashHex == ExpectedHash
 
   test "artifacts register libKF6ItemViews":
-    let arts = registeredArtifacts("kitemviews")
+    let arts = registeredArtifacts("kitemviewsSource")
     check arts.len == 1
     check arts[0].artifactName == "libKF6ItemViews"
     check arts[0].kind == dakLibrary

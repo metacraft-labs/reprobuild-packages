@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``pkgconf`` recipe.
+## Smoke test for the from-source ``pkgconfSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the M9.N Batch D build-tool
 ## slice. pkgconf's unique coverage angles vs the prior 80 from-
@@ -37,7 +37,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable + one library
-# artifacts under ``pkgconf`` at module init time.
+# artifacts under ``pkgconfSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -54,18 +54,18 @@ const ExpectedConfigureFlags = @[
   "--with-system-includedir=/usr/include",
 ]
 
-suite "pkgconf — from-source recipe smoke test":
+suite "pkgconfSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("pkgconf")
-    check spec.packageName == "pkgconf"
+    let spec = registeredFetchSpec("pkgconfSource")
+    check spec.packageName == "pkgconfSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream distfiles.ariadne.space tarball;
     # computed locally + asserted exactly.
-    let spec = registeredFetchSpec("pkgconf")
+    let spec = registeredFetchSpec("pkgconfSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -73,7 +73,7 @@ suite "pkgconf — from-source recipe smoke test":
   test "fetch spec is the tarball variant with extractStrip = 1":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention.
-    let spec = registeredFetchSpec("pkgconf")
+    let spec = registeredFetchSpec("pkgconfSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -90,13 +90,13 @@ suite "pkgconf — from-source recipe smoke test":
     # libpkgconf tagged ``dakLibrary``. The unique coverage of THIS
     # recipe vs the xz precedent is the THREE-flag configure channel
     # paired with the (1, 1) mixed cardinality.
-    let arts = registeredArtifacts("pkgconf")
+    let arts = registeredArtifacts("pkgconfSource")
     check arts.len == 3
     var seenPkgconf = false
     var seenPkgConfig = false
     var seenLibpkgconf = false
     for art in arts:
-      check art.packageName == "pkgconf"
+      check art.packageName == "pkgconfSource"
       case art.artifactName
       of "pkgconf":
         seenPkgconf = true
@@ -117,7 +117,7 @@ suite "pkgconf — from-source recipe smoke test":
     # M2 versions registry: the upstream distfiles.ariadne.space
     # release tag is recorded for ``repro update-source``. The
     # repository points at the canonical github.com project.
-    let vs = registeredVersions("pkgconf")
+    let vs = registeredVersions("pkgconfSource")
     check vs.len == 1
     check vs[0].version == "2.3.0"
     check vs[0].sourceRevision == "pkgconf-2.3.0"

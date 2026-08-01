@@ -29,7 +29,7 @@
 ##
 ## We pin gtk4 4.18.5 (rather than the current stable 4.22.4) because
 ## gtk4 4.22 requires ``glib >= 2.84`` (per gtk-4.22.4/meson.build's
-## ``glib_minor_req = 84``) while the sibling ``glib2`` recipe
+## ``glib_minor_req = 84``) while the sibling ``glib2Source`` recipe
 ## at M9.R.15b vendors 2.82.5. Bumping the glib2 recipe is out of
 ## scope for this milestone — it would invalidate every downstream
 ## cairo / pango / gdk-pixbuf / mutter cache key, and the dep
@@ -100,7 +100,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gtk4:
+package gtk4Source:
   ## From-source gtk4 — GNOME-stack primary gate. The widget toolkit
   ## underpinning libadwaita + every GTK4 application.
 
@@ -205,7 +205,7 @@ package gtk4:
     discard
 
   build:
-    setCurrentOwningPackageOverride("gtk4")
+    setCurrentOwningPackageOverride("gtk4Source")
     try:
       let opts = @[
         # M9.R.15b — pin to gtk4 4.18.5's option schema. Feature-type

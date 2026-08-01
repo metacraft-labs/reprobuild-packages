@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``pam`` recipe.
+## Smoke test for the from-source ``pamSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-THIRD real
 ## production from-source recipe. Linux-PAM's unique coverage angle vs
@@ -26,7 +26,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + three library artifacts under
-# ``pam`` at module init time.
+# ``pamSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -42,19 +42,19 @@ const ExpectedConfigureFlags = @[
   "--enable-securedir=/lib/security",
 ]
 
-suite "pam — from-source recipe smoke test":
+suite "pamSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("pam")
-    check spec.packageName == "pam"
+    let spec = registeredFetchSpec("pamSource")
+    check spec.packageName == "pamSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,054,152-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("pam")
+    let spec = registeredFetchSpec("pamSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -63,7 +63,7 @@ suite "pam — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("pam")
+    let spec = registeredFetchSpec("pamSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -82,13 +82,13 @@ suite "pam — from-source recipe smoke test":
     # the multi-library packages or dropped one of the three would
     # surface in the artifact-count + per-artifact name pinning
     # below.
-    let arts = registeredArtifacts("pam")
+    let arts = registeredArtifacts("pamSource")
     check arts.len == 3
     var seenLibpam = false
     var seenLibpamMisc = false
     var seenLibpamc = false
     for art in arts:
-      check art.packageName == "pam"
+      check art.packageName == "pamSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libpam":
@@ -109,7 +109,7 @@ suite "pam — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the Linux-PAM source
     # tree.
-    let vs = registeredVersions("pam")
+    let vs = registeredVersions("pamSource")
     check vs.len == 1
     check vs[0].version == "1.6.1"
     check vs[0].sourceRevision == "v1.6.1"
@@ -124,5 +124,5 @@ suite "pam — from-source recipe smoke test":
     # action selects the decompressor (xz vs gzip vs bzip2) from the
     # URL suffix, so dropping ``.xz`` would mis-route to gzip and
     # fail at extract time.
-    let spec = registeredFetchSpec("pam")
+    let spec = registeredFetchSpec("pamSource")
     check spec.url.endsWith(".tar.xz")

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``pipewire`` recipe.
+## Smoke test for the from-source ``pipewireSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-EIGHTH real
 ## production from-source recipe. pipewire is THE modern multimedia
@@ -15,7 +15,7 @@
 ##     spot-check (cmake + configure channels MUST be empty).
 ##   * MIXED artifact registration (M3) — one executable
 ##     (``dakExecutable``) + one library (``dakLibrary``) attributed
-##     to ``pipewire`` with kind discriminators preserved
+##     to ``pipewireSource`` with kind discriminators preserved
 ##     per-artifact. (M9.R.15q.12.6 dropped the ``pwCat`` audio-CLI
 ##     artifact: ``pw-cat`` builds only when libsndfile is reachable,
 ##     which is not a from-source sibling, and the v1 Plasma DE path
@@ -29,7 +29,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + one executable + one library artifact
-# under ``pipewire`` at module init time.
+# under ``pipewireSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -49,19 +49,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "pipewire — from-source recipe smoke test":
+suite "pipewireSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("pipewire")
-    check spec.packageName == "pipewire"
+    let spec = registeredFetchSpec("pipewireSource")
+    check spec.packageName == "pipewireSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # Length + algorithm check guards against a future bump that
     # forgets to widen the hash alongside the URL. The pinned value
     # is the upstream gitlab.freedesktop.org tarball-bytes sha256.
-    let spec = registeredFetchSpec("pipewire")
+    let spec = registeredFetchSpec("pipewireSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "pipewire — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gitlab archive
     # tarballs use.
-    let spec = registeredFetchSpec("pipewire")
+    let spec = registeredFetchSpec("pipewireSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -92,12 +92,12 @@ suite "pipewire — from-source recipe smoke test":
     # builds only when libsndfile is reachable, which is not a
     # from-source sibling); the v1 Plasma DE path consumes only the
     # daemon + ``libpipewire-0.3.so``.
-    let arts = registeredArtifacts("pipewire")
+    let arts = registeredArtifacts("pipewireSource")
     check arts.len == 2
     var seenDaemon = false
     var seenLib = false
     for art in arts:
-      check art.packageName == "pipewire"
+      check art.packageName == "pipewireSource"
       case art.artifactName
       of "pipewireDaemon":
         seenDaemon = true
@@ -115,7 +115,7 @@ suite "pipewire — from-source recipe smoke test":
     # release tag is recorded for ``repro update-source``. The
     # repository points at the canonical gitlab project that hosts
     # the pipewire source tree.
-    let vs = registeredVersions("pipewire")
+    let vs = registeredVersions("pipewireSource")
     check vs.len == 1
     check vs[0].version == "1.6.5"
     check vs[0].sourceRevision == "1.6.5"

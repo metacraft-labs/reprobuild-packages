@@ -14,7 +14,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxau:
+package libxauSource:
   versions:
     "1.0.12":
       sourceRevision = "libXau-1.0.12"
@@ -43,7 +43,7 @@ package libxau:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libxau")
+    setCurrentOwningPackageOverride("libxauSource")
     try:
       let opts = @["--disable-static", "--enable-shared"]
       let pkg = autotools_package(srcDir = "./src", configureOptions = opts)

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kdecoration`` recipe
+## Smoke test for the from-source ``kdecorationSource`` recipe
 ## (M9.R.15q.4.8).
 ##
 ## Covers fetch spec + single library artifact (libKDecoration2)
@@ -10,7 +10,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers fetch
-# spec + cmake flags + library artifact under ``kdecoration``
+# spec + cmake flags + library artifact under ``kdecorationSource``
 # at module init time.
 import ./repro
 
@@ -24,20 +24,20 @@ const ExpectedUrl =
 const ExpectedHash =
   "726c58cd4b34fc49546578727a447c76242938add577292cd334bd60bf9d8f26"
 
-suite "kdecoration — from-source recipe smoke test":
+suite "kdecorationSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("kdecoration")
-    check spec.packageName == "kdecoration"
+    let spec = registeredFetchSpec("kdecorationSource")
+    check spec.packageName == "kdecorationSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("kdecoration")
+    let spec = registeredFetchSpec("kdecorationSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("kdecoration")
+    let spec = registeredFetchSpec("kdecorationSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``tar`` recipe.
+## Smoke test for the from-source ``tarSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SEVENTY-FIRST real
 ## production from-source recipe. GNU tar is THE canonical archive
@@ -24,7 +24,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable artifact under
-# ``tar`` at module init time.
+# ``tarSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -39,19 +39,19 @@ const ExpectedConfigureFlags = @[
   "--without-xattrs",
 ]
 
-suite "tar — from-source recipe smoke test":
+suite "tarSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("tar")
-    check spec.packageName == "tar"
+    let spec = registeredFetchSpec("tarSource")
+    check spec.packageName == "tarSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 cross-checked against nixpkgs's SRI-form hash on the
     # same upstream tarball; length check guards against a future
     # bump that forgets to widen the hash alongside the URL.
-    let spec = registeredFetchSpec("tar")
+    let spec = registeredFetchSpec("tarSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -60,7 +60,7 @@ suite "tar — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("tar")
+    let spec = registeredFetchSpec("tarSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -81,9 +81,9 @@ suite "tar — from-source recipe smoke test":
     # install path; a regression that collapsed the artifact-name
     # partitioning at the one-artifact cardinality would not produce
     # a single entry with the expected name.
-    let arts = registeredArtifacts("tar")
+    let arts = registeredArtifacts("tarSource")
     check arts.len == 1
-    check arts[0].packageName == "tar"
+    check arts[0].packageName == "tarSource"
     check arts[0].artifactName == "tar"
     check arts[0].kind == dakExecutable
 
@@ -92,7 +92,7 @@ suite "tar — from-source recipe smoke test":
     # recorded for ``repro update-source``. The repository points at
     # the canonical savannah.gnu.org mirror that hosts the tar
     # source tree.
-    let vs = registeredVersions("tar")
+    let vs = registeredVersions("tarSource")
     check vs.len == 1
     check vs[0].version == "1.35"
     check vs[0].sourceRevision == "release_1_35"

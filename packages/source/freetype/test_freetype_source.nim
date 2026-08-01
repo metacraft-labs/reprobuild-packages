@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``freetype`` recipe.
+## Smoke test for the from-source ``freetypeSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTY-THIRD real
 ## production from-source recipe and the THIRD autotools-driven recipe
@@ -29,7 +29,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``freetype`` at module init time.
+# ``freetypeSource`` at module init time.
 import ./repro
 
 const ExpectedUrl = "file:./vendor/freetype-2.13.3.tar.xz"
@@ -45,19 +45,19 @@ const ExpectedConfigureFlags = @[
   "--without-harfbuzz",
 ]
 
-suite "freetype — from-source recipe smoke test":
+suite "freetypeSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("freetype")
-    check spec.packageName == "freetype"
+    let spec = registeredFetchSpec("freetypeSource")
+    check spec.packageName == "freetypeSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,617,564-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("freetype")
+    let spec = registeredFetchSpec("freetypeSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -66,7 +66,7 @@ suite "freetype — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream savannah.gnu.org
     # release tarballs use.
-    let spec = registeredFetchSpec("freetype")
+    let spec = registeredFetchSpec("freetypeSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -83,9 +83,9 @@ suite "freetype — from-source recipe smoke test":
     # rasteriser + hinting engine. A regression that mis-tagged the
     # artifact kind would mis-route the M9.L install path
     # (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("freetype")
+    let arts = registeredArtifacts("freetypeSource")
     check arts.len == 1
-    check arts[0].packageName == "freetype"
+    check arts[0].packageName == "freetypeSource"
     check arts[0].artifactName == "libFreetype"
     check arts[0].kind == dakLibrary
 
@@ -95,7 +95,7 @@ suite "freetype — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # canonical freedesktop.org gitlab mirror that hosts the freetype
     # source tree.
-    let vs = registeredVersions("freetype")
+    let vs = registeredVersions("freetypeSource")
     check vs.len == 1
     check vs[0].version == "2.13.3"
     check vs[0].sourceRevision == "VER-2-13-3"

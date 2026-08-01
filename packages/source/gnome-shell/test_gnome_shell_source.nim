@@ -1,10 +1,10 @@
-## Smoke test for the from-source ``gnomeShell`` recipe.
+## Smoke test for the from-source ``gnomeShellSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the EIGHTEENTH real production
 ## from-source recipe and the CLOSING recipe in the GNOME stack batch.
 ## gnome-shell's unique coverage angle vs the prior seventeen is that
 ## it's the FIRST recipe to combine BOTH a multi-word-kebab package
-## name (``gnome-shell`` -> ``gnomeShell``) AND a mixed-kind
+## name (``gnome-shell`` -> ``gnomeShellSource``) AND a mixed-kind
 ## artifact set (library + executable in the same ``package`` macro):
 ## the M3 registry's name-mangling + per-package artifact partitioning
 ## are exercised at the same time. A regression that fumbled the
@@ -30,7 +30,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library + executable artifacts under
-# ``gnomeShell`` at module init time.
+# ``gnomeShellSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -50,19 +50,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "gnomeShell — from-source recipe smoke test":
+suite "gnomeShellSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("gnomeShell")
-    check spec.packageName == "gnomeShell"
+    let spec = registeredFetchSpec("gnomeShellSource")
+    check spec.packageName == "gnomeShellSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,144,616-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("gnomeShell")
+    let spec = registeredFetchSpec("gnomeShellSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -71,7 +71,7 @@ suite "gnomeShell — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnome.org release
     # tarballs use.
-    let spec = registeredFetchSpec("gnomeShell")
+    let spec = registeredFetchSpec("gnomeShellSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -86,18 +86,18 @@ suite "gnomeShell — from-source recipe smoke test":
     # while ``libGnomeShell`` is tagged ``dakLibrary``. The unique
     # coverage of THIS recipe is that it combines BOTH the multi-
     # word-kebab package-name mangling (``gnome-shell`` ->
-    # ``gnomeShell``) AND a mixed-kind artifact set in the same
+    # ``gnomeShellSource``) AND a mixed-kind artifact set in the same
     # package. A regression that flattened the kind discriminator
     # would mis-route the M9.L install path (``lib/`` vs ``bin/``);
     # a regression that fumbled the kebab-to-camel translation would
     # produce ``gnome_shell`` / ``gnomeshell`` / ``GnomeShell``
     # variants none of which match the assertions below.
-    let arts = registeredArtifacts("gnomeShell")
+    let arts = registeredArtifacts("gnomeShellSource")
     check arts.len == 2
     var seenBin = false
     var seenLib = false
     for art in arts:
-      check art.packageName == "gnomeShell"
+      check art.packageName == "gnomeShellSource"
       case art.artifactName
       of "gnomeShell":
         seenBin = true
@@ -116,7 +116,7 @@ suite "gnomeShell — from-source recipe smoke test":
     # live fetch points at the vendored copy. The repository points
     # at the canonical GNOME gitlab project that hosts the
     # gnome-shell source tree.
-    let vs = registeredVersions("gnomeShell")
+    let vs = registeredVersions("gnomeShellSource")
     check vs.len == 1
     check vs[0].version == "47.10"
     check vs[0].sourceRevision == "47.10"

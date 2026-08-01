@@ -160,7 +160,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package binutils:
+package binutilsSource:
   ## From-source binutils — M9.N Batch E compiler-chain slice.
   ##
   ## Tier-2b from-source-autotools convention consumer: the
@@ -194,7 +194,7 @@ package binutils:
   nativeBuildDeps:
     ## gcc is the host C toolchain — binutils is C99 with a handful
     ## of C++ helpers in gold + libctf. The version pin matches the
-    ## gcc recipe in this batch.
+    ## gccSource recipe in this batch.
     "gcc >=11"
     ## make is the build-system driver — the from-source-autotools
     ## convention's compile action invokes ``make`` after
@@ -281,7 +281,7 @@ package binutils:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("binutils")
+    setCurrentOwningPackageOverride("binutilsSource")
     try:
       let opts = @[
         "--enable-gold",

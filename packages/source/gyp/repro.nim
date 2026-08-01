@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gyp:
+package gypSource:
   versions:
     "0.21.1":
       sourceRevision = "v0.21.1"

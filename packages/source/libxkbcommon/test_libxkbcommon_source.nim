@@ -1,9 +1,9 @@
-## Smoke test for the from-source ``libxkbcommon`` recipe.
+## Smoke test for the from-source ``libxkbcommonSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SEVENTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots`` /
-## ``sway`` / ``linuxKernel``). libxkbcommon's unique
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
+## ``swaySource`` / ``linuxKernelSource``). libxkbcommon's unique
 ## coverage angle vs the prior six is a BALANCED library + executable
 ## split (1 lib + 1 exe) — Wayland was 3 libs + 1 exe (imbalanced), so
 ## the M3 artifact registry's per-package kind discriminator is
@@ -28,7 +28,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library + executable artifacts under
-# ``libxkbcommon`` at module init time.
+# ``libxkbcommonSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -45,19 +45,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "libxkbcommon — from-source recipe smoke test":
+suite "libxkbcommonSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libxkbcommon")
-    check spec.packageName == "libxkbcommon"
+    let spec = registeredFetchSpec("libxkbcommonSource")
+    check spec.packageName == "libxkbcommonSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,243,485-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libxkbcommon")
+    let spec = registeredFetchSpec("libxkbcommonSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -67,7 +67,7 @@ suite "libxkbcommon — from-source recipe smoke test":
     # ``--strip-components=1`` convention upstream GitHub archive
     # tarballs use (the top-level dir is ``libxkbcommon-xkbcommon-...``
     # which the strip eliminates).
-    let spec = registeredFetchSpec("libxkbcommon")
+    let spec = registeredFetchSpec("libxkbcommonSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -82,13 +82,13 @@ suite "libxkbcommon — from-source recipe smoke test":
     # (1 lib + 1 exe) split — a regression that flattened the kind
     # discriminator or attributed both artifacts to the same kind
     # would mis-route the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("libxkbcommon")
+    let arts = registeredArtifacts("libxkbcommonSource")
     check arts.len == 3
     var seenLib = false
     var seenX11 = false
     var seenCli = false
     for art in arts:
-      check art.packageName == "libxkbcommon"
+      check art.packageName == "libxkbcommonSource"
       case art.artifactName
       of "libxkbcommon":
         seenLib = true
@@ -111,7 +111,7 @@ suite "libxkbcommon — from-source recipe smoke test":
     # points at the vendored copy. The repository points at the
     # canonical GitHub project that hosts the libxkbcommon source
     # tree.
-    let vs = registeredVersions("libxkbcommon")
+    let vs = registeredVersions("libxkbcommonSource")
     check vs.len == 1
     check vs[0].version == "1.13.2"
     check vs[0].sourceRevision == "xkbcommon-1.13.2"

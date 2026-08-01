@@ -115,7 +115,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kmod:
+package kmodSource:
   ## From-source kmod — forty-seventh M9.H/I/K production recipe.
   ## The canonical Linux kernel-module userland: ``modprobe`` + ``lsmod``
   ## + ``insmod`` + ``rmmod`` + ``libkmod.so`` all built from one
@@ -226,7 +226,7 @@ package kmod:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("kmod")
+    setCurrentOwningPackageOverride("kmodSource")
     try:
       let opts = @[
         "--disable-static",

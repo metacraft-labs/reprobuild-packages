@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kcompletion:
+package kcompletionSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -39,7 +39,7 @@ package kcompletion:
     ## for text-encoding helpers. The upstream kcompletion CMakeLists.txt
     ## declares find_package(KF6Codecs REQUIRED) but the M9.R.15h.4
     ## v1 recipe omitted the matching buildDep, so the configure step
-    ## fails until kcodecs publishes.
+    ## fails until kcodecsSource publishes.
     "kcodecs >=6.0"
 
   config:
@@ -49,7 +49,7 @@ package kcompletion:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kcompletion")
+    setCurrentOwningPackageOverride("kcompletionSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

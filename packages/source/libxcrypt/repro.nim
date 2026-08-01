@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxcrypt:
+package libxcryptSource:
   versions:
     "4.5.2":
       sourceRevision = "v4.5.2"
@@ -24,7 +24,7 @@ package libxcrypt:
   library libcrypt:
     discard
   build:
-    setCurrentOwningPackageOverride("libxcrypt")
+    setCurrentOwningPackageOverride("libxcryptSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static",

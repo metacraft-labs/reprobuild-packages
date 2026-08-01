@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``sonnet`` recipe (M9.R.15q.10.3).
+## Smoke test for the from-source ``sonnetSource`` recipe (M9.R.15q.10.3).
 
 import std/[unittest]
 
@@ -12,24 +12,24 @@ const ExpectedUrl =
 const ExpectedHash =
   "99c0bca563594fd115f31f18ad3264770046290c6695ded0d2aa3c2eddb0d4b7"
 
-suite "sonnet — from-source recipe smoke test":
+suite "sonnetSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("sonnet")
+    let spec = registeredFetchSpec("sonnetSource")
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("sonnet")
+    let spec = registeredFetchSpec("sonnetSource")
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "artifacts register the two KF6Sonnet libraries":
-    let arts = registeredArtifacts("sonnet")
+    let arts = registeredArtifacts("sonnetSource")
     check arts.len == 2
     check arts[0].artifactName == "libKF6SonnetCore"
     check arts[1].artifactName == "libKF6SonnetUi"
 
   test "versions block records the upstream tag + URL + repo":
-    let vs = registeredVersions("sonnet")
+    let vs = registeredVersions("sonnetSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"

@@ -121,7 +121,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package hwdata:
+package hwdataSource:
   ## From-source hwdata — closes the M9.R.58 wlroots DRM-backend gap
   ## (paired with libdisplay-info via M9.R.59.2).
   ##

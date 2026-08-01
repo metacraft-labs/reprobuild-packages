@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package qt6Multimedia:
+package qt6MultimediaSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
@@ -51,7 +51,7 @@ package qt6Multimedia:
     discard
 
   build:
-    setCurrentOwningPackageOverride("qt6Multimedia")
+    setCurrentOwningPackageOverride("qt6MultimediaSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

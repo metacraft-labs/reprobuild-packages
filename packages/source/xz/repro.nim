@@ -116,7 +116,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package xz:
+package xzSource:
   ## From-source xz / liblzma — sixty-third M9.H/I/K production recipe.
   ## THE canonical modern LZMA2 compressor on Linux; every ``.tar.xz``
   ## extraction shells through ``xz``, every package format with lzma
@@ -209,7 +209,7 @@ package xz:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("xz")
+    setCurrentOwningPackageOverride("xzSource")
     try:
       let opts = @[
         "--disable-static",

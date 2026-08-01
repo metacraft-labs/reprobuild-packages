@@ -83,10 +83,10 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6Positioning:
+package qt6PositioningSource:
   ## From-source qt6-positioning — M9.R.15q.9.1 KF6/Plasma blocker.
-  ## Sibling to qt6-base (qt6Base), qt6-tools (qt6Tools),
-  ## qt6-declarative (qt6Declarative), qt6-svg (qt6Svg);
+  ## Sibling to qt6-base (qt6BaseSource), qt6-tools (qt6ToolsSource),
+  ## qt6-declarative (qt6DeclarativeSource), qt6-svg (qt6SvgSource);
   ## shares the same 6.8.1 pin.
 
   versions:
@@ -129,7 +129,7 @@ package qt6Positioning:
     discard
 
   build:
-    setCurrentOwningPackageOverride("qt6Positioning")
+    setCurrentOwningPackageOverride("qt6PositioningSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

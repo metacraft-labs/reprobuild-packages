@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``alsaLib`` recipe.
+## Smoke test for the from-source ``alsaLibSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-SEVENTH real
 ## production from-source recipe. alsa-lib is THE userspace half of
@@ -24,7 +24,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``alsaLib`` at module init time.
+# ``alsaLibSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -38,19 +38,19 @@ const ExpectedConfigureFlags = @[
   "--disable-python",
 ]
 
-suite "alsaLib — from-source recipe smoke test":
+suite "alsaLibSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("alsaLib")
-    check spec.packageName == "alsaLib"
+    let spec = registeredFetchSpec("alsaLibSource")
+    check spec.packageName == "alsaLibSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 cross-checked against nixpkgs's SRI-form hash on the
     # same upstream tarball; length check guards against a future
     # bump that forgets to widen the hash alongside the URL.
-    let spec = registeredFetchSpec("alsaLib")
+    let spec = registeredFetchSpec("alsaLibSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -58,7 +58,7 @@ suite "alsaLib — from-source recipe smoke test":
   test "fetch spec is the tarball variant with extractStrip = 1":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream release tarballs use.
-    let spec = registeredFetchSpec("alsaLib")
+    let spec = registeredFetchSpec("alsaLibSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -77,9 +77,9 @@ suite "alsaLib — from-source recipe smoke test":
     # the PCM / mixer / sequencer / control APIs. A regression that
     # mis-tagged the artifact kind would mis-route the M9.L install
     # path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("alsaLib")
+    let arts = registeredArtifacts("alsaLibSource")
     check arts.len == 1
-    check arts[0].packageName == "alsaLib"
+    check arts[0].packageName == "alsaLibSource"
     check arts[0].artifactName == "libAsound"
     check arts[0].kind == dakLibrary
 
@@ -88,7 +88,7 @@ suite "alsaLib — from-source recipe smoke test":
     # is recorded for ``repro update-source``. The repository points
     # at the canonical GitHub mirror the upstream maintainers
     # publish the alsa-lib source tree on.
-    let vs = registeredVersions("alsaLib")
+    let vs = registeredVersions("alsaLibSource")
     check vs.len == 1
     check vs[0].version == "1.2.15.3"
     check vs[0].sourceRevision == "v1.2.15.3"

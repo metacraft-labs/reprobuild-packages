@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libpciaccess:
+package libpciaccessSource:
   versions:
     "0.19":
       sourceRevision = "libpciaccess-0.19"
@@ -29,7 +29,7 @@ package libpciaccess:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libpciaccess")
+    setCurrentOwningPackageOverride("libpciaccessSource")
     try:
       let pkg = meson_package(srcDir = "./src")
       pkg.installTreeMirror()

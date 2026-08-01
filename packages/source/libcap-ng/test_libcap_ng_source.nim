@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``libcapNg`` recipe.
+## Smoke test for the from-source ``libcapNgSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTIETH real production
 ## from-source recipe. libcap-ng's unique coverage angle vs the prior
@@ -29,7 +29,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one library artifact under
-# ``libcapNg`` at module init time.
+# ``libcapNgSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,19 +44,19 @@ const ExpectedConfigureFlags = @[
   "--without-python3",
 ]
 
-suite "libcapNg — from-source recipe smoke test":
+suite "libcapNgSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libcapNg")
-    check spec.packageName == "libcapNg"
+    let spec = registeredFetchSpec("libcapNgSource")
+    check spec.packageName == "libcapNgSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 460,149-byte tarball; length check guards
     # against a future bump that forgets to widen the hash alongside
     # the URL.
-    let spec = registeredFetchSpec("libcapNg")
+    let spec = registeredFetchSpec("libcapNgSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -65,7 +65,7 @@ suite "libcapNg — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream people.redhat.com
     # release tarballs use.
-    let spec = registeredFetchSpec("libcapNg")
+    let spec = registeredFetchSpec("libcapNgSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -86,9 +86,9 @@ suite "libcapNg — from-source recipe smoke test":
     # SONAMEs (the upstream SONAME ``cap-ng`` becomes ``libCapNg``).
     # A regression that mis-tagged the artifact kind would mis-route
     # the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("libcapNg")
+    let arts = registeredArtifacts("libcapNgSource")
     check arts.len == 1
-    check arts[0].packageName == "libcapNg"
+    check arts[0].packageName == "libcapNgSource"
     check arts[0].artifactName == "libCapNg"
     check arts[0].kind == dakLibrary
 
@@ -98,7 +98,7 @@ suite "libcapNg — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # canonical github.com mirror of Steve Grubb's libcap-ng source
     # tree.
-    let vs = registeredVersions("libcapNg")
+    let vs = registeredVersions("libcapNgSource")
     check vs.len == 1
     check vs[0].version == "0.8.5"
     check vs[0].sourceRevision == "v0.8.5"

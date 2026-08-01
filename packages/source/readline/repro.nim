@@ -4,7 +4,7 @@
 ## on every interactive Unix CLI — bash, gdb, psql, sqlite3, ipython,
 ## clisp, python's REPL (when built with the readline binding), and
 ## every emacs-style or vi-style key-binding inside a terminal app
-## flows through ``libreadline.so``. Pairs with the sibling ``bash``
+## flows through ``libreadline.so``. Pairs with the sibling ``bashSource``
 ## recipe (#59) which configures ``--enable-readline`` against this
 ## library.
 ##
@@ -13,7 +13,7 @@
 ## libreadline is the foundation of every interactive CLI's input
 ## experience:
 ##
-##   * bash (from the sibling ``bash`` recipe) links against
+##   * bash (from the sibling ``bashSource`` recipe) links against
 ##     libreadline for its interactive prompt — history,
 ##     tab-completion, emacs / vi key bindings, paste handling, and
 ##     terminfo-driven cursor positioning all flow through libreadline.
@@ -41,7 +41,7 @@
 ##
 ## readline releases are cut on ftp.gnu.org under tags of the form
 ## ``readline-<X>.<Y>``. 8.2 is the current stable in the 8.x line as
-## of mid-2026 and pairs with bash 5.2.x (sibling ``bash``); the
+## of mid-2026 and pairs with bash 5.2.x (sibling ``bashSource``); the
 ## 8.x SONAME bump from 7.x carries the bracketed-paste mode + the
 ## ``rl_unbind_function_in_map`` API the modern bash REPL reaches for.
 ## Anything ``>=8.0`` covers the bracketed-paste + the
@@ -96,7 +96,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package readline:
+package readlineSource:
   ## From-source GNU readline — sixty-fourth M9.H/I/K production
   ## recipe. THE canonical line-editing + history + tab-completion
   ## library for every interactive Unix CLI (bash, gdb, psql, sqlite3,
@@ -166,7 +166,7 @@ package readline:
   buildDeps:
     ## ncurses provides the terminfo database lookup + the curses
     ## key-handling primitives readline reaches for when the host
-    ## terminal has a non-trivial cap set (the sibling ``ncurses``
+    ## terminal has a non-trivial cap set (the sibling ``ncursesSource``
     ## recipe #62 vendors a compatible version).
     "ncurses >=6.0"
 
@@ -197,7 +197,7 @@ package readline:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("readline")
+    setCurrentOwningPackageOverride("readlineSource")
     try:
       let opts = @[
         "--disable-static",

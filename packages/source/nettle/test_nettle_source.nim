@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``nettle`` recipe.
+## Smoke test for the from-source ``nettleSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-SECOND real
 ## production from-source recipe and the SECOND recipe in the crypto-
@@ -30,7 +30,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two library artifacts under
-# ``nettle`` at module init time.
+# ``nettleSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -45,19 +45,19 @@ const ExpectedConfigureFlags = @[
   "--enable-shared",
 ]
 
-suite "nettle — from-source recipe smoke test":
+suite "nettleSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("nettle")
-    check spec.packageName == "nettle"
+    let spec = registeredFetchSpec("nettleSource")
+    check spec.packageName == "nettleSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,640,485-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("nettle")
+    let spec = registeredFetchSpec("nettleSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -66,7 +66,7 @@ suite "nettle — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("nettle")
+    let spec = registeredFetchSpec("nettleSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -87,12 +87,12 @@ suite "nettle — from-source recipe smoke test":
     # of libnettle). A regression that collapsed the multi-library
     # packages or dropped one of the two would surface in the
     # artifact-count + per-artifact name pinning below.
-    let arts = registeredArtifacts("nettle")
+    let arts = registeredArtifacts("nettleSource")
     check arts.len == 2
     var seenNettle = false
     var seenHogweed = false
     for art in arts:
-      check art.packageName == "nettle"
+      check art.packageName == "nettleSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libNettle":
@@ -110,7 +110,7 @@ suite "nettle — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical GNU project page that hosts the nettle source
     # tree.
-    let vs = registeredVersions("nettle")
+    let vs = registeredVersions("nettleSource")
     check vs.len == 1
     check vs[0].version == "3.10"
     check vs[0].sourceRevision == "nettle_3_10"

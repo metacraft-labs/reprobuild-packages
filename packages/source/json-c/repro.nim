@@ -19,7 +19,7 @@
 ## config helpers, NetworkManager, BlueZ, PolicyKit). It is a
 ## transitive dependency of every JSON-aware desktop component and is
 ## consumed by the sway ecosystem for IPC message construction. The
-## sibling ``sway`` recipe pins ``json-c >=0.17`` in its
+## sibling ``swaySource`` recipe pins ``json-c >=0.17`` in its
 ## ``uses:`` block (added when the desktop story closes), so this
 ## recipe is the upstream-source side of that dependency edge.
 ##
@@ -74,7 +74,7 @@
 ## the package-level identifier ``libJsonC`` (the kebab-cased
 ## ``-c`` suffix is stripped from the artifact identifier and the
 ## camel-case mapping follows the gdk-pixbuf precedent of
-## kebab-to-camel for ``json-c`` -> ``jsonC``).
+## kebab-to-camel for ``json-c`` -> ``jsonCSource``).
 ##
 ## ## Configurables
 ##
@@ -109,7 +109,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package jsonC:
+package jsonCSource:
   ## From-source json-c — thirteenth M9.H/I/K production recipe and
   ## FIRST CMake-driven from-source recipe (every prior recipe used
   ## meson or make).
@@ -177,7 +177,7 @@ package jsonC:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("jsonC")
+    setCurrentOwningPackageOverride("jsonCSource")
     try:
       let opts = @[
         "BUILD_SHARED_LIBS=ON",

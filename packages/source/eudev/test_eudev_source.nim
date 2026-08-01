@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``eudev`` recipe.
+## Smoke test for the from-source ``eudevSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-FIFTH real
 ## production from-source recipe. eudev's unique coverage angle vs the
@@ -21,7 +21,7 @@
 ##   * THREE artifact registration (M3) — ``udevd`` + ``udevadm``
 ##     tagged ``dakExecutable`` + ``libUdev`` tagged ``dakLibrary``.
 ##   * Artifact-name collision distinctness — eudev's ``libUdev``
-##     is registered under the ``eudev`` packageName and is
+##     is registered under the ``eudevSource`` packageName and is
 ##     DISTINCT from any sibling's ``libUdev`` (the package-name
 ##     pin guards the collision-distinctness property).
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
@@ -33,7 +33,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two executable + one library
-# artifacts under ``eudev`` at module init time.
+# artifacts under ``eudevSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -49,19 +49,19 @@ const ExpectedConfigureFlags = @[
   "--enable-hwdb",
 ]
 
-suite "eudev — from-source recipe smoke test":
+suite "eudevSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("eudev")
-    check spec.packageName == "eudev"
+    let spec = registeredFetchSpec("eudevSource")
+    check spec.packageName == "eudevSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,188,254-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("eudev")
+    let spec = registeredFetchSpec("eudevSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "eudev — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("eudev")
+    let spec = registeredFetchSpec("eudevSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -87,13 +87,13 @@ suite "eudev — from-source recipe smoke test":
     # ``dakExecutable`` while ``libUdev`` is tagged ``dakLibrary``. A
     # regression that flattened the kind discriminator would mis-route
     # the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("eudev")
+    let arts = registeredArtifacts("eudevSource")
     check arts.len == 3
     var seenUdevd = false
     var seenUdevadm = false
     var seenLibUdev = false
     for art in arts:
-      check art.packageName == "eudev"
+      check art.packageName == "eudevSource"
       case art.artifactName
       of "udevd":
         seenUdevd = true
@@ -118,11 +118,11 @@ suite "eudev — from-source recipe smoke test":
     # the convention layer's install action (shipping a corrupt
     # ``libudev.so`` that's neither the systemd nor the eudev
     # implementation cleanly).
-    let arts = registeredArtifacts("eudev")
+    let arts = registeredArtifacts("eudevSource")
     var foundLibUdevForEudev = false
     for art in arts:
       if art.artifactName == "libUdev":
-        check art.packageName == "eudev"
+        check art.packageName == "eudevSource"
         foundLibUdevForEudev = true
     check foundLibUdevForEudev
 
@@ -131,7 +131,7 @@ suite "eudev — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the eudev source tree.
-    let vs = registeredVersions("eudev")
+    let vs = registeredVersions("eudevSource")
     check vs.len == 1
     check vs[0].version == "3.2.14"
     check vs[0].sourceRevision == "v3.2.14"

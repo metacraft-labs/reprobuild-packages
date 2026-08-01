@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package evolutionDataServer:
+package evolutionDataServerSource:
   versions:
     "3.54.3":
       sourceRevision = "3.54.3"
@@ -44,7 +44,7 @@ package evolutionDataServer:
   library libCamel:
     discard
   build:
-    setCurrentOwningPackageOverride("evolutionDataServer")
+    setCurrentOwningPackageOverride("evolutionDataServerSource")
     try:
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
         cacheVars = @[

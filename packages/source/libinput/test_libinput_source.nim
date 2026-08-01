@@ -1,10 +1,10 @@
-## Smoke test for the from-source ``libinput`` recipe.
+## Smoke test for the from-source ``libinputSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the NINTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots`` /
-## ``sway`` / ``linuxKernel`` / ``libxkbcommon`` /
-## ``pixman``). libinput's unique coverage angle vs the prior
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
+## ``swaySource`` / ``linuxKernelSource`` / ``libxkbcommonSource`` /
+## ``pixmanSource``). libinput's unique coverage angle vs the prior
 ## eight is a library + executable pair where the on-disk filenames
 ## COLLIDE (``libinput.so`` vs ``libinput`` CLI) but the DSL identifiers
 ## must STAY DISTINCT (``libinput`` for the library, ``libinputBin``
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library + executable artifacts under
-# ``libinput`` at module init time.
+# ``libinputSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -50,19 +50,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "libinput — from-source recipe smoke test":
+suite "libinputSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libinput")
-    check spec.packageName == "libinput"
+    let spec = registeredFetchSpec("libinputSource")
+    check spec.packageName == "libinputSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,074,349-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libinput")
+    let spec = registeredFetchSpec("libinputSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -71,7 +71,7 @@ suite "libinput — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream libinput release
     # dist tarballs use.
-    let spec = registeredFetchSpec("libinput")
+    let spec = registeredFetchSpec("libinputSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -89,12 +89,12 @@ suite "libinput — from-source recipe smoke test":
     # regression that flattened the kind tag would mis-route the M9.L
     # install path (``lib/`` vs ``bin/``) and produce a file-system
     # collision at install time.
-    let arts = registeredArtifacts("libinput")
+    let arts = registeredArtifacts("libinputSource")
     check arts.len == 2
     var seenLib = false
     var seenBin = false
     for art in arts:
-      check art.packageName == "libinput"
+      check art.packageName == "libinputSource"
       case art.artifactName
       of "libinput":
         seenLib = true
@@ -114,7 +114,7 @@ suite "libinput — from-source recipe smoke test":
     # release URL sits behind an Anubis bot-protection challenge).
     # The repository points at the canonical freedesktop.org gitlab
     # project that hosts the libinput source tree.
-    let vs = registeredVersions("libinput")
+    let vs = registeredVersions("libinputSource")
     check vs.len == 1
     check vs[0].version == "1.28.1"
     check vs[0].sourceRevision == "1.28.1"

@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxrandr:
+package libxrandrSource:
   versions:
     "1.5.4":
       sourceRevision = "libXrandr-1.5.4"
@@ -37,7 +37,7 @@ package libxrandr:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libxrandr")
+    setCurrentOwningPackageOverride("libxrandrSource")
     try:
       let pkg = autotools_package(srcDir = "./src",
         configureOptions = @["--disable-static", "--enable-shared"])

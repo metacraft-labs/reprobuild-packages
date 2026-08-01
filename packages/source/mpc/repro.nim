@@ -5,7 +5,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package mpc:
+package mpcSource:
   versions:
     "1.4.0":
       sourceRevision = "1.4.0"
@@ -35,7 +35,7 @@ package mpc:
     discard
 
   build:
-    setCurrentOwningPackageOverride("mpc")
+    setCurrentOwningPackageOverride("mpcSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static",

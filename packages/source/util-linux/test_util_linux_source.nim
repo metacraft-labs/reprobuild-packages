@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``utilLinux`` recipe.
+## Smoke test for the from-source ``utilLinuxSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-SECOND real
 ## production from-source recipe. util-linux's unique coverage angle vs
@@ -33,7 +33,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + five executable + three library
-# artifacts under ``utilLinux`` at module init time.
+# artifacts under ``utilLinuxSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -51,19 +51,19 @@ const ExpectedConfigureFlags = @[
   "--disable-bash-completion",
 ]
 
-suite "utilLinux — from-source recipe smoke test":
+suite "utilLinuxSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("utilLinux")
-    check spec.packageName == "utilLinux"
+    let spec = registeredFetchSpec("utilLinuxSource")
+    check spec.packageName == "utilLinuxSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 8,848,216-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("utilLinux")
+    let spec = registeredFetchSpec("utilLinuxSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -72,7 +72,7 @@ suite "utilLinux — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream kernel.org release
     # tarballs use.
-    let spec = registeredFetchSpec("utilLinux")
+    let spec = registeredFetchSpec("utilLinuxSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -93,7 +93,7 @@ suite "utilLinux — from-source recipe smoke test":
     # vs ``bin/``); a regression that collapsed the artifact-name
     # partitioning at the eight-artifact cardinality would not
     # produce eight distinct entries with the expected names below.
-    let arts = registeredArtifacts("utilLinux")
+    let arts = registeredArtifacts("utilLinuxSource")
     check arts.len == 8
     var seenMount = false
     var seenUmount = false
@@ -104,7 +104,7 @@ suite "utilLinux — from-source recipe smoke test":
     var seenLibUuid = false
     var seenLibMount = false
     for art in arts:
-      check art.packageName == "utilLinux"
+      check art.packageName == "utilLinuxSource"
       case art.artifactName
       of "mount":
         seenMount = true
@@ -147,7 +147,7 @@ suite "utilLinux — from-source recipe smoke test":
     # points at the vendored copy. The repository points at the
     # canonical mirror on git.kernel.org that hosts the util-linux
     # source tree.
-    let vs = registeredVersions("utilLinux")
+    let vs = registeredVersions("utilLinuxSource")
     check vs.len == 1
     check vs[0].version == "2.40.4"
     check vs[0].sourceRevision == "v2.40.4"

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``procps`` recipe.
+## Smoke test for the from-source ``procpsSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-EIGHTH real
 ## production from-source recipe. procps-ng's unique coverage angle vs
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + five executable + one library
-# artifacts under ``procps`` at module init time.
+# artifacts under ``procpsSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -47,26 +47,26 @@ const ExpectedConfigureFlags = @[
   "NCURSES_LIBS=-lncursesw",
 ]
 
-suite "procps — from-source recipe smoke test":
+suite "procpsSource — from-source recipe smoke test":
 
   test "build dependencies cover autoreconf and top's terminal UI":
-    check registeredNativeBuildDeps("procps") == @[
+    check registeredNativeBuildDeps("procpsSource") == @[
       "autoconf", "automake", "libtool", "m4", "make", "gcc >=11",
       "pkg-config",
     ]
-    check registeredBuildDeps("procps") == @["ncurses >=6.0"]
+    check registeredBuildDeps("procpsSource") == @["ncurses >=6.0"]
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("procps")
-    check spec.packageName == "procps"
+    let spec = registeredFetchSpec("procpsSource")
+    check spec.packageName == "procpsSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,392,641-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("procps")
+    let spec = registeredFetchSpec("procpsSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -77,7 +77,7 @@ suite "procps — from-source recipe smoke test":
     # tarballs use (the leading directory in the .tar.gz is
     # ``procps-v4.0.5/`` so extractStrip=1 lands the source tree at
     # the build cwd root).
-    let spec = registeredFetchSpec("procps")
+    let spec = registeredFetchSpec("procpsSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -97,7 +97,7 @@ suite "procps — from-source recipe smoke test":
     # vs ``bin/``); a regression that collapsed the artifact-name
     # partitioning would not produce six distinct entries with the
     # expected names below.
-    let arts = registeredArtifacts("procps")
+    let arts = registeredArtifacts("procpsSource")
     check arts.len == 6
     var seenPs = false
     var seenTop = false
@@ -106,7 +106,7 @@ suite "procps — from-source recipe smoke test":
     var seenUptime = false
     var seenLibProc = false
     for art in arts:
-      check art.packageName == "procps"
+      check art.packageName == "procpsSource"
       case art.artifactName
       of "ps":
         seenPs = true
@@ -140,7 +140,7 @@ suite "procps — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # canonical procps-ng GitLab project that hosts the source tree.
-    let vs = registeredVersions("procps")
+    let vs = registeredVersions("procpsSource")
     check vs.len == 1
     check vs[0].version == "4.0.5"
     check vs[0].sourceRevision == "v4.0.5"

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kglobalaccel`` recipe.
+## Smoke test for the from-source ``kglobalaccelSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-FOURTH real
 ## production from-source recipe and the SECOND recipe in the SECOND
@@ -25,7 +25,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + library artifact under
-# ``kglobalaccel`` at module init time.
+# ``kglobalaccelSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -41,17 +41,17 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "kglobalaccel — from-source recipe smoke test":
+suite "kglobalaccelSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("kglobalaccel")
-    check spec.packageName == "kglobalaccel"
+    let spec = registeredFetchSpec("kglobalaccelSource")
+    check spec.packageName == "kglobalaccelSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,294,700-byte tarball.
-    let spec = registeredFetchSpec("kglobalaccel")
+    let spec = registeredFetchSpec("kglobalaccelSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -60,7 +60,7 @@ suite "kglobalaccel — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("kglobalaccel")
+    let spec = registeredFetchSpec("kglobalaccelSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -75,15 +75,15 @@ suite "kglobalaccel — from-source recipe smoke test":
     # and must be tagged ``dakLibrary``. A regression that mis-cased
     # the PascalCase brand (``libKF6Globalaccel`` vs
     # ``libKF6GlobalAccel``) would not match the assertion below.
-    let arts = registeredArtifacts("kglobalaccel")
+    let arts = registeredArtifacts("kglobalaccelSource")
     check arts.len == 1
-    check arts[0].packageName == "kglobalaccel"
+    check arts[0].packageName == "kglobalaccelSource"
     check arts[0].artifactName == "libKF6GlobalAccel"
     check arts[0].kind == dakLibrary
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry.
-    let vs = registeredVersions("kglobalaccel")
+    let vs = registeredVersions("kglobalaccelSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

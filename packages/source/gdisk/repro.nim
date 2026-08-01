@@ -16,7 +16,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gdisk:
+package gdiskSource:
   versions:
     "1.0.10":
       sourceRevision = "v1.0.10"
@@ -53,7 +53,7 @@ package gdisk:
     discard
 
   build:
-    setCurrentOwningPackageOverride("gdisk")
+    setCurrentOwningPackageOverride("gdiskSource")
     try:
       let sourceRoot = "/opt/repro/reprobuild/recipes/packages/source"
       let utilLinux = sourceRoot & "/util-linux/.repro/output/install/usr"

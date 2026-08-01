@@ -8,7 +8,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kparts:
+package kpartsSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -57,7 +57,7 @@ package kparts:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kparts")
+    setCurrentOwningPackageOverride("kpartsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

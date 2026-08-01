@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``iproute2`` recipe.
+## Smoke test for the from-source ``iproute2Source`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-NINTH real production
 ## from-source recipe. iproute2's unique coverage angle vs the prior
@@ -28,7 +28,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + four executable artifacts under
-# ``iproute2`` at module init time.
+# ``iproute2Source`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -41,19 +41,19 @@ const ExpectedConfigureFlags = @[
   "--without-libelf",
 ]
 
-suite "iproute2 — from-source recipe smoke test":
+suite "iproute2Source — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("iproute2")
-    check spec.packageName == "iproute2"
+    let spec = registeredFetchSpec("iproute2Source")
+    check spec.packageName == "iproute2Source"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 925,392-byte tarball; length check guards
     # against a future bump that forgets to widen the hash alongside
     # the URL.
-    let spec = registeredFetchSpec("iproute2")
+    let spec = registeredFetchSpec("iproute2Source")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -62,7 +62,7 @@ suite "iproute2 — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream kernel.org release
     # tarballs use.
-    let spec = registeredFetchSpec("iproute2")
+    let spec = registeredFetchSpec("iproute2Source")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -80,14 +80,14 @@ suite "iproute2 — from-source recipe smoke test":
     # at the externally-consumed surface (the internal
     # ``libnetlink.a`` static archive + helper libraries are NOT
     # installed as library artifacts in the distro-packaging sense).
-    let arts = registeredArtifacts("iproute2")
+    let arts = registeredArtifacts("iproute2Source")
     check arts.len == 4
     var seenIp = false
     var seenTc = false
     var seenSs = false
     var seenBridge = false
     for art in arts:
-      check art.packageName == "iproute2"
+      check art.packageName == "iproute2Source"
       check art.kind == dakExecutable
       case art.artifactName
       of "ip":
@@ -111,7 +111,7 @@ suite "iproute2 — from-source recipe smoke test":
     # points at the vendored copy. The repository points at the
     # canonical mirror on git.kernel.org that hosts the iproute2 source
     # tree.
-    let vs = registeredVersions("iproute2")
+    let vs = registeredVersions("iproute2Source")
     check vs.len == 1
     check vs[0].version == "6.12.0"
     check vs[0].sourceRevision == "v6.12.0"

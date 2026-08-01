@@ -9,7 +9,7 @@
 ## artifact-kind permutation. plasma-workspace is the FOURTH CMake-
 ## driven recipe and the FIRST CMake recipe to combine BOTH a
 ## multi-word-kebab package name (``plasma-workspace`` ->
-## ``plasmaWorkspace``) AND a mixed-kind artifact set (library +
+## ``plasmaWorkspaceSource``) AND a mixed-kind artifact set (library +
 ## executable). The gnome-shell precedent exercised the same shape on
 ## the meson channel; this is the CMake-side analogue, so a regression
 ## that fumbled the multi-word kebab-to-camel translation specifically
@@ -45,7 +45,7 @@
 ##
 ## download.kde.org publishes KDE Plasma releases at
 ## ``https://download.kde.org/stable/plasma/<x.y.z>/``. plasma-workspace
-## 6.2.5 is the current stable matching the sibling ``kwin``
+## 6.2.5 is the current stable matching the sibling ``kwinSource``
 ## 6.2.5 pin (the Plasma 6.x point releases ship as a coordinated set
 ## so plasma-workspace + kwin minor lines MUST stay in lockstep).
 ##
@@ -122,7 +122,7 @@
 ##                                propagates through plasma-workspace's
 ##                                kwin-integration sub-build to keep
 ##                                this recipe in lockstep with the
-##                                sibling ``kwin`` recipe's
+##                                sibling ``kwinSource`` recipe's
 ##                                identical ``-DKWIN_BUILD_X11=OFF``.
 ##   * ``CMAKE_BUILD_TYPE=Release`` — release-mode optimisation;
 ##                                     matches the sibling from-source
@@ -141,12 +141,12 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package plasmaWorkspace:
+package plasmaWorkspaceSource:
   ## From-source plasma-workspace — twenty-first M9.H/I/K production
   ## recipe and the THIRD recipe in the Plasma stack batch. Fourth
   ## CMake-driven recipe after json-c + kcoreaddons + kwin, and the
   ## FIRST CMake recipe to combine BOTH a multi-word-kebab package
-  ## name (``plasma-workspace`` -> ``plasmaWorkspace``) AND a
+  ## name (``plasma-workspace`` -> ``plasmaWorkspaceSource``) AND a
   ## mixed-kind artifact set.
   ##
   ## Tier-2b c_cpp_cmake convention consumer: the convention layer
@@ -201,7 +201,7 @@ package plasmaWorkspace:
   buildDeps:
     ## kwin is the Wayland compositor plasma-workspace's session leader
     ## chain-execs into after the Plasma session bootstraps. The
-    ## sibling ``kwin`` recipe vendors 6.2.5 to match the
+    ## sibling ``kwinSource`` recipe vendors 6.2.5 to match the
     ## Plasma 6.2.x point-release coordination.
     "kwin >=6.2"
     ## M9.R.15f.5 — the legacy ``kf6-base`` umbrella name had no
@@ -393,7 +393,7 @@ package plasmaWorkspace:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("plasmaWorkspace")
+    setCurrentOwningPackageOverride("plasmaWorkspaceSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

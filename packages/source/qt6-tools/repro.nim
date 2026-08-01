@@ -95,10 +95,10 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6Tools:
+package qt6ToolsSource:
   ## From-source qt6-tools — adds the missing qt6-tools module every
   ## KF6 recipe declares as a buildDep. Sibling to qt6-base
-  ## (qt6Base) and shares the same 6.8.1 pin.
+  ## (qt6BaseSource) and shares the same 6.8.1 pin.
   ##
   ## Tier-2b c_cpp_cmake convention consumer: the convention layer
   ## reads the ``fetch:`` block (registered via ``registeredFetchSpec``)
@@ -160,7 +160,7 @@ package qt6Tools:
     ## qt6-base supplies QtCore + QtGui + QtWidgets + QtNetwork +
     ## QtSql — qt6-tools links against every one of these for the
     ## linguist/assistant/designer/qhelpgenerator binaries. The
-    ## sibling ``qt6Base`` recipe vendors 6.8.1.
+    ## sibling ``qt6BaseSource`` recipe vendors 6.8.1.
     "qt6-base >=6.8"
 
   config:
@@ -191,7 +191,7 @@ package qt6Tools:
     ## M9.R.15f.2 — explicit `build:` block constructed from the
     ## inlined verbatim flags. Calls the M9.R.2b high-level
     ## `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("qt6Tools")
+    setCurrentOwningPackageOverride("qt6ToolsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

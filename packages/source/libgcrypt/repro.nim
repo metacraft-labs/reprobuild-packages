@@ -101,7 +101,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libgcrypt:
+package libgcryptSource:
   ## From-source libgcrypt — fifty-third M9.H/I/K production recipe
   ## and the FIRST recipe in the corpus to vendor a .tar.bz2 archive
   ## (the prior fifty-two used .tar.gz or .tar.xz). Single library
@@ -193,7 +193,7 @@ package libgcrypt:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("libgcrypt")
+    setCurrentOwningPackageOverride("libgcryptSource")
     try:
       let opts = @[
         "--disable-static",

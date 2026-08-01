@@ -26,7 +26,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package attica:
+package atticaSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -54,7 +54,7 @@ package attica:
     discard
 
   build:
-    setCurrentOwningPackageOverride("attica")
+    setCurrentOwningPackageOverride("atticaSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

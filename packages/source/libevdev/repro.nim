@@ -61,7 +61,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libevdev:
+package libevdevSource:
   ## From-source libevdev — closes M9.R.26 Gap 2. Tier-2b
   ## c_cpp_autotools convention consumer. Single library artifact
   ## recipe.
@@ -100,7 +100,7 @@ package libevdev:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libevdev")
+    setCurrentOwningPackageOverride("libevdevSource")
     try:
       let opts = @[
         "tests=disabled",

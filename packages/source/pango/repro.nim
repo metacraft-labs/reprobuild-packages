@@ -18,7 +18,7 @@
 ## ## Plasma desktop stories
 ##
 ## pango is the text-layout and font-rendering library underpinning
-## GTK + GNOME's text-shaping pipeline. The sibling ``sway``
+## GTK + GNOME's text-shaping pipeline. The sibling ``swaySource``
 ## recipe pins ``pango >=1.50`` in its ``uses:`` block via its
 ## swaybar / swaybg / sway-status helpers that render text via the
 ## pangocairo surface binding, so this recipe is the upstream-source
@@ -107,7 +107,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package pango:
+package pangoSource:
   ## From-source pango recipe with two library artifacts.
   ##
   ## The registered ``fetch:`` pin feeds the explicit package-level
@@ -180,7 +180,7 @@ package pango:
     ## The upstream minimum is 2.15.0.
     "fontconfig >=2.15.0"
     ## cairo is the surface library the pangocairo binding emits to
-    ## (and the sibling ``cairo`` recipe is the upstream-source
+    ## (and the sibling ``cairoSource`` recipe is the upstream-source
     ## side of that edge). The upstream minimum is 1.18.0.
     "cairo >=1.18.0"
 
@@ -197,7 +197,7 @@ package pango:
   library libpangocairo:
     ## ``libpangocairo-1.0.so`` — the pango/cairo surface binding that
     ## lets cairo surfaces render pango layouts; the sibling
-    ## ``cairo`` recipe is the upstream-source side of this
+    ## ``cairoSource`` recipe is the upstream-source side of this
     ## edge. The package build slices this artifact from the Meson
     ## install result.
     discard
@@ -205,7 +205,7 @@ package pango:
   build:
     ## Explicit package-level build with inlined options, using the
     ## high-level typed ``meson_package`` constructor.
-    setCurrentOwningPackageOverride("pango")
+    setCurrentOwningPackageOverride("pangoSource")
     try:
       let opts = @[
         # pango 1.54 renamed ``gtk_doc`` to ``documentation``

@@ -9,10 +9,10 @@ const ExpectedUrl =
 const ExpectedHash =
   "5f47764274cb7532349ce0aa20ec10f1e8e851a6e9fa3eb66812c43d196db042"
 
-suite "nano from-source recipe":
+suite "nanoSource from-source recipe":
   test "pins the official release tarball":
-    let spec = registeredFetchSpec("nano")
-    check spec.packageName == "nano"
+    let spec = registeredFetchSpec("nanoSource")
+    check spec.packageName == "nanoSource"
     check spec.url == ExpectedUrl
     check spec.hashAlg == dshaSha256
     check spec.hashHex == ExpectedHash

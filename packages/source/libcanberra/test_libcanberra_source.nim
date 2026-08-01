@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``libcanberra`` recipe.
+## Smoke test for the from-source ``libcanberraSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SEVENTY-FIFTH real
 ## production from-source recipe. libcanberra's unique coverage angle
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``libcanberra`` at module init time.
+# ``libcanberraSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -36,22 +36,22 @@ const ExpectedUrl =
 const ExpectedHash =
   "c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72"
 
-suite "libcanberra — from-source recipe smoke test":
+suite "libcanberraSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
     # Post-M9.R.14d.2 convention pins the upstream URL (never a
     # host-absolute ``file:///`` path) so the recipe is portable across
     # hosts.
-    let spec = registeredFetchSpec("libcanberra")
-    check spec.packageName == "libcanberra"
+    let spec = registeredFetchSpec("libcanberraSource")
+    check spec.packageName == "libcanberraSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 318,960-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libcanberra")
+    let spec = registeredFetchSpec("libcanberraSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -60,7 +60,7 @@ suite "libcanberra — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream 0pointer.de release
     # tarballs use.
-    let spec = registeredFetchSpec("libcanberra")
+    let spec = registeredFetchSpec("libcanberraSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -71,7 +71,7 @@ suite "libcanberra — from-source recipe smoke test":
   test "configureFlags does not leak into the cmake channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "build dependencies name the bundled libltdl ABI":
-    check "libltdl" in registeredBuildDeps("libcanberra")
+    check "libltdl" in registeredBuildDeps("libcanberraSource")
   test "artifacts register a single library":
     # M3 artifact registry: ``libCanberra`` is the only artifact and
     # must be tagged ``dakLibrary``. libcanberra's autotools build emits
@@ -79,9 +79,9 @@ suite "libcanberra — from-source recipe smoke test":
     # core + the property-list helpers + the null back-end. A
     # regression that mis-tagged the artifact kind would mis-route the
     # M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("libcanberra")
+    let arts = registeredArtifacts("libcanberraSource")
     check arts.len == 1
-    check arts[0].packageName == "libcanberra"
+    check arts[0].packageName == "libcanberraSource"
     check arts[0].artifactName == "libCanberra"
     check arts[0].kind == dakLibrary
 
@@ -90,7 +90,7 @@ suite "libcanberra — from-source recipe smoke test":
     # recorded for ``repro update-source``. The repository points at
     # the qbittorrent fork on GitHub that picked up active maintenance
     # of libcanberra after upstream went dormant in 2012.
-    let vs = registeredVersions("libcanberra")
+    let vs = registeredVersions("libcanberraSource")
     check vs.len == 1
     check vs[0].version == "0.30"
     check vs[0].sourceRevision == "0.30"

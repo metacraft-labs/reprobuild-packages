@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``plasmaFramework`` recipe.
+## Smoke test for the from-source ``plasmaFrameworkSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-SIXTH real production
 ## from-source recipe and the CLOSING recipe in the SECOND KF6 module-
@@ -31,7 +31,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + library artifact under
-# ``plasmaFramework`` at module init time.
+# ``plasmaFrameworkSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -47,7 +47,7 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "plasmaFramework — from-source recipe smoke test":
+suite "plasmaFrameworkSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
@@ -55,13 +55,13 @@ suite "plasmaFramework — from-source recipe smoke test":
     # the upstream post-rename release artefact (NOT
     # ``plasma-framework-6.2.5.tar.xz``); a regression that mis-lifted
     # the legacy KF5 filename would not match the assertion below.
-    let spec = registeredFetchSpec("plasmaFramework")
-    check spec.packageName == "plasmaFramework"
+    let spec = registeredFetchSpec("plasmaFrameworkSource")
+    check spec.packageName == "plasmaFrameworkSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,970,096-byte tarball.
-    let spec = registeredFetchSpec("plasmaFramework")
+    let spec = registeredFetchSpec("plasmaFrameworkSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "plasmaFramework — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("plasmaFramework")
+    let spec = registeredFetchSpec("plasmaFrameworkSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -87,9 +87,9 @@ suite "plasmaFramework — from-source recipe smoke test":
     # (``libKF6Plasma`` vs ``libPlasma``) would not match the
     # assertion below — libplasma is a Plasma-stack library, not a KF6
     # framework, and the upstream SONAME reflects that.
-    let arts = registeredArtifacts("plasmaFramework")
+    let arts = registeredArtifacts("plasmaFrameworkSource")
     check arts.len == 1
-    check arts[0].packageName == "plasmaFramework"
+    check arts[0].packageName == "plasmaFrameworkSource"
     check arts[0].artifactName == "libPlasma"
     check arts[0].kind == dakLibrary
 
@@ -98,7 +98,7 @@ suite "plasmaFramework — from-source recipe smoke test":
     # (``stable/plasma/6.2.5/`` instead of
     # ``stable/frameworks/<x.y>/``) AND the v6.2.5 upstream tag
     # (instead of the v6.10.0 the sibling KF6 recipes use).
-    let vs = registeredVersions("plasmaFramework")
+    let vs = registeredVersions("plasmaFrameworkSource")
     check vs.len == 1
     check vs[0].version == "6.2.5"
     check vs[0].sourceRevision == "v6.2.5"

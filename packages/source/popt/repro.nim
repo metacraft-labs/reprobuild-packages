@@ -5,7 +5,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package popt:
+package poptSource:
   versions:
     "1.19":
       sourceRevision = "popt-1.19"
@@ -29,7 +29,7 @@ package popt:
     discard
 
   build:
-    setCurrentOwningPackageOverride("popt")
+    setCurrentOwningPackageOverride("poptSource")
     try:
       let pkg = autotools_package(
         srcDir = "./src",

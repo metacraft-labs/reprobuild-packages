@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``sqlite`` recipe.
+## Smoke test for the from-source ``sqliteSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-FIRST real
 ## production from-source recipe. sqlite's unique coverage angle vs
@@ -28,7 +28,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library + executable artifacts under
-# ``sqlite`` at module init time.
+# ``sqliteSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,19 +44,19 @@ const ExpectedConfigureFlags = @[
   "--enable-json1",
 ]
 
-suite "sqlite — from-source recipe smoke test":
+suite "sqliteSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("sqlite")
-    check spec.packageName == "sqlite"
+    let spec = registeredFetchSpec("sqliteSource")
+    check spec.packageName == "sqliteSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 3,328,564-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("sqlite")
+    let spec = registeredFetchSpec("sqliteSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -65,7 +65,7 @@ suite "sqlite — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream sqlite.org release
     # tarballs use.
-    let spec = registeredFetchSpec("sqlite")
+    let spec = registeredFetchSpec("sqliteSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,12 +85,12 @@ suite "sqlite — from-source recipe smoke test":
     # install path (``lib/`` vs ``bin/``); a regression that collapsed
     # the artifact-name partitioning would not produce two distinct
     # entries with the expected names below.
-    let arts = registeredArtifacts("sqlite")
+    let arts = registeredArtifacts("sqliteSource")
     check arts.len == 2
     var seenLib = false
     var seenCli = false
     for art in arts:
-      check art.packageName == "sqlite"
+      check art.packageName == "sqliteSource"
       case art.artifactName
       of "libSqlite3":
         seenLib = true
@@ -108,7 +108,7 @@ suite "sqlite — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # canonical GitHub mirror that hosts the sqlite source tree.
-    let vs = registeredVersions("sqlite")
+    let vs = registeredVersions("sqliteSource")
     check vs.len == 1
     check vs[0].version == "3.47.1"
     check vs[0].sourceRevision == "version-3.47.1"

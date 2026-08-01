@@ -19,7 +19,7 @@
 ##
 ## cairo is the 2D vector-graphics library that underpins GTK's
 ## rendering and pango's text-shaping output surface. The sibling
-## ``sway`` recipe pins ``cairo >=1.16`` in its ``uses:`` block
+## ``swaySource`` recipe pins ``cairo >=1.16`` in its ``uses:`` block
 ## via its swaybar / swaybg / sway-status helpers, so this recipe is
 ## the upstream-source side of that dependency edge. Mutter (GNOME)
 ## and most modern GUI toolkits also link against cairo.
@@ -123,7 +123,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package cairo:
+package cairoSource:
   ## From-source cairo — tenth M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -181,7 +181,7 @@ package cairo:
 
   buildDeps:
     ## pixman is cairo's per-pixel software-rasteriser backend; the
-    ## sibling ``pixman`` recipe is the upstream-source side of
+    ## sibling ``pixmanSource`` recipe is the upstream-source side of
     ## this edge.
     "pixman >=0.42"
     ## freetype is the font-glyph rasteriser cairo's font backends
@@ -236,7 +236,7 @@ package cairo:
     ##   bundled libpng / glib / freetype / fontconfig / pixman / zlib
     ##   wraps from kicking in and guarantees every dep is satisfied
     ##   through the resolver's ``PKG_CONFIG_PATH``.
-    setCurrentOwningPackageOverride("cairo")
+    setCurrentOwningPackageOverride("cairoSource")
     try:
       let opts = @[
         "libdir=lib",

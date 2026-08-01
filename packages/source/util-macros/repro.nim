@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package utilMacros:
+package utilMacrosSource:
   versions:
     "1.20.2":
       sourceRevision = "util-macros-1.20.2"
@@ -29,7 +29,7 @@ package utilMacros:
     discard
 
   build:
-    setCurrentOwningPackageOverride("utilMacros")
+    setCurrentOwningPackageOverride("utilMacrosSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[],
                                   patchHardcodedFile = true)

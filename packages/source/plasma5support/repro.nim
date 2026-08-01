@@ -8,7 +8,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package plasma5support:
+package plasma5supportSource:
   versions:
     "6.2.5":
       sourceRevision = "v6.2.5"
@@ -65,7 +65,7 @@ package plasma5support:
     discard
 
   build:
-    setCurrentOwningPackageOverride("plasma5support")
+    setCurrentOwningPackageOverride("plasma5supportSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

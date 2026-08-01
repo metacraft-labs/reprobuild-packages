@@ -113,7 +113,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libxml2:
+package libxml2Source:
   ## From-source libxml2 — twenty-eighth M9.H/I/K production recipe
   ## and the SIXTH autotools-driven from-source recipe (expat, gdm,
   ## freetype, fontconfig, zlib precedents).
@@ -175,7 +175,7 @@ package libxml2:
   buildDeps:
     ## zlib is consumed by libxml2's gzip-compressed XML stream
     ## reader (libxml2 transparently decompresses ``.xml.gz`` and
-    ## gzip-encoded HTTP responses). The sibling ``zlib`` recipe
+    ## gzip-encoded HTTP responses). The sibling ``zlibSource`` recipe
     ## vendors a compatible version.
     "zlib >=1.2.11"
 
@@ -196,7 +196,7 @@ package libxml2:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("libxml2")
+    setCurrentOwningPackageOverride("libxml2Source")
     try:
       let opts = @[
         "--disable-static",

@@ -6,7 +6,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package ffmpeg:
+package ffmpegSource:
   versions:
     "7.1.1":
       sourceRevision = "n7.1.1"
@@ -48,7 +48,7 @@ package ffmpeg:
     discard
 
   build:
-    setCurrentOwningPackageOverride("ffmpeg")
+    setCurrentOwningPackageOverride("ffmpegSource")
     try:
       let opts = @[
         "--enable-shared",

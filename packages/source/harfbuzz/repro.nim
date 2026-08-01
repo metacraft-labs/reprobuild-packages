@@ -20,7 +20,7 @@
 ## substitution + positioning; cairo / GTK / Qt6 (via QtGui) /
 ## Firefox / Chromium all consume harfbuzz as the second leg of
 ## "freetype rasterises glyphs, harfbuzz arranges them". The sibling
-## ``pango`` recipe pins ``harfbuzz >=4.0`` in its ``uses:``
+## ``pangoSource`` recipe pins ``harfbuzz >=4.0`` in its ``uses:``
 ## block, so this recipe is the upstream-source side of that
 ## dependency edge.
 ##
@@ -116,7 +116,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package harfbuzz:
+package harfbuzzSource:
   ## From-source harfbuzz — twenty-fourth M9.H/I/K production recipe.
   ## The OpenType text-shaping engine that complements freetype's glyph
   ## rasteriser; pango / cairo / GTK / Qt / browsers all consume it.
@@ -185,7 +185,7 @@ package harfbuzz:
     "glib2 >=2.62"
     ## freetype is the glyph rasteriser harfbuzz consumes for the
     ## ``hb-ft.h`` FreeType integration layer (the canonical pairing
-    ## downstream consumers go through). The sibling ``freetype``
+    ## downstream consumers go through). The sibling ``freetypeSource``
     ## recipe vendors 2.13.3 to match the >=2.10 floor.
     "freetype >=2.10"
 
@@ -203,7 +203,7 @@ package harfbuzz:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("harfbuzz")
+    setCurrentOwningPackageOverride("harfbuzzSource")
     try:
       let opts = @[
         "tests=disabled",

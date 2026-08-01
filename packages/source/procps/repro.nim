@@ -126,7 +126,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package procps:
+package procpsSource:
   ## From-source procps-ng — forty-eighth M9.H/I/K production recipe.
   ## The canonical Linux process-utilities userland: ``ps`` + ``top`` +
   ## ``free`` + ``kill`` + ``uptime`` + ``libproc2.so`` all built from
@@ -247,7 +247,7 @@ package procps:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("procps")
+    setCurrentOwningPackageOverride("procpsSource")
     try:
       let opts = @[
         "--disable-static",

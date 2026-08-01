@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libsecret:
+package libsecretSource:
   versions:
     "0.21.6":
       sourceRevision = "0.21.6"
@@ -31,7 +31,7 @@ package libsecret:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libsecret")
+    setCurrentOwningPackageOverride("libsecretSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "manpage=false",

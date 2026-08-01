@@ -1,9 +1,9 @@
-## Smoke test for the from-source ``kernel`` recipe.
+## Smoke test for the from-source ``kernelSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots`` /
-## ``sway``). The kernel's specific coverage angle is that it
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
+## ``swaySource``). The kernel's specific coverage angle is that it
 ## is the FIRST consumer of the M9.I ``makeFlags:`` channel — the
 ## five prior from-source recipes all build under meson + ninja and
 ## consume ``mesonOptions:``. The kernel by contrast drives ``make``
@@ -32,7 +32,7 @@
 ##   * MIXED artifact registration (M3) — ``bzImage`` registered as
 ##     ``dakExecutable``; ``vmlinux`` / ``systemMap`` /
 ##     ``kernelRelease`` registered as ``dakFiles``. All four
-##     attributed to ``kernel``.
+##     attributed to ``kernelSource``.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
@@ -42,7 +42,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + make flags + executable + files artifacts under
-# ``kernel`` at module init time.
+# ``kernelSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -60,19 +60,19 @@ const ExpectedMakeFlags = @[
   "-j1",
 ]
 
-suite "kernel — from-source recipe smoke test":
+suite "kernelSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("kernel")
-    check spec.packageName == "kernel"
+    let spec = registeredFetchSpec("kernelSource")
+    check spec.packageName == "kernelSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 140,641,384-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("kernel")
+    let spec = registeredFetchSpec("kernelSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -82,7 +82,7 @@ suite "kernel — from-source recipe smoke test":
     # ``--strip-components=1`` convention upstream uses for
     # cdn.kernel.org tarballs (the top-level dir inside is
     # ``linux-<version>/`` which we strip).
-    let spec = registeredFetchSpec("kernel")
+    let spec = registeredFetchSpec("kernelSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -96,11 +96,11 @@ suite "kernel — from-source recipe smoke test":
     # A regression that mis-tagged it as ``dakFiles`` would route
     # the binary under ``share/`` instead of ``bin/`` / ``boot/``,
     # breaking the activation layer's bootloader-menu generator.
-    let arts = registeredArtifacts("kernel")
+    let arts = registeredArtifacts("kernelSource")
     check arts.len == 4
     var seenBzImage = false
     for art in arts:
-      check art.packageName == "kernel"
+      check art.packageName == "kernelSource"
       if art.artifactName == "bzImage":
         check art.kind == dakExecutable
         seenBzImage = true
@@ -111,7 +111,7 @@ suite "kernel — from-source recipe smoke test":
     # be tagged ``dakFiles``. A regression that flattened the
     # discriminator (e.g. labelling them all as executable) would
     # mis-route them on install.
-    let arts = registeredArtifacts("kernel")
+    let arts = registeredArtifacts("kernelSource")
     var seenVmlinux = false
     var seenSystemMap = false
     var seenKernelRelease = false
@@ -136,7 +136,7 @@ suite "kernel — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live
     # fetch points at the vendored copy. The repository points at
     # the canonical Linus tree on git.kernel.org.
-    let vs = registeredVersions("kernel")
+    let vs = registeredVersions("kernelSource")
     check vs.len == 1
     check vs[0].version == "6.6.142"
     check vs[0].sourceRevision == "v6.6.142"

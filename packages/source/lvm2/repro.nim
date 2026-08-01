@@ -13,7 +13,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package lvm2:
+package lvm2Source:
   versions:
     "2.03.30":
       sourceRevision = "v2_03_30"
@@ -59,7 +59,7 @@ package lvm2:
   ## stage-copy doesn't look for a library we never produced.
 
   build:
-    setCurrentOwningPackageOverride("lvm2")
+    setCurrentOwningPackageOverride("lvm2Source")
     try:
       let opts = @[
         "--disable-static",

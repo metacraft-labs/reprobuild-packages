@@ -67,7 +67,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6ShaderTools:
+package qt6ShaderToolsSource:
   ## From-source qt6-shadertools — M9.R.15n.2 Qt Quick blocker. Sibling
   ## to qt6-base, qt6-tools, qt6-declarative, qt6-svg; shares the same
   ## 6.8.1 pin.
@@ -135,7 +135,7 @@ package qt6ShaderTools:
   build:
     ## M9.R.15n.2 — explicit `build:` block invoking the
     ## ``cmake_package(...)`` high-level constructor.
-    setCurrentOwningPackageOverride("qt6ShaderTools")
+    setCurrentOwningPackageOverride("qt6ShaderToolsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

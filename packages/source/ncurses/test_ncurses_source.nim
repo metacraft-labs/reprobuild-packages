@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``ncurses`` recipe.
+## Smoke test for the from-source ``ncursesSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-SECOND real
 ## production from-source recipe. ncurses's unique coverage angle vs
@@ -30,7 +30,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two library + two executable
-# artifacts under ``ncurses`` at module init time.
+# artifacts under ``ncursesSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -48,19 +48,19 @@ const ExpectedConfigureFlags = @[
   "--with-termlib",
 ]
 
-suite "ncurses — from-source recipe smoke test":
+suite "ncursesSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("ncurses")
-    check spec.packageName == "ncurses"
+    let spec = registeredFetchSpec("ncursesSource")
+    check spec.packageName == "ncursesSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 3,688,489-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("ncurses")
+    let spec = registeredFetchSpec("ncursesSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -69,7 +69,7 @@ suite "ncurses — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("ncurses")
+    let spec = registeredFetchSpec("ncursesSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -95,14 +95,14 @@ suite "ncurses — from-source recipe smoke test":
     # ``bin/``); a regression that collapsed the artifact-name
     # partitioning would not produce four distinct entries with the
     # expected names below.
-    let arts = registeredArtifacts("ncurses")
+    let arts = registeredArtifacts("ncursesSource")
     check arts.len == 4
     var seenLibNcursesw = false
     var seenLibTinfow = false
     var seenTic = false
     var seenInfocmp = false
     for art in arts:
-      check art.packageName == "ncurses"
+      check art.packageName == "ncursesSource"
       case art.artifactName
       of "libNcursesw":
         seenLibNcursesw = true
@@ -128,7 +128,7 @@ suite "ncurses — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # canonical github.com mirror that hosts the ncurses source tree.
-    let vs = registeredVersions("ncurses")
+    let vs = registeredVersions("ncursesSource")
     check vs.len == 1
     check vs[0].version == "6.5"
     check vs[0].sourceRevision == "v6.5"

@@ -5,7 +5,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libgpgError:
+package libgpgErrorSource:
   versions:
     "1.51":
       sourceRevision = "libgpg-error-1.51"
@@ -29,7 +29,7 @@ package libgpgError:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libgpgError")
+    setCurrentOwningPackageOverride("libgpgErrorSource")
     try:
       let pkg = autotools_package(
         srcDir = "./src",

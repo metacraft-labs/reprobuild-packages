@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``qcoro6`` recipe.
+## Smoke test for the from-source ``qcoro6Source`` recipe.
 ##
 ## Pins the M9.R.33.1 production from-source recipe that closes the
 ## "QCoro6 not found" fresh-configure trip documented in
@@ -20,7 +20,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers fetch
-# spec + library artifact under ``qcoro6`` at module init time.
+# spec + library artifact under ``qcoro6Source`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -29,19 +29,19 @@ const ExpectedUrl =
 const ExpectedHash =
   "809afafab61593f994c005ca6e242300e1e3e7f4db8b5d41f8c642aab9450fbc"
 
-suite "qcoro6 --- from-source recipe smoke test":
+suite "qcoro6Source --- from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip --- URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("qcoro6")
-    check spec.packageName == "qcoro6"
+    let spec = registeredFetchSpec("qcoro6Source")
+    check spec.packageName == "qcoro6Source"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 161,468-byte tarball; length check guards
     # against a future bump that forgets to widen the hash alongside the
     # URL.
-    let spec = registeredFetchSpec("qcoro6")
+    let spec = registeredFetchSpec("qcoro6Source")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -50,7 +50,7 @@ suite "qcoro6 --- from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("qcoro6")
+    let spec = registeredFetchSpec("qcoro6Source")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -62,9 +62,9 @@ suite "qcoro6 --- from-source recipe smoke test":
     # not registered as named artifacts here.  A regression that mis-
     # tagged the artifact kind would mis-route the M9.L install path
     # (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("qcoro6")
+    let arts = registeredArtifacts("qcoro6Source")
     check arts.len == 1
-    check arts[0].packageName == "qcoro6"
+    check arts[0].packageName == "qcoro6Source"
     check arts[0].artifactName == "libQCoro6Core"
     check arts[0].kind == dakLibrary
 
@@ -72,7 +72,7 @@ suite "qcoro6 --- from-source recipe smoke test":
     # M2 versions registry: the upstream GitHub release tag is recorded
     # for ``repro update-source``.  The repository points at the
     # canonical github.com project that hosts the QCoro source tree.
-    let vs = registeredVersions("qcoro6")
+    let vs = registeredVersions("qcoro6Source")
     check vs.len == 1
     check vs[0].version == "0.12.0"
     check vs[0].sourceRevision == "v0.12.0"
@@ -82,4 +82,4 @@ suite "qcoro6 --- from-source recipe smoke test":
       "https://github.com/danvratil/qcoro"
 
   test "runtime closure includes Qt6 Base":
-    check registeredRuntimeDeps("qcoro6") == @["qt6-base >=6.6"]
+    check registeredRuntimeDeps("qcoro6Source") == @["qt6-base >=6.6"]

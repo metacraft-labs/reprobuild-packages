@@ -159,7 +159,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package utilLinux:
+package utilLinuxSource:
   ## From-source util-linux — thirty-second M9.H/I/K production recipe
   ## and the SEVENTH autotools-driven recipe (expat + gdm + freetype +
   ## fontconfig + zlib-custom-configure + libxml2 + openssl-custom-
@@ -293,7 +293,7 @@ package utilLinux:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("utilLinux")
+    setCurrentOwningPackageOverride("utilLinuxSource")
     try:
       let opts = @[
         "--disable-static",

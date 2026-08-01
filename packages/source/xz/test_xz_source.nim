@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``xz`` recipe.
+## Smoke test for the from-source ``xzSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-THIRD real
 ## production from-source recipe. xz's unique coverage angle vs the
@@ -17,7 +17,7 @@
 ##     spot-check (meson + cmake + make channels MUST be empty).
 ##   * MIXED artifact registration (M3) — one executable
 ##     (``dakExecutable``) + one library (``dakLibrary``) attributed
-##     to ``xz`` with kind discriminators preserved per-artifact.
+##     to ``xzSource`` with kind discriminators preserved per-artifact.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable + one library artifact
-# under ``xz`` at module init time.
+# under ``xzSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -42,19 +42,19 @@ const ExpectedConfigureFlags = @[
   "--disable-rpath",
 ]
 
-suite "xz — from-source recipe smoke test":
+suite "xzSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("xz")
-    check spec.packageName == "xz"
+    let spec = registeredFetchSpec("xzSource")
+    check spec.packageName == "xzSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,503,860-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("xz")
+    let spec = registeredFetchSpec("xzSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -62,7 +62,7 @@ suite "xz — from-source recipe smoke test":
   test "fetch spec is the tarball variant with extractStrip = 1":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream release tarballs use.
-    let spec = registeredFetchSpec("xz")
+    let spec = registeredFetchSpec("xzSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -82,12 +82,12 @@ suite "xz — from-source recipe smoke test":
     # regression that flattened the kind discriminator at the autotools
     # convention layer would mis-route the M9.L install path (``lib/``
     # vs ``bin/``) for one of the two.
-    let arts = registeredArtifacts("xz")
+    let arts = registeredArtifacts("xzSource")
     check arts.len == 2
     var seenXz = false
     var seenLzma = false
     for art in arts:
-      check art.packageName == "xz"
+      check art.packageName == "xzSource"
       case art.artifactName
       of "xz":
         seenXz = true
@@ -106,7 +106,7 @@ suite "xz — from-source recipe smoke test":
     # points at the vendored copy. The repository points at the
     # github.com mirror where the upstream maintainers publish the
     # xz-utils source tree after the CVE-2024-3094 incident.
-    let vs = registeredVersions("xz")
+    let vs = registeredVersions("xzSource")
     check vs.len == 1
     check vs[0].version == "5.6.3"
     check vs[0].sourceRevision == "v5.6.3"

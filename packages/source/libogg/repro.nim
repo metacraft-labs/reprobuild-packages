@@ -48,7 +48,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libogg:
+package liboggSource:
   ## From-source libogg — M9.R.15p.2.2 libcanberra blocker.
   ## Tier-2b c_cpp_autotools convention consumer. Single library
   ## artifact recipe.
@@ -81,7 +81,7 @@ package libogg:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libogg")
+    setCurrentOwningPackageOverride("liboggSource")
     try:
       let opts = @[
         "--disable-static",

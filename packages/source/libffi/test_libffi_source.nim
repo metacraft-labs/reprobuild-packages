@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``libffi`` recipe.
+## Smoke test for the from-source ``libffiSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-FIRST real production
 ## from-source recipe and the FIRST recipe in the crypto-and-FFI batch
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``libffi`` at module init time.
+# ``libffiSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -63,7 +63,7 @@ when defined(reproProviderMode):
     ProviderGraphRequest(
       kind: prkGraphInvocation,
       providerArtifactId: "test-provider",
-      entryPointId: "libffi.root",
+      entryPointId: "libffiSource.root",
       entryPointBodyHash: "test-body",
       reason: girExplicitUserRequest,
       arguments: projectRoot,
@@ -121,19 +121,19 @@ when defined(reproProviderMode):
         return action
     raise newException(ValueError, "make action not found")
 
-suite "libffi — from-source recipe smoke test":
+suite "libffiSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libffi")
-    check spec.packageName == "libffi"
+    let spec = registeredFetchSpec("libffiSource")
+    check spec.packageName == "libffiSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,391,684-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libffi")
+    let spec = registeredFetchSpec("libffiSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -142,7 +142,7 @@ suite "libffi — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("libffi")
+    let spec = registeredFetchSpec("libffiSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -161,9 +161,9 @@ suite "libffi — from-source recipe smoke test":
     # assembly trampolines + type-encoding helpers. A regression that
     # mis-tagged the artifact kind would mis-route the M9.L install
     # path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("libffi")
+    let arts = registeredArtifacts("libffiSource")
     check arts.len == 1
-    check arts[0].packageName == "libffi"
+    check arts[0].packageName == "libffiSource"
     check arts[0].artifactName == "libFfi"
     check arts[0].kind == dakLibrary
 
@@ -173,7 +173,7 @@ suite "libffi — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the libffi source
     # tree.
-    let vs = registeredVersions("libffi")
+    let vs = registeredVersions("libffiSource")
     check vs.len == 1
     check vs[0].version == "3.4.6"
     check vs[0].sourceRevision == "v3.4.6"
@@ -186,7 +186,7 @@ suite "libffi — from-source recipe smoke test":
     test "provider actions keep libffi build artifacts out of fetched src":
       let projectRoot = currentSourcePath.parentDir
       let pkg = PackageDef(
-        packageName: "libffi",
+        packageName: "libffiSource",
         sourceFile: projectRoot / "repro.nim",
         hasDevEnv: false,
         devEnvBodyHash: "",
@@ -200,7 +200,7 @@ suite "libffi — from-source recipe smoke test":
         "autotools_package.configure")
       let build = findMakeAction(actions, wantsInstall = false)
       let install = findMakeAction(actions, wantsInstall = true)
-      let cleanup = findById(actions, "autotools-la-cleanup-libffi")
+      let cleanup = findById(actions, "autotools-la-cleanup-libffiSource")
 
       let expectedBuildRoot = projectRoot / ExpectedBuildDir
       let expectedInstallRoot = expectedBuildRoot / "out"

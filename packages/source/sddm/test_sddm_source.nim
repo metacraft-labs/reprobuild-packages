@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``sddm`` recipe.
+## Smoke test for the from-source ``sddmSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTY-SECOND real
 ## production from-source recipe and the CLOSING recipe in the Plasma
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + two executable artifacts + one library
-# artifact under ``sddm`` at module init time.
+# artifact under ``sddmSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -50,19 +50,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "sddm — from-source recipe smoke test":
+suite "sddmSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("sddm")
-    check spec.packageName == "sddm"
+    let spec = registeredFetchSpec("sddmSource")
+    check spec.packageName == "sddmSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 3,557,266-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("sddm")
+    let spec = registeredFetchSpec("sddmSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -71,7 +71,7 @@ suite "sddm — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("sddm")
+    let spec = registeredFetchSpec("sddmSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -101,12 +101,12 @@ suite "sddm — from-source recipe smoke test":
     # installed filename exactly via the backticked quoted-form so
     # the convention layer's stage-copy probe finds the binary at
     # ``build/out/usr/bin/sddm-greeter-qt6``.
-    let arts = registeredArtifacts("sddm")
+    let arts = registeredArtifacts("sddmSource")
     check arts.len == 2
     var seenDaemon = false
     var seenGreeter = false
     for art in arts:
-      check art.packageName == "sddm"
+      check art.packageName == "sddmSource"
       case art.artifactName
       of "sddm":
         seenDaemon = true
@@ -124,7 +124,7 @@ suite "sddm — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the sddm source tree.
-    let vs = registeredVersions("sddm")
+    let vs = registeredVersions("sddmSource")
     check vs.len == 1
     check vs[0].version == "0.21.0"
     check vs[0].sourceRevision == "v0.21.0"

@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libsndfile:
+package libsndfileSource:
   versions:
     "1.2.2":
       sourceRevision = "1.2.2"
@@ -29,7 +29,7 @@ package libsndfile:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libsndfile")
+    setCurrentOwningPackageOverride("libsndfileSource")
     try:
       let opts = @[
         "BUILD_SHARED_LIBS=ON",

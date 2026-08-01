@@ -66,7 +66,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package plasmaActivities:
+package plasmaActivitiesSource:
   ## From-source plasma-activities — M9.R.15q.1.2 production recipe.
   ## Closes the ``PlasmaActivities`` find_package gap on plasma-framework.
   ## Tier-2b c_cpp_cmake convention consumer. Single library artifact
@@ -142,7 +142,7 @@ package plasmaActivities:
     ## M9.R.15q.1.2 — explicit `build:` block invoking the
     ## ``cmake_package(...)`` high-level constructor. Same modern-
     ## desktop baseline as the sibling Plasma 6 + KF6 recipes.
-    setCurrentOwningPackageOverride("plasmaActivities")
+    setCurrentOwningPackageOverride("plasmaActivitiesSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

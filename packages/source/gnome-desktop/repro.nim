@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gnomeDesktop:
+package gnomeDesktopSource:
   versions:
     "44.5":
       sourceRevision = "44.5"
@@ -38,7 +38,7 @@ package gnomeDesktop:
     discard
 
   build:
-    setCurrentOwningPackageOverride("gnomeDesktop")
+    setCurrentOwningPackageOverride("gnomeDesktopSource")
     try:
       let pkg = meson_package(
         srcDir = "./src",

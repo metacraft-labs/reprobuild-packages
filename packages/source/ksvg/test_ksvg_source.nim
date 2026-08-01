@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``ksvg`` recipe.
+## Smoke test for the from-source ``ksvgSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-FIFTH real
 ## production from-source recipe and the FIRST recipe in the THIRD
@@ -24,7 +24,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + cmake flags + library artifact under ``ksvg``
+# fetch spec + cmake flags + library artifact under ``ksvgSource``
 # at module init time.
 import ./repro
 
@@ -41,19 +41,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "ksvg — from-source recipe smoke test":
+suite "ksvgSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("ksvg")
-    check spec.packageName == "ksvg"
+    let spec = registeredFetchSpec("ksvgSource")
+    check spec.packageName == "ksvgSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 83,964-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("ksvg")
+    let spec = registeredFetchSpec("ksvgSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -62,7 +62,7 @@ suite "ksvg — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("ksvg")
+    let spec = registeredFetchSpec("ksvgSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -77,15 +77,15 @@ suite "ksvg — from-source recipe smoke test":
     # must be tagged ``dakLibrary``. A regression that mis-tagged the
     # artifact kind would mis-route the M9.L install path (``lib/`` vs
     # ``bin/``).
-    let arts = registeredArtifacts("ksvg")
+    let arts = registeredArtifacts("ksvgSource")
     check arts.len == 1
-    check arts[0].packageName == "ksvg"
+    check arts[0].packageName == "ksvgSource"
     check arts[0].artifactName == "libKF6Svg"
     check arts[0].kind == dakLibrary
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry.
-    let vs = registeredVersions("ksvg")
+    let vs = registeredVersions("ksvgSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

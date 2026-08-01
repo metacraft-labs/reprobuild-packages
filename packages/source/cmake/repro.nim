@@ -96,7 +96,7 @@ import repro_dsl_stdlib/types
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package cmake:
+package cmakeSource:
   ## From-source cmake — M9.N Batch D build-tool slice.
   ##
   ## ``from-source-custom`` convention consumer: the recipe's
@@ -104,7 +104,7 @@ package cmake:
   ## install pipeline as a verbatim shell sequence under the ``cmake``
   ## artifact. ``$extracted`` resolves to ``<projectRoot>/src/``;
   ## ``$out`` resolves to ``<projectRoot>/.repro/build/from-source-
-  ## custom/cmake/``. The ``ctest`` + ``cpack`` artifacts share
+  ## custom/cmakeSource/``. The ``ctest`` + ``cpack`` artifacts share
   ## the same install-tree (all three binaries land under
   ## ``$out/bin/``); the convention's stage-copy step probes
   ## ``$out/bin/<member>`` per declared artifact member.

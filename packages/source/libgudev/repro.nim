@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libgudev:
+package libgudevSource:
   versions:
     "238":
       sourceRevision = "238"
@@ -25,7 +25,7 @@ package libgudev:
   library libgudev:
     discard
   build:
-    setCurrentOwningPackageOverride("libgudev")
+    setCurrentOwningPackageOverride("libgudevSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "tests=disabled",

@@ -14,7 +14,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xorgproto:
+package xorgprotoSource:
   versions:
     "2024.1":
       sourceRevision = "xorgproto-2024.1"
@@ -39,7 +39,7 @@ package xorgproto:
     discard
 
   build:
-    setCurrentOwningPackageOverride("xorgproto")
+    setCurrentOwningPackageOverride("xorgprotoSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[])
       ## M9.R.29.13 — pure-header X11 protocol package; emit the

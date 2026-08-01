@@ -12,7 +12,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package e2fsprogs:
+package e2fsprogsSource:
   versions:
     "1.47.2":
       sourceRevision = "v1.47.2"
@@ -56,7 +56,7 @@ package e2fsprogs:
     discard
 
   build:
-    setCurrentOwningPackageOverride("e2fsprogs")
+    setCurrentOwningPackageOverride("e2fsprogsSource")
     try:
       let opts = @[
         "--disable-static",

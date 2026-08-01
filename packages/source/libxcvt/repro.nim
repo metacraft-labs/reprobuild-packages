@@ -5,7 +5,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxcvt:
+package libxcvtSource:
   versions:
     "0.1.3":
       sourceRevision = "libxcvt-0.1.3"
@@ -36,7 +36,7 @@ package libxcvt:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libxcvt")
+    setCurrentOwningPackageOverride("libxcvtSource")
     try:
       let pkg = meson_package(
         srcDir = "./src",

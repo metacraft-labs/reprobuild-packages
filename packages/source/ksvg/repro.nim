@@ -57,7 +57,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package ksvg:
+package ksvgSource:
   ## From-source ksvg — fifty-fifth M9.H/I/K production recipe and the
   ## FIRST recipe in the THIRD KF6 module-sweep batch (ksvg / ksolid /
   ## kio / kded). Thirteenth CMake-driven recipe and the NINTH KF6
@@ -153,7 +153,7 @@ package ksvg:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("ksvg")
+    setCurrentOwningPackageOverride("ksvgSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

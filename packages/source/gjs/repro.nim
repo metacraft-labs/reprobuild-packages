@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gjs:
+package gjsSource:
   versions:
     "1.82.3":
       sourceRevision = "1.82.3"
@@ -31,7 +31,7 @@ package gjs:
   executable gjs:
     discard
   build:
-    setCurrentOwningPackageOverride("gjs")
+    setCurrentOwningPackageOverride("gjsSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "readline=disabled",

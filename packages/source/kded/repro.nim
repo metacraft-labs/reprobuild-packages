@@ -75,7 +75,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kded:
+package kdedSource:
   ## From-source kded — fifty-eighth M9.H/I/K production recipe and
   ## the CLOSING (FOURTH) recipe in the THIRD KF6 module-sweep batch
   ## (ksvg / ksolid / kio / kded). Sixteenth CMake-driven recipe and
@@ -169,7 +169,7 @@ package kded:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kded")
+    setCurrentOwningPackageOverride("kdedSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

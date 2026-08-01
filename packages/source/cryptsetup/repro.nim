@@ -12,7 +12,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package cryptsetup:
+package cryptsetupSource:
   versions:
     "2.7.5":
       sourceRevision = "v2.7.5"
@@ -59,7 +59,7 @@ package cryptsetup:
     discard
 
   build:
-    setCurrentOwningPackageOverride("cryptsetup")
+    setCurrentOwningPackageOverride("cryptsetupSource")
     try:
       # M9.R.29.9b — disable the optional plugins that pull in libssh /
       # libfido2 / libpwquality / libpasswdqc / udev. None are needed

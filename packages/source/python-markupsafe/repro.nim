@@ -6,7 +6,7 @@
 
 import repro_project_dsl
 
-package pythonMarkupSafe:
+package pythonMarkupSafeSource:
   versions:
     "3.0.3":
       sourceRevision = "3.0.3"

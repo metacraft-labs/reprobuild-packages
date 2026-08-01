@@ -78,7 +78,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libpng:
+package libpngSource:
   ## From-source libpng — closes M9.R.26 Gap 1. Tier-2b c_cpp_autotools
   ## convention consumer. Single library artifact recipe.
 
@@ -102,7 +102,7 @@ package libpng:
 
   buildDeps:
     ## libpng links against zlib for the deflate/inflate compression
-    ## of PNG IDAT chunks. The sibling ``zlib`` recipe vendors
+    ## of PNG IDAT chunks. The sibling ``zlibSource`` recipe vendors
     ## 1.3.1 to match.
     "zlib >=1.2.11"
 
@@ -112,7 +112,7 @@ package libpng:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libpng")
+    setCurrentOwningPackageOverride("libpngSource")
     try:
       let opts = @[
         "--disable-static",

@@ -28,7 +28,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package plasmaWaylandProtocols:
+package plasmaWaylandProtocolsSource:
   ## From-source plasma-wayland-protocols — M9.R.15p.1.4 KF6 Wayland
   ## blocker. Tier-2b c_cpp_cmake convention consumer. No compiled
   ## artifact — same shape as extra-cmake-modules.
@@ -65,7 +65,7 @@ package plasmaWaylandProtocols:
     discard
 
   build:
-    setCurrentOwningPackageOverride("plasmaWaylandProtocols")
+    setCurrentOwningPackageOverride("plasmaWaylandProtocolsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

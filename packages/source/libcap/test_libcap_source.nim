@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``libcap`` recipe.
+## Smoke test for the from-source ``libcapSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-FOURTH real
 ## production from-source recipe. libcap's unique coverage angle vs
@@ -36,7 +36,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + make flags + one library + three executable
-# artifacts under ``libcap`` at module init time.
+# artifacts under ``libcapSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -53,19 +53,19 @@ const ExpectedMakeFlags = @[
   "GOLANG=no",
 ]
 
-suite "libcap — from-source recipe smoke test":
+suite "libcapSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libcap")
-    check spec.packageName == "libcap"
+    let spec = registeredFetchSpec("libcapSource")
+    check spec.packageName == "libcapSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 193,512-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libcap")
+    let spec = registeredFetchSpec("libcapSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -74,7 +74,7 @@ suite "libcap — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream kernel.org release
     # tarballs use.
-    let spec = registeredFetchSpec("libcap")
+    let spec = registeredFetchSpec("libcapSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -96,14 +96,14 @@ suite "libcap — from-source recipe smoke test":
     # vs ``bin/``); a regression that collapsed the artifact-name
     # partitioning would not produce four distinct entries with the
     # expected names below.
-    let arts = registeredArtifacts("libcap")
+    let arts = registeredArtifacts("libcapSource")
     check arts.len == 4
     var seenLibCap = false
     var seenCapsh = false
     var seenGetcap = false
     var seenSetcap = false
     for art in arts:
-      check art.packageName == "libcap"
+      check art.packageName == "libcapSource"
       case art.artifactName
       of "libCap":
         seenLibCap = true
@@ -130,7 +130,7 @@ suite "libcap — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical mirror on git.kernel.org that hosts the libcap
     # source tree.
-    let vs = registeredVersions("libcap")
+    let vs = registeredVersions("libcapSource")
     check vs.len == 1
     check vs[0].version == "2.71"
     check vs[0].sourceRevision == "libcap-2.71"

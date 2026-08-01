@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``harfbuzz`` recipe.
+## Smoke test for the from-source ``harfbuzzSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTY-FOURTH real
 ## production from-source recipe. harfbuzz is the SIXTEENTH meson-driven
@@ -26,7 +26,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library artifact under
-# ``harfbuzz`` at module init time.
+# ``harfbuzzSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,19 +44,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "harfbuzz — from-source recipe smoke test":
+suite "harfbuzzSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("harfbuzz")
-    check spec.packageName == "harfbuzz"
+    let spec = registeredFetchSpec("harfbuzzSource")
+    check spec.packageName == "harfbuzzSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 17,922,136-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("harfbuzz")
+    let spec = registeredFetchSpec("harfbuzzSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -65,7 +65,7 @@ suite "harfbuzz — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("harfbuzz")
+    let spec = registeredFetchSpec("harfbuzzSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -82,9 +82,9 @@ suite "harfbuzz — from-source recipe smoke test":
     # script + Unicode-tables core. A regression that mis-tagged the
     # artifact kind would mis-route the M9.L install path
     # (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("harfbuzz")
+    let arts = registeredArtifacts("harfbuzzSource")
     check arts.len == 1
-    check arts[0].packageName == "harfbuzz"
+    check arts[0].packageName == "harfbuzzSource"
     check arts[0].artifactName == "libHarfbuzz"
     check arts[0].kind == dakLibrary
 
@@ -93,7 +93,7 @@ suite "harfbuzz — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # canonical GitHub project that hosts the harfbuzz source tree.
-    let vs = registeredVersions("harfbuzz")
+    let vs = registeredVersions("harfbuzzSource")
     check vs.len == 1
     check vs[0].version == "10.1.0"
     check vs[0].sourceRevision == "10.1.0"

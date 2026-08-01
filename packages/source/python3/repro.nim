@@ -9,7 +9,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package python3:
+package python3Source:
   versions:
     "3.13.12":
       sourceRevision = "v3.13.12"
@@ -42,7 +42,7 @@ package python3:
     discard
 
   build:
-    setCurrentOwningPackageOverride("python3")
+    setCurrentOwningPackageOverride("python3Source")
     try:
       let opts = @[
         "--enable-shared",

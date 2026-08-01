@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package qt6Speech:
+package qt6SpeechSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
@@ -48,7 +48,7 @@ package qt6Speech:
     discard
 
   build:
-    setCurrentOwningPackageOverride("qt6Speech")
+    setCurrentOwningPackageOverride("qt6SpeechSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

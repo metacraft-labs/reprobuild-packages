@@ -13,11 +13,23 @@ foreach ($recipe in $recipes) {
     }
 
     $source = Get-Content -LiteralPath $definition -Raw
-    if ($source -notmatch '(?m)^package\s+') {
+    $packageMatch = [regex]::Match(
+        $source,
+        '(?m)^package\s+([A-Za-z0-9_`-]+):'
+    )
+    if (-not $packageMatch.Success) {
         $failures.Add("$($recipe.Name): missing package declaration")
+        continue
     }
-    if ($source -match '(?m)^package\s+[A-Za-z0-9_]+Source:') {
-        $failures.Add("$($recipe.Name): package identity still has Source suffix")
+
+    $packageName = $packageMatch.Groups[1].Value.Trim('`')
+    if ($recipe.Name -eq 'create-dmg') {
+        if ($packageName -ne 'create-dmg') {
+            $failures.Add("$($recipe.Name): expected package identity create-dmg, got $packageName")
+        }
+    }
+    elseif (-not $packageName.EndsWith('Source', [StringComparison]::Ordinal)) {
+        $failures.Add("$($recipe.Name): private recipe package identity must end in Source, got $packageName")
     }
 }
 
@@ -26,5 +38,4 @@ if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host "Validated $($recipes.Count) independently addressable source recipes."
-
+Write-Host "Validated $($recipes.Count) source recipes with private implementation identities."

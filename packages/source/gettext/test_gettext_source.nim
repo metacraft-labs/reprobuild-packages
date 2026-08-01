@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``gettext`` recipe.
+## Smoke test for the from-source ``gettextSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-FIFTH real
 ## production from-source recipe. gettext's unique coverage angle vs
@@ -15,7 +15,7 @@
 ##     sequence equality on the five-flag set + channel-isolation
 ##     spot-check (meson + cmake + make channels MUST be empty).
 ##   * artifact registration (M3) — three executables
-##     (``dakExecutable``) attributed to ``gettext``.
+##     (``dakExecutable``) attributed to ``gettextSource``.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
@@ -25,7 +25,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + three executable artifacts under
-# ``gettext`` at module init time.
+# ``gettextSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,19 +44,19 @@ const ExpectedConfigureFlags = @[
   "--without-included-libintl",
 ]
 
-suite "gettext — from-source recipe smoke test":
+suite "gettextSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("gettext")
-    check spec.packageName == "gettext"
+    let spec = registeredFetchSpec("gettextSource")
+    check spec.packageName == "gettextSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 10,329,748-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("gettext")
+    let spec = registeredFetchSpec("gettextSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -64,7 +64,7 @@ suite "gettext — from-source recipe smoke test":
   test "fetch spec is the tarball variant with extractStrip = 1":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream release tarballs use.
-    let spec = registeredFetchSpec("gettext")
+    let spec = registeredFetchSpec("gettextSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -82,13 +82,13 @@ suite "gettext — from-source recipe smoke test":
   test "artifacts register three executables":
     # glibc provides the libintl API in libc, so this build installs the
     # gettext toolchain but no standalone libintl.so artifact.
-    let arts = registeredArtifacts("gettext")
+    let arts = registeredArtifacts("gettextSource")
     check arts.len == 3
     var seenMsgfmt = false
     var seenMsgmerge = false
     var seenXgettext = false
     for art in arts:
-      check art.packageName == "gettext"
+      check art.packageName == "gettextSource"
       case art.artifactName
       of "msgfmt":
         seenMsgfmt = true
@@ -110,7 +110,7 @@ suite "gettext — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # savannah.gnu.org git mirror that hosts the gettext source tree.
-    let vs = registeredVersions("gettext")
+    let vs = registeredVersions("gettextSource")
     check vs.len == 1
     check vs[0].version == "0.22.5"
     check vs[0].sourceRevision == "v0.22.5"

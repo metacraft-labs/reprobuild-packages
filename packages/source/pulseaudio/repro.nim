@@ -5,7 +5,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package pulseaudio:
+package pulseaudioSource:
   versions:
     "17.0":
       sourceRevision = "v17.0"
@@ -41,7 +41,7 @@ package pulseaudio:
     discard
 
   build:
-    setCurrentOwningPackageOverride("pulseaudio")
+    setCurrentOwningPackageOverride("pulseaudioSource")
     try:
       let opts = @[
         "daemon=false",

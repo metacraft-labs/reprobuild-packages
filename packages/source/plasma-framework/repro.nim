@@ -20,7 +20,7 @@
 ## ``libplasma-6.2.5.tar.xz`` pin in that case, and that is the path
 ## taken here.
 ##
-## We KEEP the package identifier ``plasmaFramework`` (per the
+## We KEEP the package identifier ``plasmaFrameworkSource`` (per the
 ## task brief) so the recipe slot in the recipe suite maps cleanly to
 ## the historical "Plasma framework" role even though the upstream
 ## release artefact is now branded ``libplasma``. Downstream consumers
@@ -84,14 +84,14 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package plasmaFramework:
+package plasmaFrameworkSource:
   ## From-source plasma-framework — forty-sixth M9.H/I/K production
   ## recipe and the CLOSING recipe in the SECOND KF6 module-sweep
   ## batch. Fourteenth CMake-driven recipe and the FIRST recipe to lift
   ## from ``stable/plasma/<x.y.z>/`` (every prior KF6 recipe lifted from
   ## ``stable/frameworks/<x.y>/``). Pins the post-rename
   ## ``libplasma-6.2.5`` tarball under the historical
-  ## ``plasmaFramework`` slot per the task brief's fallback
+  ## ``plasmaFrameworkSource`` slot per the task brief's fallback
   ## clause.
   ##
   ## Tier-2b c_cpp_cmake convention consumer. Single library artifact
@@ -188,7 +188,7 @@ package plasmaFramework:
     "ksvg >=6.0"
     ## M9.R.15q.1.4 — libplasma's CMakeLists.txt:68 declares
     ## ``find_package(PlasmaActivities REQUIRED ${PROJECT_DEP_VERSION})``;
-    ## the plasmaActivities recipe ships
+    ## the plasmaActivitiesSource recipe ships
     ## ``PlasmaActivitiesConfig.cmake``.
     "plasma-activities >=6.2"
     ## M9.R.15q.1.4 — libplasma's CMakeLists.txt:70-72 declares
@@ -234,7 +234,7 @@ package plasmaFramework:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("plasmaFramework")
+    setCurrentOwningPackageOverride("plasmaFrameworkSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

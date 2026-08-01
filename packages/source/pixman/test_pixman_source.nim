@@ -1,9 +1,9 @@
-## Smoke test for the from-source ``pixman`` recipe.
+## Smoke test for the from-source ``pixmanSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the EIGHTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots`` /
-## ``sway`` / ``linuxKernel`` / ``libxkbcommon``).
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
+## ``swaySource`` / ``linuxKernelSource`` / ``libxkbcommonSource``).
 ## pixman's unique coverage angle vs the prior seven is a single
 ## library artifact built from a cairographics.org tarball with the
 ## minimal ``uses:`` set (meson + ninja + gcc only, no transitive
@@ -27,7 +27,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + meson options + library artifact under ``pixman``
+# fetch spec + meson options + library artifact under ``pixmanSource``
 # at module init time.
 import ./repro
 
@@ -43,19 +43,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "pixman — from-source recipe smoke test":
+suite "pixmanSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("pixman")
-    check spec.packageName == "pixman"
+    let spec = registeredFetchSpec("pixmanSource")
+    check spec.packageName == "pixmanSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 827,198-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("pixman")
+    let spec = registeredFetchSpec("pixmanSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -64,7 +64,7 @@ suite "pixman — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream cairographics.org
     # release tarballs use.
-    let spec = registeredFetchSpec("pixman")
+    let spec = registeredFetchSpec("pixmanSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -79,9 +79,9 @@ suite "pixman — from-source recipe smoke test":
     # .so via auto-detection, not separate artifacts); a regression
     # that mis-tagged the artifact kind would mis-route the M9.L
     # install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("pixman")
+    let arts = registeredArtifacts("pixmanSource")
     check arts.len == 1
-    check arts[0].packageName == "pixman"
+    check arts[0].packageName == "pixmanSource"
     check arts[0].artifactName == "libpixman1"
     check arts[0].kind == dakLibrary
 
@@ -91,7 +91,7 @@ suite "pixman — from-source recipe smoke test":
     # live fetch points at the vendored copy. The repository points
     # at the canonical freedesktop.org gitlab project that hosts the
     # pixman source tree.
-    let vs = registeredVersions("pixman")
+    let vs = registeredVersions("pixmanSource")
     check vs.len == 1
     check vs[0].version == "0.46.4"
     check vs[0].sourceRevision == "pixman-0.46.4"

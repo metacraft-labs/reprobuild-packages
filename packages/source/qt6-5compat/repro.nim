@@ -16,9 +16,9 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package qt6Core5Compat:
+package qt6Core5CompatSource:
   ## From-source qt6-5compat — M9.R.15q.5.10 KF6/Plasma blocker.
-  ## Sibling to qt6-base (qt6Base); shares the same 6.8.1 pin.
+  ## Sibling to qt6-base (qt6BaseSource); shares the same 6.8.1 pin.
 
   versions:
     "6.8.1":
@@ -57,7 +57,7 @@ package qt6Core5Compat:
     discard
 
   build:
-    setCurrentOwningPackageOverride("qt6Core5Compat")
+    setCurrentOwningPackageOverride("qt6Core5CompatSource")
     try:
       # Same SBOM disable as siblings (qt6-base / qt6-tools /
       # qt6-declarative / qt6-svg). SBOM gen hard-codes the canonical

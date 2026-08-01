@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``less`` recipe.
+## Smoke test for the from-source ``lessSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTIETH real production
 ## from-source recipe. less's unique coverage angle vs the prior
@@ -25,7 +25,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable artifact under
-# ``less`` at module init time.
+# ``lessSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -38,19 +38,19 @@ const ExpectedConfigureFlags = @[
   "--with-regex=posix",
 ]
 
-suite "less — from-source recipe smoke test":
+suite "lessSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("less")
-    check spec.packageName == "less"
+    let spec = registeredFetchSpec("lessSource")
+    check spec.packageName == "lessSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 649,770-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("less")
+    let spec = registeredFetchSpec("lessSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -59,7 +59,7 @@ suite "less — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream release tarballs
     # use.
-    let spec = registeredFetchSpec("less")
+    let spec = registeredFetchSpec("lessSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -72,7 +72,7 @@ suite "less — from-source recipe smoke test":
   test "configureFlags does not leak into the make channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "ncurses is registered as the terminal capability build dependency":
-    check registeredBuildDeps("less") == @["ncurses >=6.0"]
+    check registeredBuildDeps("lessSource") == @["ncurses >=6.0"]
 
   test "artifacts register a single less executable tagged dakExecutable":
     # M3 artifact registry: ``less`` is tagged ``dakExecutable``.
@@ -83,9 +83,9 @@ suite "less — from-source recipe smoke test":
     # regression that collapsed the artifact-name partitioning at the
     # one-artifact cardinality would not produce a single entry with
     # the expected name.
-    let arts = registeredArtifacts("less")
+    let arts = registeredArtifacts("lessSource")
     check arts.len == 1
-    check arts[0].packageName == "less"
+    check arts[0].packageName == "lessSource"
     check arts[0].artifactName == "less"
     check arts[0].kind == dakExecutable
 
@@ -95,7 +95,7 @@ suite "less — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # github.com mirror where the upstream maintainer publishes the
     # less source tree (greenwoodsoftware.com only hosts tarballs).
-    let vs = registeredVersions("less")
+    let vs = registeredVersions("lessSource")
     check vs.len == 1
     check vs[0].version == "668"
     check vs[0].sourceRevision == "v668"

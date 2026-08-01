@@ -98,7 +98,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libdrm:
+package libdrmSource:
   ## From-source libdrm — second M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -172,7 +172,7 @@ package libdrm:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("libdrm")
+    setCurrentOwningPackageOverride("libdrmSource")
     try:
       let opts = @[
         "intel=disabled",

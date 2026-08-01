@@ -7,7 +7,7 @@
 import repro_project_dsl
 import repro_dsl_stdlib/types
 
-package perl:
+package perlSource:
   versions:
     "5.40.0":
       sourceRevision = "v5.40.0"

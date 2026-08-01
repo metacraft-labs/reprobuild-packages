@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``zlib`` recipe.
+## Smoke test for the from-source ``zlibSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTY-NINTH real
 ## production from-source recipe. zlib's unique coverage angle vs the
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``zlib`` at module init time.
+# ``zlibSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -45,19 +45,19 @@ const ExpectedConfigureFlags = @[
   "--shared",
 ]
 
-suite "zlib — from-source recipe smoke test":
+suite "zlibSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("zlib")
-    check spec.packageName == "zlib"
+    let spec = registeredFetchSpec("zlibSource")
+    check spec.packageName == "zlibSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,512,791-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("zlib")
+    let spec = registeredFetchSpec("zlibSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -66,7 +66,7 @@ suite "zlib — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("zlib")
+    let spec = registeredFetchSpec("zlibSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -83,9 +83,9 @@ suite "zlib — from-source recipe smoke test":
     # stream reader/writer, and the CRC32 helper. A regression that
     # mis-tagged the artifact kind would mis-route the M9.L install
     # path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("zlib")
+    let arts = registeredArtifacts("zlibSource")
     check arts.len == 1
-    check arts[0].packageName == "zlib"
+    check arts[0].packageName == "zlibSource"
     check arts[0].artifactName == "libZ"
     check arts[0].kind == dakLibrary
 
@@ -96,7 +96,7 @@ suite "zlib — from-source recipe smoke test":
     # the canonical GitHub project that hosts the zlib source tree
     # (the historical zlib.net mirror lifecycle is brittle — GitHub
     # is the stable mirror).
-    let vs = registeredVersions("zlib")
+    let vs = registeredVersions("zlibSource")
     check vs.len == 1
     check vs[0].version == "1.3.1"
     check vs[0].sourceRevision == "v1.3.1"

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``gawk`` recipe.
+## Smoke test for the from-source ``gawkSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SEVENTY-FOURTH real
 ## production from-source recipe. GNU awk (gawk) is THE canonical
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable artifact under
-# ``gawk`` at module init time.
+# ``gawkSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -42,19 +42,19 @@ const ExpectedConfigureFlags = @[
   "--disable-libsigsegv",
 ]
 
-suite "gawk — from-source recipe smoke test":
+suite "gawkSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("gawk")
-    check spec.packageName == "gawk"
+    let spec = registeredFetchSpec("gawkSource")
+    check spec.packageName == "gawkSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 is the canonical published upstream ``sha256sum`` for
     # gawk-5.3.0.tar.xz; length check guards against a future bump
     # that forgets to widen the hash alongside the URL.
-    let spec = registeredFetchSpec("gawk")
+    let spec = registeredFetchSpec("gawkSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -63,7 +63,7 @@ suite "gawk — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("gawk")
+    let spec = registeredFetchSpec("gawkSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,9 +85,9 @@ suite "gawk — from-source recipe smoke test":
     # install path; a regression that collapsed the artifact-name
     # partitioning at the one-artifact cardinality would not produce
     # a single entry with the expected name.
-    let arts = registeredArtifacts("gawk")
+    let arts = registeredArtifacts("gawkSource")
     check arts.len == 1
-    check arts[0].packageName == "gawk"
+    check arts[0].packageName == "gawkSource"
     check arts[0].artifactName == "awk"
     check arts[0].kind == dakExecutable
 
@@ -96,7 +96,7 @@ suite "gawk — from-source recipe smoke test":
     # recorded for ``repro update-source``. The repository points at
     # the canonical savannah.gnu.org mirror that hosts the gawk
     # source tree.
-    let vs = registeredVersions("gawk")
+    let vs = registeredVersions("gawkSource")
     check vs.len == 1
     check vs[0].version == "5.3.0"
     check vs[0].sourceRevision == "gawk-5.3.0"

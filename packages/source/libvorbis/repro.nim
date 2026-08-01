@@ -52,7 +52,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libvorbis:
+package libvorbisSource:
   ## From-source libvorbis — M9.R.15p.2.3 libcanberra blocker.
   ## Tier-2b c_cpp_autotools convention consumer. Three library
   ## artifacts recipe.
@@ -98,7 +98,7 @@ package libvorbis:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libvorbis")
+    setCurrentOwningPackageOverride("libvorbisSource")
     try:
       let opts = @[
         "--disable-static",

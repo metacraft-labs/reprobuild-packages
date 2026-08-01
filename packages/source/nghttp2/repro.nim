@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package nghttp2:
+package nghttp2Source:
   versions:
     "1.64.0":
       sourceRevision = "v1.64.0"
@@ -21,7 +21,7 @@ package nghttp2:
   library libNghttp2:
     discard
   build:
-    setCurrentOwningPackageOverride("nghttp2")
+    setCurrentOwningPackageOverride("nghttp2Source")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--enable-lib-only", "--disable-static", "--disable-dependency-tracking",

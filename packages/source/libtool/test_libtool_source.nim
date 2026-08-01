@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``libtool`` recipe.
+## Smoke test for the from-source ``libtoolSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the M9.N Batch D build-tool
 ## slice. libtool's unique coverage angles vs the prior 79 from-
@@ -29,7 +29,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two executable + one library
-# artifacts under ``libtool`` at module init time.
+# artifacts under ``libtoolSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,18 +44,18 @@ const ExpectedConfigureFlags = @[
   "--disable-static",
 ]
 
-suite "libtool — from-source recipe smoke test":
+suite "libtoolSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libtool")
-    check spec.packageName == "libtool"
+    let spec = registeredFetchSpec("libtoolSource")
+    check spec.packageName == "libtoolSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream ftp.gnu.org ``.tar.xz`` tarball;
     # computed locally + asserted exactly.
-    let spec = registeredFetchSpec("libtool")
+    let spec = registeredFetchSpec("libtoolSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -64,7 +64,7 @@ suite "libtool — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("libtool")
+    let spec = registeredFetchSpec("libtoolSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -84,13 +84,13 @@ suite "libtool — from-source recipe smoke test":
     # ``./configure`` + ``make`` invocation. A regression that
     # flattened the kind discriminator would mis-route the M9.L
     # install path (``lib/`` vs ``bin/``) for one of the three.
-    let arts = registeredArtifacts("libtool")
+    let arts = registeredArtifacts("libtoolSource")
     check arts.len == 3
     var seenLibtool = false
     var seenLibtoolize = false
     var seenLibltdl = false
     for art in arts:
-      check art.packageName == "libtool"
+      check art.packageName == "libtoolSource"
       case art.artifactName
       of "libtool":
         seenLibtool = true
@@ -111,7 +111,7 @@ suite "libtool — from-source recipe smoke test":
     # M2 versions registry: the upstream ftp.gnu.org release tag is
     # recorded for ``repro update-source``. The repository points at
     # the canonical savannah.gnu.org mirror.
-    let vs = registeredVersions("libtool")
+    let vs = registeredVersions("libtoolSource")
     check vs.len == 1
     check vs[0].version == "2.5.4"
     check vs[0].sourceRevision == "v2.5.4"

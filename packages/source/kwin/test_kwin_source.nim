@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kwin`` recipe.
+## Smoke test for the from-source ``kwinSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTIETH real production
 ## from-source recipe and the SECOND recipe in the Plasma stack batch.
@@ -31,7 +31,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + library + executable artifacts under
-# ``kwin`` at module init time.
+# ``kwinSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -97,19 +97,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "kwin — from-source recipe smoke test":
+suite "kwinSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("kwin")
-    check spec.packageName == "kwin"
+    let spec = registeredFetchSpec("kwinSource")
+    check spec.packageName == "kwinSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 8,563,352-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("kwin")
+    let spec = registeredFetchSpec("kwinSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -118,7 +118,7 @@ suite "kwin — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("kwin")
+    let spec = registeredFetchSpec("kwinSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -130,10 +130,10 @@ suite "kwin — from-source recipe smoke test":
       buildKwinSourcePackage()
 
       let configure = findCmakeConfigureAction()
-      let waylandRoot = dependencyInstallMirrorRoot("wayland", "kwin")
-      let qt6BaseRoot = dependencyInstallMirrorRoot("qt6-base", "kwin")
+      let waylandRoot = dependencyInstallMirrorRoot("wayland", "kwinSource")
+      let qt6BaseRoot = dependencyInstallMirrorRoot("qt6-base", "kwinSource")
       let qt6DeclRoot = dependencyInstallMirrorRoot(
-        "qt6-declarative", "kwin")
+        "qt6-declarative", "kwinSource")
 
       check configure.envValue("DEP_WAYLAND_ROOT") == waylandRoot
       check configure.envValue("DEP_QT6_BASE_ROOT") == qt6BaseRoot
@@ -160,12 +160,12 @@ suite "kwin — from-source recipe smoke test":
     # (``lib/`` vs ``bin/``); a regression that mis-mapped the
     # PascalCase brand-casing on the library name (``libKWin``)
     # would not match the assertion below.
-    let arts = registeredArtifacts("kwin")
+    let arts = registeredArtifacts("kwinSource")
     check arts.len == 2
     var seenBin = false
     var seenLib = false
     for art in arts:
-      check art.packageName == "kwin"
+      check art.packageName == "kwinSource"
       case art.artifactName
       of "kwinWayland":
         seenBin = true
@@ -184,7 +184,7 @@ suite "kwin — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # canonical KDE invent.kde.org project that hosts the kwin source
     # tree.
-    let vs = registeredVersions("kwin")
+    let vs = registeredVersions("kwinSource")
     check vs.len == 1
     check vs[0].version == "6.2.5"
     check vs[0].sourceRevision == "v6.2.5"

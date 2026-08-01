@@ -61,7 +61,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kglobalaccel:
+package kglobalaccelSource:
   ## From-source kglobalaccel — forty-fourth M9.H/I/K production recipe
   ## and the SECOND recipe in the SECOND KF6 module-sweep batch.
   ## Twelfth CMake-driven recipe and the SEVENTH KF6 foundation module
@@ -133,7 +133,7 @@ package kglobalaccel:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kglobalaccel")
+    setCurrentOwningPackageOverride("kglobalaccelSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

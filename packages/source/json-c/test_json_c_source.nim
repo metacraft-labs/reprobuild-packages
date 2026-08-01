@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``jsonC`` recipe.
+## Smoke test for the from-source ``jsonCSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTEENTH real production
 ## from-source recipe and the FIRST CMake-driven recipe. Prior twelve
@@ -30,7 +30,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + library artifact under
-# ``jsonC`` at module init time.
+# ``jsonCSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -47,19 +47,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "jsonC — from-source recipe smoke test":
+suite "jsonCSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("jsonC")
-    check spec.packageName == "jsonC"
+    let spec = registeredFetchSpec("jsonCSource")
+    check spec.packageName == "jsonCSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 401,874-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("jsonC")
+    let spec = registeredFetchSpec("jsonCSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -68,7 +68,7 @@ suite "jsonC — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("jsonC")
+    let spec = registeredFetchSpec("jsonCSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -84,9 +84,9 @@ suite "jsonC — from-source recipe smoke test":
     # shared object bundling the parser + serialiser + tree walker.
     # A regression that mis-tagged the artifact kind would mis-route
     # the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("jsonC")
+    let arts = registeredArtifacts("jsonCSource")
     check arts.len == 1
-    check arts[0].packageName == "jsonC"
+    check arts[0].packageName == "jsonCSource"
     check arts[0].artifactName == "libJsonC"
     check arts[0].kind == dakLibrary
 
@@ -95,7 +95,7 @@ suite "jsonC — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the json-c source tree.
-    let vs = registeredVersions("jsonC")
+    let vs = registeredVersions("jsonCSource")
     check vs.len == 1
     check vs[0].version == "0.18-20240915"
     check vs[0].sourceRevision == "json-c-0.18-20240915"

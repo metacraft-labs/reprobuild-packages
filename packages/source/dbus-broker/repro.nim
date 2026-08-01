@@ -11,7 +11,7 @@
 ## policy file. It does NOT build the broker binary; the broker
 ## binary is sourced from the (deferred) apt-jammy .deb in v1.
 ##
-## This recipe (``dbusBroker``) is the COMPLEMENT — it builds
+## This recipe (``dbusBrokerSource``) is the COMPLEMENT — it builds
 ## the ``dbus-broker`` + ``dbus-broker-launch`` binaries from the
 ## upstream tarball via meson/ninja. The two recipes are wired into
 ## the SAME package universe but live at different paths so the
@@ -63,7 +63,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package dbusBroker:
+package dbusBrokerSource:
   ## From-source dbus-broker — first M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -130,7 +130,7 @@ package dbusBroker:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("dbusBroker")
+    setCurrentOwningPackageOverride("dbusBrokerSource")
     try:
       let opts = @[
         "audit=false",

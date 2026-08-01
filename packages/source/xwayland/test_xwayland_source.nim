@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``xwayland`` recipe.
+## Smoke test for the from-source ``xwaylandSource`` recipe.
 ##
 ## Closes M9.R.26 Gap 4 at the DSL surface; full from-source closure
 ## of the long tail of xorg leaf deps is deferred to M9.R.27.
@@ -15,26 +15,26 @@ const ExpectedUrl =
 const ExpectedHash =
   "737e612ca36bbdf415a911644eb7592cf9389846847b47fa46dc705bd754d2d7"
 
-suite "xwayland — from-source recipe smoke test":
+suite "xwaylandSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
-    let spec = registeredFetchSpec("xwayland")
-    check spec.packageName == "xwayland"
+    let spec = registeredFetchSpec("xwaylandSource")
+    check spec.packageName == "xwaylandSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
-    let spec = registeredFetchSpec("xwayland")
+    let spec = registeredFetchSpec("xwaylandSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("xwayland")
+    let spec = registeredFetchSpec("xwaylandSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
   test "declares source libX11":
-    let deps = registeredBuildDeps("xwayland")
+    let deps = registeredBuildDeps("xwaylandSource")
     check "libx11 >=1.8" in deps
     check "libxcvt >=0.1.1" in deps
     check "libepoxy >=1.5" in deps
@@ -42,7 +42,7 @@ suite "xwayland — from-source recipe smoke test":
     check "xorgproto" in deps
 
   test "declares the runtime server and XKB closure":
-    let deps = registeredRuntimeDeps("xwayland")
+    let deps = registeredRuntimeDeps("xwaylandSource")
     check "pixman >=0.42" in deps
     check "libxfont2" in deps
     check "wayland >=1.22" in deps

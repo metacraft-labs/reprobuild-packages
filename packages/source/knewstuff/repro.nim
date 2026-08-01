@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package knewstuff:
+package knewstuffSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -67,7 +67,7 @@ package knewstuff:
     discard
 
   build:
-    setCurrentOwningPackageOverride("knewstuff")
+    setCurrentOwningPackageOverride("knewstuffSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

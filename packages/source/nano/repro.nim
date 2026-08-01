@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package nano:
+package nanoSource:
   versions:
     "9.1":
       sourceRevision = "v9.1"
@@ -31,7 +31,7 @@ package nano:
     discard
 
   build:
-    setCurrentOwningPackageOverride("nano")
+    setCurrentOwningPackageOverride("nanoSource")
     try:
       let opts = @[
         "--disable-nls",

@@ -6,7 +6,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libx11:
+package libx11Source:
   versions:
     "1.8.12":
       sourceRevision = "libX11-1.8.12"
@@ -41,7 +41,7 @@ package libx11:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libx11")
+    setCurrentOwningPackageOverride("libx11Source")
     try:
       let opts = @[
         "--disable-static",

@@ -50,7 +50,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package polkit:
+package polkitSource:
   ## From-source polkit — closes M9.R.26 Gap 3. Tier-2b c_cpp_meson
   ## convention consumer.
 
@@ -82,20 +82,20 @@ package polkit:
 
   buildDeps:
     ## glib2 + gio supply the GMainLoop + GDBus the polkit daemon's
-    ## D-Bus server uses. The sibling glib2 recipe vendors 2.82.5.
+    ## D-Bus server uses. The sibling glib2Source recipe vendors 2.82.5.
     "glib2 >=2.62"
     "glib2-introspection"
     ## expat is the XML parser polkit uses to load the per-action
     ## policy files from /usr/share/polkit-1/actions/. The sibling
-    ## expat recipe vendors 2.7.0.
+    ## expatSource recipe vendors 2.7.0.
     "expat >=2.4"
     ## duktape is the JavaScript engine that evaluates the
     ## /etc/polkit-1/rules.d/*.rules per-action authorization
-    ## scripts. The sibling duktape recipe vendors 2.7.0
+    ## scripts. The sibling duktapeSource recipe vendors 2.7.0
     ## (M9.R.26.3 companion).
     "duktape >=2.2"
     ## pam supplies libpam.so, consumed by polkit-agent-helper-1 for
-    ## authentication. The sibling pam recipe vendors via the
+    ## authentication. The sibling pamSource recipe vendors via the
     ## stdlib stub when needed.
     "pam"
     ## M9.R.27.2 — polkit's session_tracking=libsystemd-login backend
@@ -135,7 +135,7 @@ package polkit:
     discard
 
   build:
-    setCurrentOwningPackageOverride("polkit")
+    setCurrentOwningPackageOverride("polkitSource")
     try:
       let opts = @[
         # Use duktape as the JS engine (the v1 default per upstream;

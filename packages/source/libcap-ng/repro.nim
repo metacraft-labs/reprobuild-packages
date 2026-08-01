@@ -108,7 +108,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libcapNg:
+package libcapNgSource:
   ## From-source libcap-ng — fiftieth M9.H/I/K production recipe.
   ## The simplified-API POSIX capabilities library (Steve Grubb's
   ## libcap alternative) consumed by auditd + cronie. Closes the
@@ -195,7 +195,7 @@ package libcapNg:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("libcapNg")
+    setCurrentOwningPackageOverride("libcapNgSource")
     try:
       let opts = @[
         "--disable-static",

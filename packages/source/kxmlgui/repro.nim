@@ -56,7 +56,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kxmlgui:
+package kxmlguiSource:
   ## From-source kxmlgui — thirty-ninth M9.H/I/K production recipe and
   ## the CLOSING recipe in the KF6 module-sweep batch. Tenth CMake-
   ## driven recipe and the FIFTH KF6 foundation module after
@@ -105,7 +105,7 @@ package kxmlgui:
     "qt6-tools >=6.6"
     ## kconfig is the KF6 configuration-storage library kxmlgui uses
     ## to read ``*ui.rc`` files + persist menu/toolbar customisations
-    ## under ``$XDG_CONFIG_HOME``. The sibling ``kconfig`` recipe
+    ## under ``$XDG_CONFIG_HOME``. The sibling ``kconfigSource`` recipe
     ## vendors a compatible 6.x version.
     "kconfig >=6.0"
     ## kcoreaddons is the KF6 foundation library kxmlgui's actions
@@ -153,7 +153,7 @@ package kxmlgui:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kxmlgui")
+    setCurrentOwningPackageOverride("kxmlguiSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

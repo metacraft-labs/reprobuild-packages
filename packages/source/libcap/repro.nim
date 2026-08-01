@@ -138,7 +138,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libcap:
+package libcapSource:
   ## From-source libcap — thirty-fourth M9.H/I/K production recipe
   ## and the SECOND consumer of the M9.I ``makeFlags:`` channel
   ## (linux-kernel was the first). FIRST recipe to drive a non-kbuild
@@ -234,7 +234,7 @@ package libcap:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("libcap")
+    setCurrentOwningPackageOverride("libcapSource")
     try:
       let opts = @[
         "BUILD_CC=gcc",

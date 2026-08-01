@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``qt6Declarative`` recipe (M9.R.15j.1).
+## Smoke test for the from-source ``qt6DeclarativeSource`` recipe (M9.R.15j.1).
 ##
 ## Pins the M9.H/I/K trio's behaviour on the qt6-declarative module that
 ## unblocks the KF6/Plasma cascade (kdeclarative, knotifications, kio,
@@ -20,7 +20,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors/cmake_package
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + library artifacts under ``qt6Declarative`` at
+# fetch spec + library artifacts under ``qt6DeclarativeSource`` at
 # module init time.
 import ./repro
 
@@ -30,30 +30,30 @@ const ExpectedUrl =
 const ExpectedHash =
   "95d15d5c1b6adcedb1df6485219ad13b8dc1bb5168b5151f2f1f7246a4c039fc"
 
-suite "qt6Declarative — from-source recipe smoke test":
+suite "qt6DeclarativeSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("qt6Declarative")
-    check spec.packageName == "qt6Declarative"
+    let spec = registeredFetchSpec("qt6DeclarativeSource")
+    check spec.packageName == "qt6DeclarativeSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("qt6Declarative")
+    let spec = registeredFetchSpec("qt6DeclarativeSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("qt6Declarative")
+    let spec = registeredFetchSpec("qt6DeclarativeSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
   test "artifacts register the three Qt6 declarative libraries":
-    let arts = registeredArtifacts("qt6Declarative")
+    let arts = registeredArtifacts("qt6DeclarativeSource")
     check arts.len == 3
     var names: seq[string] = @[]
     for art in arts:
-      check art.packageName == "qt6Declarative"
+      check art.packageName == "qt6DeclarativeSource"
       check art.kind == dakLibrary
       names.add(art.artifactName)
     check "libQt6Qml" in names
@@ -61,7 +61,7 @@ suite "qt6Declarative — from-source recipe smoke test":
     check "libQt6QuickControls2" in names
 
   test "CMake actions carry Qt GUI transitive search-path dependencies":
-    setCurrentOwningPackageOverride("qt6Declarative")
+    setCurrentOwningPackageOverride("qt6DeclarativeSource")
     try:
       let pkg = cmake_package(srcDir = "./src", buildDir = "dependency-ref-test")
       check "libxkbcommon" in pkg.compileEdge.toolIdentityRefs
@@ -72,7 +72,7 @@ suite "qt6Declarative — from-source recipe smoke test":
       clearCurrentOwningPackageOverride()
 
   test "versions block records the upstream tag + URL + repository":
-    let vs = registeredVersions("qt6Declarative")
+    let vs = registeredVersions("qt6DeclarativeSource")
     check vs.len == 1
     check vs[0].version == "6.8.1"
     check vs[0].sourceRevision == "v6.8.1"

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``dbus`` recipe.
+## Smoke test for the from-source ``dbusSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTIETH real production
 ## from-source recipe. Upstream dbus 1.16.0 ships meson-only (the
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + executable + library artifacts under
-# ``dbus`` at module init time.
+# ``dbusSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -46,19 +46,19 @@ const ExpectedMesonOptions = @[
   "ducktype_docs=disabled",
 ]
 
-suite "dbus — from-source recipe smoke test":
+suite "dbusSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("dbus")
-    check spec.packageName == "dbus"
+    let spec = registeredFetchSpec("dbusSource")
+    check spec.packageName == "dbusSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 1,114,680-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("dbus")
+    let spec = registeredFetchSpec("dbusSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -67,7 +67,7 @@ suite "dbus — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream freedesktop release
     # tarballs use.
-    let spec = registeredFetchSpec("dbus")
+    let spec = registeredFetchSpec("dbusSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -87,12 +87,12 @@ suite "dbus — from-source recipe smoke test":
     # would mis-route the M9.L install path (``lib/`` vs ``bin/``);
     # a regression that collapsed the artifact-name partitioning would
     # not produce two distinct entries with the expected names below.
-    let arts = registeredArtifacts("dbus")
+    let arts = registeredArtifacts("dbusSource")
     check arts.len == 2
     var seenDaemon = false
     var seenLib = false
     for art in arts:
-      check art.packageName == "dbus"
+      check art.packageName == "dbusSource"
       case art.artifactName
       of "dbusDaemon":
         seenDaemon = true
@@ -111,7 +111,7 @@ suite "dbus — from-source recipe smoke test":
     # points at the vendored copy. The repository points at the
     # canonical GitLab project that hosts the reference dbus source
     # tree.
-    let vs = registeredVersions("dbus")
+    let vs = registeredVersions("dbusSource")
     check vs.len == 1
     check vs[0].version == "1.16.0"
     check vs[0].sourceRevision == "dbus-1.16.0"

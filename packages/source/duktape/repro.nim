@@ -38,7 +38,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package duktape:
+package duktapeSource:
   ## From-source duktape. Tier-2b custom-Makefile via the
   ## skipConfigure shape of autotools_package.
 
@@ -66,7 +66,7 @@ package duktape:
     discard
 
   build:
-    setCurrentOwningPackageOverride("duktape")
+    setCurrentOwningPackageOverride("duktapeSource")
     try:
       # duktape's Makefile.sharedlibrary builds libduktape.so.207 in
       # the source tree. We override INSTALL_PREFIX via the

@@ -145,7 +145,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package vim:
+package vimSource:
   ## From-source vim — sixty-first M9.H/I/K production recipe. The
   ## de-facto Unix modal editor; ``/usr/bin/vim`` is the default
   ## ``EDITOR=`` on every major Linux distribution that doesn't pin
@@ -247,7 +247,7 @@ package vim:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("vim")
+    setCurrentOwningPackageOverride("vimSource")
     try:
       let opts = @[
         "--enable-gui=no",

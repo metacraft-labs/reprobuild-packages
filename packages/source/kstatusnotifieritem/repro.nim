@@ -9,7 +9,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kstatusnotifieritem:
+package kstatusnotifieritemSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -52,7 +52,7 @@ package kstatusnotifieritem:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kstatusnotifieritem")
+    setCurrentOwningPackageOverride("kstatusnotifieritemSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

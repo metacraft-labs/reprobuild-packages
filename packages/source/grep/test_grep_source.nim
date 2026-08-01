@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``grep`` recipe.
+## Smoke test for the from-source ``grepSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SEVENTY-SECOND real
 ## production from-source recipe. GNU grep is THE canonical line-
@@ -24,7 +24,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable artifact under
-# ``grep`` at module init time.
+# ``grepSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -37,19 +37,19 @@ const ExpectedConfigureFlags = @[
   "--disable-perl-regexp",
 ]
 
-suite "grep — from-source recipe smoke test":
+suite "grepSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("grep")
-    check spec.packageName == "grep"
+    let spec = registeredFetchSpec("grepSource")
+    check spec.packageName == "grepSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 is the canonical published upstream ``sha256sum`` for
     # grep-3.11.tar.xz; length check guards against a future bump
     # that forgets to widen the hash alongside the URL.
-    let spec = registeredFetchSpec("grep")
+    let spec = registeredFetchSpec("grepSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -58,7 +58,7 @@ suite "grep — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("grep")
+    let spec = registeredFetchSpec("grepSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -79,9 +79,9 @@ suite "grep — from-source recipe smoke test":
     # mis-route the M9.L install path; a regression that collapsed
     # the artifact-name partitioning at the one-artifact cardinality
     # would not produce a single entry with the expected name.
-    let arts = registeredArtifacts("grep")
+    let arts = registeredArtifacts("grepSource")
     check arts.len == 1
-    check arts[0].packageName == "grep"
+    check arts[0].packageName == "grepSource"
     check arts[0].artifactName == "grep"
     check arts[0].kind == dakExecutable
 
@@ -90,7 +90,7 @@ suite "grep — from-source recipe smoke test":
     # recorded for ``repro update-source``. The repository points at
     # the canonical savannah.gnu.org mirror that hosts the grep
     # source tree.
-    let vs = registeredVersions("grep")
+    let vs = registeredVersions("grepSource")
     check vs.len == 1
     check vs[0].version == "3.11"
     check vs[0].sourceRevision == "v3.11"

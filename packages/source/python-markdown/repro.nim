@@ -5,7 +5,7 @@
 
 import repro_project_dsl
 
-package pythonMarkdown:
+package pythonMarkdownSource:
   versions:
     "3.9":
       sourceRevision = "3.9"

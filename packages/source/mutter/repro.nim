@@ -27,7 +27,7 @@
 ## glue, and the standalone ``mutter`` binary can drive a bare-bones
 ## Wayland session for embedded / headless deployments. NDE-G1 (the
 ## GNOME desktop entry) pins ``mutter >=47`` and the sibling
-## ``gnomeShell`` recipe declares the same pin in its ``uses:``
+## ``gnomeShellSource`` recipe declares the same pin in its ``uses:``
 ## block.
 ##
 ## ## sha256 strategy
@@ -142,7 +142,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package mutter:
+package mutterSource:
   ## From-source mutter — sixteenth M9.H/I/K production recipe and the
   ## FIRST recipe in the GNOME stack batch. Second meson-driven multi-
   ## artifact recipe to ship a library + an executable from the same
@@ -213,22 +213,22 @@ package mutter:
   buildDeps:
     ## glib2 is the foundation library mutter's compositor + window-
     ## manager layers consume (GObject type system, GMainLoop event
-    ## loop, GSettings configuration). The sibling ``glib2``
+    ## loop, GSettings configuration). The sibling ``glib2Source``
     ## recipe vendors 2.82.5 to match.
     "glib2 >=2.62"
     ## libdrm is the KMS/DRM userspace library mutter's native backend
     ## consumes to drive bare-metal Wayland sessions. The sibling
-    ## ``libdrm`` recipe vendors 2.4.124 to match.
+    ## ``libdrmSource`` recipe vendors 2.4.124 to match.
     "libdrm >=2.4.110"
     ## wayland is the protocol library mutter's compositor backend
-    ## consumes. The sibling ``wayland`` recipe vendors 1.25.0
+    ## consumes. The sibling ``waylandSource`` recipe vendors 1.25.0
     ## to match.
     "wayland >=1.22"
     ## M9.R.15e.5 — wayland-protocols ships the XML protocol-definition
     ## files (xdg-shell, linux-dmabuf, presentation-time, ...) mutter's
     ## Wayland backend consumes at build time. Stub routes through
     ## nixpkgs#wayland-protocols (.pc lives at share/pkgconfig).
-    ## (``wayland-egl.pc`` is already provided by the ``wayland``
+    ## (``wayland-egl.pc`` is already provided by the ``waylandSource``
     ## sibling recipe's install tree, picked up via the existing
     ## ``wayland`` buildDep — no separate declaration needed.)
     "wayland-protocols >=1.31"
@@ -257,7 +257,7 @@ package mutter:
     ## short-fails meson setup with
     ## ``ERROR: Dependency "graphene-gobject-1.0" not found`` when the
     ## graphene .pc is not on PKG_CONFIG_PATH. The sibling
-    ## ``graphene`` recipe (M9.R.15b.2) vendors 1.10.8 to match.
+    ## ``grapheneSource`` recipe (M9.R.15b.2) vendors 1.10.8 to match.
     "graphene >=1.10"
     ## harfbuzz is the OpenType shaper mutter's clutter+cogl layers
     ## consume directly (independent of pango).
@@ -373,7 +373,7 @@ package mutter:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("mutter")
+    setCurrentOwningPackageOverride("mutterSource")
     try:
       let opts = @[
         # M9.R.15b.1 — mutter 47.10's `tests` and `libdisplay_info`

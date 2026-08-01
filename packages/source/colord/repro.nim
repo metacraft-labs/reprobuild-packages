@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package colord:
+package colordSource:
   versions:
     "1.4.6":
       sourceRevision = "1.4.6"
@@ -30,7 +30,7 @@ package colord:
   library libcolord:
     discard
   build:
-    setCurrentOwningPackageOverride("colord")
+    setCurrentOwningPackageOverride("colordSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "daemon=false",

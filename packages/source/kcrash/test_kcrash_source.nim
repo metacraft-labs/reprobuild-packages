@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kcrash`` recipe (M9.R.15h.6).
+## Smoke test for the from-source ``kcrashSource`` recipe (M9.R.15h.6).
 
 import std/[unittest]
 
@@ -12,18 +12,18 @@ const ExpectedUrl =
 const ExpectedHash =
   "c0329da6ac28aaac824db235e578999e4a487e5cedbb3cec3a6a39e9ee9b5db4"
 
-suite "kcrash — from-source recipe smoke test":
+suite "kcrashSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("kcrash")
+    let spec = registeredFetchSpec("kcrashSource")
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("kcrash")
+    let spec = registeredFetchSpec("kcrashSource")
     check spec.hashHex == ExpectedHash
 
   test "artifacts register libKF6Crash":
-    let arts = registeredArtifacts("kcrash")
+    let arts = registeredArtifacts("kcrashSource")
     check arts.len == 1
     check arts[0].artifactName == "libKF6Crash"
     check arts[0].kind == dakLibrary

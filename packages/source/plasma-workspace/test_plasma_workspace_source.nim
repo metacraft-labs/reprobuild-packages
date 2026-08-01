@@ -1,11 +1,11 @@
-## Smoke test for the from-source ``plasmaWorkspace`` recipe.
+## Smoke test for the from-source ``plasmaWorkspaceSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTY-FIRST real
 ## production from-source recipe and the THIRD recipe in the Plasma
 ## stack batch. plasma-workspace's unique coverage angle vs the prior
 ## twenty is that it's the FIRST CMake recipe to combine BOTH a
 ## multi-word-kebab package name (``plasma-workspace`` ->
-## ``plasmaWorkspace``) AND a mixed-kind artifact set
+## ``plasmaWorkspaceSource``) AND a mixed-kind artifact set
 ## (library + executable). The gnome-shell precedent exercised the
 ## same multi-word-kebab + mixed-kind shape on the meson channel;
 ## this is the CMake-side analogue, so a regression that fumbled the
@@ -35,7 +35,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + library + executable artifacts under
-# ``plasmaWorkspace`` at module init time.
+# ``plasmaWorkspaceSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -52,19 +52,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "plasmaWorkspace — from-source recipe smoke test":
+suite "plasmaWorkspaceSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("plasmaWorkspace")
-    check spec.packageName == "plasmaWorkspace"
+    let spec = registeredFetchSpec("plasmaWorkspaceSource")
+    check spec.packageName == "plasmaWorkspaceSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 19,136,676-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("plasmaWorkspace")
+    let spec = registeredFetchSpec("plasmaWorkspaceSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -73,7 +73,7 @@ suite "plasmaWorkspace — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("plasmaWorkspace")
+    let spec = registeredFetchSpec("plasmaWorkspaceSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -88,7 +88,7 @@ suite "plasmaWorkspace — from-source recipe smoke test":
     # while ``libkworkspace6`` is tagged ``dakLibrary``. The
     # unique coverage of THIS recipe is that it's the first CMake
     # recipe combining a multi-word-kebab package name
-    # (``plasma-workspace`` -> ``plasmaWorkspace``) AND a
+    # (``plasma-workspace`` -> ``plasmaWorkspaceSource``) AND a
     # mixed-kind artifact set. A regression that flattened the kind
     # discriminator would mis-route the M9.L install path
     # (``lib/`` vs ``bin/``). M9.R.36.2 verified the upstream CMake
@@ -96,7 +96,7 @@ suite "plasmaWorkspace — from-source recipe smoke test":
     # ``OUTPUT_NAME kworkspace6`` + KF6 ``6`` ABI suffix); the
     # speculative ``libPlasmaWorkspace`` name never existed in the
     # install-mirror.
-    let arts = registeredArtifacts("plasmaWorkspace")
+    let arts = registeredArtifacts("plasmaWorkspaceSource")
     # M9.R.32.1 added ``startplasmaWayland`` so the artifact count went
     # from 2 (plasmashell + libPlasmaWorkspace) to 3.  The session
     # entry-point binary's name kebabs to ``startplasma-wayland`` for
@@ -106,7 +106,7 @@ suite "plasmaWorkspace — from-source recipe smoke test":
     var seenLib = false
     var seenStartplasma = false
     for art in arts:
-      check art.packageName == "plasmaWorkspace"
+      check art.packageName == "plasmaWorkspaceSource"
       case art.artifactName
       of "plasmashell":
         seenBin = true
@@ -129,7 +129,7 @@ suite "plasmaWorkspace — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # canonical KDE invent.kde.org project that hosts the
     # plasma-workspace source tree.
-    let vs = registeredVersions("plasmaWorkspace")
+    let vs = registeredVersions("plasmaWorkspaceSource")
     check vs.len == 1
     check vs[0].version == "6.2.5"
     check vs[0].sourceRevision == "v6.2.5"

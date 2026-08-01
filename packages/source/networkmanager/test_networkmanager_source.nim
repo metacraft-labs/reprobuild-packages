@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``networkManager`` recipe.
+## Smoke test for the from-source ``networkManagerSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SEVENTIETH real production
 ## from-source recipe. NetworkManager is THE canonical network
@@ -16,7 +16,7 @@
 ##     spot-check (meson + cmake + make channels MUST be empty).
 ##   * MIXED artifact registration (M3) — two executables
 ##     (``dakExecutable``) + one library (``dakLibrary``) attributed
-##     to ``networkManager`` with kind discriminators preserved
+##     to ``networkManagerSource`` with kind discriminators preserved
 ##     per-artifact.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two executables + one library
-# artifact under ``networkManager`` at module init time.
+# artifact under ``networkManagerSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -45,19 +45,19 @@ const ExpectedConfigureFlags = @[
   "--with-modify-system=true",
 ]
 
-suite "networkManager — from-source recipe smoke test":
+suite "networkManagerSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("networkManager")
-    check spec.packageName == "networkManager"
+    let spec = registeredFetchSpec("networkManagerSource")
+    check spec.packageName == "networkManagerSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 cross-checked against nixpkgs's SRI-form hash on the
     # same upstream tarball; length check guards against a future
     # bump that forgets to widen the hash alongside the URL.
-    let spec = registeredFetchSpec("networkManager")
+    let spec = registeredFetchSpec("networkManagerSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -65,7 +65,7 @@ suite "networkManager — from-source recipe smoke test":
   test "fetch spec is the tarball variant with extractStrip = 1":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream release tarballs use.
-    let spec = registeredFetchSpec("networkManager")
+    let spec = registeredFetchSpec("networkManagerSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,13 +85,13 @@ suite "networkManager — from-source recipe smoke test":
     # that flattened the kind discriminator at the autotools
     # convention layer would mis-route the M9.L install path
     # (``lib/`` vs ``bin/``) for one of the three.
-    let arts = registeredArtifacts("networkManager")
+    let arts = registeredArtifacts("networkManagerSource")
     check arts.len == 3
     var seenDaemon = false
     var seenNmcli = false
     var seenLib = false
     for art in arts:
-      check art.packageName == "networkManager"
+      check art.packageName == "networkManagerSource"
       case art.artifactName
       of "nmDaemon":
         seenDaemon = true
@@ -115,7 +115,7 @@ suite "networkManager — from-source recipe smoke test":
     # the NetworkManager source tree (the project moved from
     # download.gnome.org to gitlab.freedesktop.org after the 2022
     # freedesktop migration).
-    let vs = registeredVersions("networkManager")
+    let vs = registeredVersions("networkManagerSource")
     check vs.len == 1
     check vs[0].version == "1.56.0"
     check vs[0].sourceRevision == "1.56.0"

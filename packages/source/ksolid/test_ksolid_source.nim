@@ -1,11 +1,11 @@
-## Smoke test for the from-source ``ksolid`` recipe.
+## Smoke test for the from-source ``ksolidSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-SIXTH real
 ## production from-source recipe and the SECOND recipe in the THIRD
 ## KF6 module-sweep batch (ksvg / ksolid / kio / kded). ksolid's
 ## unique coverage angle is the FIRST KF6-batch recipe whose vendored
 ## tarball filename (``solid-6.10.0.tar.xz``) does NOT match the
-## package identifier (``ksolid``) — upstream publishes the
+## package identifier (``ksolidSource``) — upstream publishes the
 ## project as bare ``solid`` while we shelve it under ``ksolid`` for
 ## consistency with the rest of the KF6 module-sweep cluster. The
 ## test below explicitly asserts the upstream filename round-trips
@@ -30,7 +30,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + cmake flags + library artifact under ``ksolid``
+# fetch spec + cmake flags + library artifact under ``ksolidSource``
 # at module init time.
 import ./repro
 
@@ -47,22 +47,22 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "ksolid — from-source recipe smoke test":
+suite "ksolidSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
     # The vendored filename preserves the upstream ``solid-`` prefix
     # (not the ``ksolid-`` package-identifier shape) so byte-comparison
     # with the live download.kde.org URL stays clean.
-    let spec = registeredFetchSpec("ksolid")
-    check spec.packageName == "ksolid"
+    let spec = registeredFetchSpec("ksolidSource")
+    check spec.packageName == "ksolidSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 307,236-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("ksolid")
+    let spec = registeredFetchSpec("ksolidSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -71,7 +71,7 @@ suite "ksolid — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("ksolid")
+    let spec = registeredFetchSpec("ksolidSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -86,9 +86,9 @@ suite "ksolid — from-source recipe smoke test":
     # must be tagged ``dakLibrary``. A regression that mis-tagged the
     # artifact kind would mis-route the M9.L install path (``lib/`` vs
     # ``bin/``).
-    let arts = registeredArtifacts("ksolid")
+    let arts = registeredArtifacts("ksolidSource")
     check arts.len == 1
-    check arts[0].packageName == "ksolid"
+    check arts[0].packageName == "ksolidSource"
     check arts[0].artifactName == "libKF6Solid"
     check arts[0].kind == dakLibrary
 
@@ -97,7 +97,7 @@ suite "ksolid — from-source recipe smoke test":
     # filename — a regression that "normalised" the URL to
     # ``ksolid-...`` to match the package identifier would not survive
     # a re-fetch from download.kde.org and would trip this check.
-    let vs = registeredVersions("ksolid")
+    let vs = registeredVersions("ksolidSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

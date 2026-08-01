@@ -133,7 +133,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package systemd:
+package systemdSource:
   ## From-source systemd — thirty-first M9.H/I/K production recipe and
   ## the SEVENTEENTH meson-driven recipe. FIRST recipe in the corpus to
   ## ship a four-executable + two-library mixed-kind artifact set from
@@ -280,7 +280,7 @@ package systemd:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("systemd")
+    setCurrentOwningPackageOverride("systemdSource")
     try:
       let opts = @[
         "mode=release",

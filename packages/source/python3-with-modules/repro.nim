@@ -6,7 +6,7 @@
 
 import repro_project_dsl
 
-package python3WithModules:
+package python3WithModulesSource:
   versions:
     "1.3.12":
       sourceRevision = "1.3.12"

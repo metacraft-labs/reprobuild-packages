@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package grub:
+package grubSource:
   versions:
     "2.12":
       sourceRevision = "grub-2.12"
@@ -34,7 +34,7 @@ package grub:
     discard
 
   build:
-    setCurrentOwningPackageOverride("grub")
+    setCurrentOwningPackageOverride("grubSource")
     try:
       let opts = @[
         "--target=x86_64",

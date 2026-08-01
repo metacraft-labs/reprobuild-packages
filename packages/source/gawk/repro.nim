@@ -6,7 +6,7 @@
 ## every report-generation pipeline invokes to run AWK programs
 ## against text streams.
 ##
-## GNU awk joins ``tar`` + ``grep`` + ``sed`` in
+## GNU awk joins ``tarSource`` + ``grepSource`` + ``sedSource`` in
 ## the GNU text-processing + archiving CLI batch — the four pillar
 ## GNU userland binaries every shell script + every Makefile + every
 ## install script consumes.
@@ -114,7 +114,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gawk:
+package gawkSource:
   ## From-source GNU awk (gawk) — seventy-fourth M9.H/I/K production
   ## recipe. THE canonical AWK implementation on every modern Linux
   ## distribution — every shell pipeline + every Makefile field-
@@ -190,7 +190,7 @@ package gawk:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("gawk")
+    setCurrentOwningPackageOverride("gawkSource")
     try:
       let opts = @[
         "--disable-extensions",

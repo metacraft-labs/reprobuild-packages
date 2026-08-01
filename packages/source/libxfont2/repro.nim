@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxfont2:
+package libxfont2Source:
   versions:
     "2.0.7":
       sourceRevision = "libXfont2-2.0.7"
@@ -44,7 +44,7 @@ package libxfont2:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libxfont2")
+    setCurrentOwningPackageOverride("libxfont2Source")
     try:
       let opts = @["--disable-static", "--enable-shared"]
       let patches = @[

@@ -144,7 +144,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package mesa:
+package mesaSource:
   ## From-source mesa — drives M9.R.15m.1: the OpenGL / EGL / GBM gap
   ## blocking the kwin + mutter Wayland compositors. v1 builds the
   ## software-rasterizer-only configuration sufficient to satisfy
@@ -240,7 +240,7 @@ package mesa:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("mesa")
+    setCurrentOwningPackageOverride("mesaSource")
     try:
       let opts = @[
         "vulkan-drivers=",

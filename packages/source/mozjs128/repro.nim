@@ -9,7 +9,7 @@ import repro_dsl_stdlib/packages/perl
 import repro_dsl_stdlib/packages/llvm_objdump
 import repro_dsl_stdlib/packages/cbindgen
 
-package mozjs128:
+package mozjs128Source:
   versions:
     "128.5.0":
       sourceRevision = "FIREFOX_128_5_0esr_RELEASE"
@@ -40,7 +40,7 @@ package mozjs128:
   executable js128:
     discard
   build:
-    setCurrentOwningPackageOverride("mozjs128")
+    setCurrentOwningPackageOverride("mozjs128Source")
     try:
       let pkg = autotools_package(
         srcDir = "./src/js",

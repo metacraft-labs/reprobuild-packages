@@ -5,7 +5,7 @@
 
 import repro_project_dsl
 
-package pythonPackaging:
+package pythonPackagingSource:
   versions:
     "26.2":
       sourceRevision = "26.2"

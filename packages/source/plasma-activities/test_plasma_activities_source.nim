@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``plasmaActivities`` recipe
+## Smoke test for the from-source ``plasmaActivitiesSource`` recipe
 ## (M9.R.15q.1.2).
 ##
 ## Pins the M9.H + M3 registry behaviour on the recipe that closes the
@@ -19,7 +19,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers fetch
 # spec + cmake flags + library artifact under
-# ``plasmaActivities`` at module init time.
+# ``plasmaActivitiesSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -28,21 +28,21 @@ const ExpectedUrl =
 const ExpectedHash =
   "77ea739c7ce5170d92d78d6f3765e19a32f0e24b741f525555d59dc7de15e6c7"
 
-suite "plasmaActivities — from-source recipe smoke test":
+suite "plasmaActivitiesSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("plasmaActivities")
-    check spec.packageName == "plasmaActivities"
+    let spec = registeredFetchSpec("plasmaActivitiesSource")
+    check spec.packageName == "plasmaActivitiesSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("plasmaActivities")
+    let spec = registeredFetchSpec("plasmaActivitiesSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("plasmaActivities")
+    let spec = registeredFetchSpec("plasmaActivitiesSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -51,14 +51,14 @@ suite "plasmaActivities — from-source recipe smoke test":
     # plasma-activities is a Plasma-stack library, not a KF6 framework,
     # and the upstream SONAME reflects that (same shape as
     # plasma-framework's libPlasma artifact).
-    let arts = registeredArtifacts("plasmaActivities")
+    let arts = registeredArtifacts("plasmaActivitiesSource")
     check arts.len == 1
-    check arts[0].packageName == "plasmaActivities"
+    check arts[0].packageName == "plasmaActivitiesSource"
     check arts[0].artifactName == "libPlasmaActivities"
     check arts[0].kind == dakLibrary
 
   test "versions block records the upstream tag + URL + repository":
-    let vs = registeredVersions("plasmaActivities")
+    let vs = registeredVersions("plasmaActivitiesSource")
     check vs.len == 1
     check vs[0].version == "6.2.5"
     check vs[0].sourceRevision == "v6.2.5"

@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xorgServer:
+package xorgServerSource:
   versions:
     "21.1.24":
       sourceRevision = "xorg-server-21.1.24"
@@ -46,7 +46,7 @@ package xorgServer:
     discard
 
   build:
-    setCurrentOwningPackageOverride("xorgServer")
+    setCurrentOwningPackageOverride("xorgServerSource")
     try:
       let opts = @[
         "xorg=true",

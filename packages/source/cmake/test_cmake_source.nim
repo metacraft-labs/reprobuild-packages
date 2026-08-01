@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``cmake`` recipe.
+## Smoke test for the from-source ``cmakeSource`` recipe.
 ##
 ## Pins the M9.H/I + M3 registry behaviour on the M9.N Batch D
 ## build-tool slice. cmake's unique coverage angles vs the prior 76
@@ -10,7 +10,7 @@
 ##     ``from-source-custom`` convention's per-artifact stage-copy
 ##     fan-out from a multi-binary install-tree.
 ##   * SECOND ``from-source-custom`` consumer with a multi-shell
-##     ``build:`` block (vs ``meson``'s four-shell install body)
+##     ``build:`` block (vs ``mesonSource``'s four-shell install body)
 ##     — pins the M9.N Batch C.1 shell-action registry round-trip on a
 ##     bootstrap-build-install pipeline.
 ##   * Real sha256 on the fetch channel — the test asserts the exact
@@ -36,7 +36,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + three executable artifacts + three shell actions
-# under ``cmake`` at module init time.
+# under ``cmakeSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -47,18 +47,18 @@ const ExpectedUrl =
 const ExpectedHash =
   "42abb3f48f37dbd739cdfeb19d3712db0c5935ed5c2aef6c340f9ae9114238a2"
 
-suite "cmake — from-source recipe smoke test":
+suite "cmakeSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("cmake")
-    check spec.packageName == "cmake"
+    let spec = registeredFetchSpec("cmakeSource")
+    check spec.packageName == "cmakeSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream GitHub release tarball; computed
     # locally + asserted exactly.
-    let spec = registeredFetchSpec("cmake")
+    let spec = registeredFetchSpec("cmakeSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -67,7 +67,7 @@ suite "cmake — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("cmake")
+    let spec = registeredFetchSpec("cmakeSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -86,13 +86,13 @@ suite "cmake — from-source recipe smoke test":
     # a regression that mis-tagged any of the three would mis-route
     # the from-source-custom stage-copy step (which probes
     # ``$out/bin/<member>`` per executable artifact).
-    let arts = registeredArtifacts("cmake")
+    let arts = registeredArtifacts("cmakeSource")
     check arts.len == 3
     var seenCmake = false
     var seenCtest = false
     var seenCpack = false
     for art in arts:
-      check art.packageName == "cmake"
+      check art.packageName == "cmakeSource"
       check art.kind == dakExecutable
       case art.artifactName
       of "cmake":
@@ -112,7 +112,7 @@ suite "cmake — from-source recipe smoke test":
     # recorded for ``repro update-source``. The repository points at
     # the canonical github.com project that hosts the cmake source
     # tree.
-    let vs = registeredVersions("cmake")
+    let vs = registeredVersions("cmakeSource")
     check vs.len == 1
     check vs[0].version == "3.31.2"
     check vs[0].sourceRevision == "v3.31.2"
@@ -128,10 +128,10 @@ suite "cmake — from-source recipe smoke test":
     # source-custom convention consumes the sequence verbatim;
     # ``$out`` is resolved to the per-package output dir at emit
     # time.
-    let rows = registeredShellActions("cmake")
+    let rows = registeredShellActions("cmakeSource")
     check rows.len == 3
     for r in rows:
-      check r.packageName == "cmake"
+      check r.packageName == "cmakeSource"
       check r.artifactName == "cmake"
     check rows[0].command == "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF"
     check rows[1].command == "make"
@@ -141,8 +141,8 @@ suite "cmake — from-source recipe smoke test":
     # M9.N Batch C.1 — auto-generated ids follow the
     # ``<package>-<artifact>-<seq>`` shape; sequence increments per
     # artifact.
-    let rows = registeredShellActions("cmake")
+    let rows = registeredShellActions("cmakeSource")
     check rows.len == 3
-    check rows[0].id == "cmake-cmake-1"
-    check rows[1].id == "cmake-cmake-2"
-    check rows[2].id == "cmake-cmake-3"
+    check rows[0].id == "cmakeSource-cmake-1"
+    check rows[1].id == "cmakeSource-cmake-2"
+    check rows[2].id == "cmakeSource-cmake-3"

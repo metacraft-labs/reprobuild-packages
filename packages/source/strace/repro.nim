@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package strace:
+package straceSource:
   versions:
     "6.16":
       sourceRevision = "v6.16"
@@ -30,7 +30,7 @@ package strace:
     discard
 
   build:
-    setCurrentOwningPackageOverride("strace")
+    setCurrentOwningPackageOverride("straceSource")
     try:
       let opts = @[
         "--enable-mpers=no",

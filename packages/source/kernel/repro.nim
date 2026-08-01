@@ -41,19 +41,19 @@
 ## compilation back end is deferred there (see honest-deferrals
 ## comment block).
 ##
-## This recipe (``kernel``) is the COMPLEMENT — it provides the
+## This recipe (``kernelSource``) is the COMPLEMENT — it provides the
 ## upstream-source side: a separate package that fetches the kernel
 ## tarball, exposes its build via ``c_cpp_make`` + ``makeFlags:``,
 ## and records the artifacts the kernel build emits. The two recipes
 ## live at different paths so the NDE-E config-emission cache key is
 ## isolated from the upstream tarball sha256 (a 6.6.142 → 6.6.143
-## bump invalidates only ``kernel``, not the unit-file
+## bump invalidates only ``kernelSource``, not the unit-file
 ## emissions; flipping ``reproosKernel.enableHypervDrm`` invalidates
 ## the NDE-E artifacts, not the upstream tarball cache).
 ##
 ## A future milestone will wire the two together: the NDE-E
 ## ``bzImage`` artifact's ``toolBuild("kernelCompile", ...)`` call
-## becomes a real build-action edge into ``kernel``'s
+## becomes a real build-action edge into ``kernelSource``'s
 ## ``bzImage`` executable, replacing the v1 text stub with the actual
 ## kernel image bytes. The DECLARATIVE shape on both sides is what
 ## makes that swap a one-line change at the consumer site.
@@ -139,7 +139,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kernel:
+package kernelSource:
   ## From-source Linux kernel — SIXTH M9.H/I/K production recipe and
   ## FIRST consumer of the M9.I ``makeFlags:`` channel.
   ##
@@ -278,7 +278,7 @@ package kernel:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kernel")
+    setCurrentOwningPackageOverride("kernelSource")
     try:
       let opts = @[
         "ARCH=x86_64",

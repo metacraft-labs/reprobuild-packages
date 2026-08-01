@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``boost`` recipe.
+## Smoke test for the from-source ``boostSource`` recipe.
 ##
 ## Pins the M9.H/I + M3 registry behaviour on the FIRST C++ multi-module
 ## custom-build library to land in the from-source corpus. boost's
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + five library artifacts + three shell actions under
-# ``boost`` at module init time.
+# ``boostSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -43,18 +43,18 @@ const ExpectedUrl =
 const ExpectedHash =
   "1bed88e40401b2cb7a1f76d4bab499e352fa4d0c5f31c0dbae64e24d34d7513b"
 
-suite "boost — from-source recipe smoke test":
+suite "boostSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("boost")
-    check spec.packageName == "boost"
+    let spec = registeredFetchSpec("boostSource")
+    check spec.packageName == "boostSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream archives.boost.io tarball; computed
     # locally + asserted exactly.
-    let spec = registeredFetchSpec("boost")
+    let spec = registeredFetchSpec("boostSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -63,7 +63,7 @@ suite "boost — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream archives.boost.io
     # release tarballs use.
-    let spec = registeredFetchSpec("boost")
+    let spec = registeredFetchSpec("boostSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -73,7 +73,7 @@ suite "boost — from-source recipe smoke test":
     # tagged ``dakLibrary``. The shared install-tree on the anchor
     # artifact's build body fans out across all five via the
     # convention's stage-copy step.
-    let arts = registeredArtifacts("boost")
+    let arts = registeredArtifacts("boostSource")
     check arts.len == 5
     var seenSystem = false
     var seenFilesystem = false
@@ -81,7 +81,7 @@ suite "boost — from-source recipe smoke test":
     var seenDateTime = false
     var seenProgramOptions = false
     for art in arts:
-      check art.packageName == "boost"
+      check art.packageName == "boostSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libBoostSystem": seenSystem = true
@@ -100,7 +100,7 @@ suite "boost — from-source recipe smoke test":
     # M2 versions registry: the upstream archives.boost.io release tag
     # is recorded for ``repro update-source``. The repository points at
     # the canonical github.com/boostorg/boost tree.
-    let vs = registeredVersions("boost")
+    let vs = registeredVersions("boostSource")
     check vs.len == 1
     check vs[0].version == "1.86.0"
     check vs[0].sourceRevision == "boost-1.86.0"
@@ -113,10 +113,10 @@ suite "boost — from-source recipe smoke test":
     # M9.N Batch C.1 — the anchor artifact's ``build:`` block records
     # three shell actions: bootstrap + b2 install + stage-copy. The
     # from-source-custom convention consumes the sequence verbatim.
-    let rows = registeredShellActions("boost")
+    let rows = registeredShellActions("boostSource")
     check rows.len == 3
     for r in rows:
-      check r.packageName == "boost"
+      check r.packageName == "boostSource"
       check r.artifactName == "libBoostSystem"
     check rows[0].command ==
       "./bootstrap.sh --prefix=$out --with-libraries=system,filesystem,thread,date_time,program_options"
@@ -129,8 +129,8 @@ suite "boost — from-source recipe smoke test":
     # M9.N Batch C.1 — auto-generated ids follow the
     # ``<package>-<artifact>-<seq>`` shape; sequence increments per
     # artifact.
-    let rows = registeredShellActions("boost")
+    let rows = registeredShellActions("boostSource")
     check rows.len == 3
-    check rows[0].id == "boost-libBoostSystem-1"
-    check rows[1].id == "boost-libBoostSystem-2"
-    check rows[2].id == "boost-libBoostSystem-3"
+    check rows[0].id == "boostSource-libBoostSystem-1"
+    check rows[1].id == "boostSource-libBoostSystem-2"
+    check rows[2].id == "boostSource-libBoostSystem-3"

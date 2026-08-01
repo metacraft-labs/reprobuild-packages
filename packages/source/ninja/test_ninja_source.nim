@@ -1,18 +1,18 @@
-## Smoke test for the from-source ``ninja`` recipe.
+## Smoke test for the from-source ``ninjaSource`` recipe.
 ##
 ## Pins the M9.H/I + M3 registry behaviour on the M9.N Batch C
 ## build-tool slice. ninja's unique coverage angles vs the prior 75
-## from-source recipes (including the sibling ``meson`` landing
+## from-source recipes (including the sibling ``mesonSource`` landing
 ## in this same batch):
 ##
 ##   * SECOND source recipe in the corpus to declare a
 ##     Python-bootstrapped toolchain (``uses: "python3 >=3.8"`` +
-##     ``uses: "gcc >=11"``) — pairs with the sibling ``meson``
+##     ``uses: "gcc >=11"``) — pairs with the sibling ``mesonSource``
 ##     recipe but ALSO declares the C++ toolchain because ninja's
 ##     bootstrap step compiles C++ sources (whereas meson is pure
 ##     Python).
 ##   * Zero flag blocks AND ``executable`` artifact (same shape as
-##     ``meson``) — pins the four-channel cross-isolation
+##     ``mesonSource``) — pins the four-channel cross-isolation
 ##     empty-state on a SECOND load-bearing executable-shaped recipe.
 ##   * Registration-only — no ``from-source-*`` convention claims this
 ##     recipe today (see ``repro.nim``'s "Honest deferral" section).
@@ -36,7 +36,7 @@ import std/[strutils, unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + one executable artifact under ``ninja`` at module
+# fetch spec + one executable artifact under ``ninjaSource`` at module
 # init time. No build-flag block on any channel — ninja's upstream
 # bootstrap takes no build-system flags by default in the v1 scope.
 import ./repro
@@ -47,19 +47,19 @@ const ExpectedUrl =
 const ExpectedHash =
   "821bdff48a3f683bc4bb3b6f0b5fe7b2d647cf65d52aeb63328c91a6c6df285a"
 
-suite "ninja — from-source recipe smoke test":
+suite "ninjaSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("ninja")
-    check spec.packageName == "ninja"
+    let spec = registeredFetchSpec("ninjaSource")
+    check spec.packageName == "ninjaSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the upstream 240,483-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("ninja")
+    let spec = registeredFetchSpec("ninjaSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -68,7 +68,7 @@ suite "ninja — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub archive
     # tarballs use.
-    let spec = registeredFetchSpec("ninja")
+    let spec = registeredFetchSpec("ninjaSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,9 +85,9 @@ suite "ninja — from-source recipe smoke test":
     # ninja exposes a single load-bearing CLI binary (the build-
     # driver consumed by meson / cmake compile actions); auxiliary
     # shell-completion files under ``misc/`` are NOT registered in v1.
-    let arts = registeredArtifacts("ninja")
+    let arts = registeredArtifacts("ninjaSource")
     check arts.len == 1
-    check arts[0].packageName == "ninja"
+    check arts[0].packageName == "ninjaSource"
     check arts[0].artifactName == "ninja"
     check arts[0].kind == dakExecutable
 
@@ -95,7 +95,7 @@ suite "ninja — from-source recipe smoke test":
     # M2 versions registry: the upstream GitHub tag is recorded for
     # ``repro update-source``. The repository points at the canonical
     # github.com project that hosts the ninja source tree.
-    let vs = registeredVersions("ninja")
+    let vs = registeredVersions("ninjaSource")
     check vs.len == 1
     check vs[0].version == "1.12.1"
     check vs[0].sourceRevision == "v1.12.1"
@@ -110,10 +110,10 @@ suite "ninja — from-source recipe smoke test":
     # ``install -Dm755 ninja $out/bin/ninja``. The from-source-custom
     # convention consumes the sequence verbatim; ``$out`` is resolved
     # to the per-package output dir at emit time.
-    let rows = registeredShellActions("ninja")
+    let rows = registeredShellActions("ninjaSource")
     check rows.len == 2
     for r in rows:
-      check r.packageName == "ninja"
+      check r.packageName == "ninjaSource"
       check r.artifactName == "ninja"
     check rows[0].command == "python3 configure.py --bootstrap"
     check rows[1].command.contains("install -Dm755 ninja $out/bin/ninja")
@@ -122,7 +122,7 @@ suite "ninja — from-source recipe smoke test":
     # M9.N Batch C.1 — auto-generated ids follow the
     # ``<package>-<artifact>-<seq>`` shape; sequence increments per
     # artifact.
-    let rows = registeredShellActions("ninja")
+    let rows = registeredShellActions("ninjaSource")
     check rows.len == 2
-    check rows[0].id == "ninja-ninja-1"
-    check rows[1].id == "ninja-ninja-2"
+    check rows[0].id == "ninjaSource-ninja-1"
+    check rows[1].id == "ninjaSource-ninja-2"

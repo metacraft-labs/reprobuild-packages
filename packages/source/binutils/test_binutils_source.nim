@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``binutils`` recipe.
+## Smoke test for the from-source ``binutilsSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the M9.N Batch E compiler-
 ## chain slice. binutils's unique coverage angles vs the prior 82
@@ -37,7 +37,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + eleven executable artifacts under
-# ``binutils`` at module init time.
+# ``binutilsSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -56,18 +56,18 @@ const ExpectedConfigureFlags = @[
   "--disable-werror",
 ]
 
-suite "binutils — from-source recipe smoke test":
+suite "binutilsSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("binutils")
-    check spec.packageName == "binutils"
+    let spec = registeredFetchSpec("binutilsSource")
+    check spec.packageName == "binutilsSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream ftp.gnu.org tarball; computed
     # locally + asserted exactly.
-    let spec = registeredFetchSpec("binutils")
+    let spec = registeredFetchSpec("binutilsSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -75,7 +75,7 @@ suite "binutils — from-source recipe smoke test":
   test "fetch spec is the tarball variant with extractStrip = 1":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention.
-    let spec = registeredFetchSpec("binutils")
+    let spec = registeredFetchSpec("binutilsSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -93,7 +93,7 @@ suite "binutils — from-source recipe smoke test":
     # ``dakExecutable``. A regression that flattened the kind
     # discriminator at the eleven-artifact cardinality would surface
     # here.
-    let arts = registeredArtifacts("binutils")
+    let arts = registeredArtifacts("binutilsSource")
     check arts.len == 11
     var seenLd = false
     var seenAs = false
@@ -107,7 +107,7 @@ suite "binutils — from-source recipe smoke test":
     var seenSize = false
     var seenStrings = false
     for art in arts:
-      check art.packageName == "binutils"
+      check art.packageName == "binutilsSource"
       check art.kind == dakExecutable
       case art.artifactName
       of "ld":
@@ -150,7 +150,7 @@ suite "binutils — from-source recipe smoke test":
     # M2 versions registry: the upstream ftp.gnu.org release tag is
     # recorded for ``repro update-source``. The repository points at
     # the canonical sourceware.org git tree.
-    let vs = registeredVersions("binutils")
+    let vs = registeredVersions("binutilsSource")
     check vs.len == 1
     check vs[0].version == "2.43"
     check vs[0].sourceRevision == "binutils-2_43"

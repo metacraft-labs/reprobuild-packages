@@ -1,8 +1,8 @@
-## Smoke test for the from-source ``wlroots`` recipe.
+## Smoke test for the from-source ``wlrootsSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FOURTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland``). wlroots' specific coverage
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource``). wlroots' specific coverage
 ## angle vs the prior three is a SINGLE library artifact off a meson
 ## build whose dependency surface is wider than libdrm's (it pulls
 ## libdrm, Wayland, libxkbcommon, pixman, libinput together) — the M2
@@ -17,7 +17,7 @@
 ##     sequence equality on the production flag set + channel-isolation
 ##     spot-check (the ``cmake`` channel must NOT see the meson flags).
 ##   * SINGLE library artifact registration (M3) — ``libwlroots``
-##     attributed to ``wlroots`` with kind ``dakLibrary``.
+##     attributed to ``wlrootsSource`` with kind ``dakLibrary``.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
@@ -26,7 +26,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + meson options + library artifact under ``wlroots``
+# fetch spec + meson options + library artifact under ``wlrootsSource``
 # at module init time.
 import ./repro
 
@@ -44,19 +44,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "wlroots — from-source recipe smoke test":
+suite "wlrootsSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("wlroots")
-    check spec.packageName == "wlroots"
+    let spec = registeredFetchSpec("wlrootsSource")
+    check spec.packageName == "wlrootsSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 671,529-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("wlroots")
+    let spec = registeredFetchSpec("wlrootsSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -65,7 +65,7 @@ suite "wlroots — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream uses for
     # freedesktop.org gitlab release dist tarballs.
-    let spec = registeredFetchSpec("wlroots")
+    let spec = registeredFetchSpec("wlrootsSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -80,9 +80,9 @@ suite "wlroots — from-source recipe smoke test":
     # Wayland's client/server/cursor split); a regression that
     # mis-tagged the artifact kind would mis-route the M9.L install
     # path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("wlroots")
+    let arts = registeredArtifacts("wlrootsSource")
     check arts.len == 1
-    check arts[0].packageName == "wlroots"
+    check arts[0].packageName == "wlrootsSource"
     check arts[0].artifactName == "libwlroots"
     check arts[0].kind == dakLibrary
 
@@ -92,7 +92,7 @@ suite "wlroots — from-source recipe smoke test":
     # the live fetch points at the vendored copy. The repository
     # points at the canonical gitlab project that hosts the wlroots
     # source tree.
-    let vs = registeredVersions("wlroots")
+    let vs = registeredVersions("wlrootsSource")
     check vs.len == 1
     check vs[0].version == "0.19.3"
     check vs[0].sourceRevision == "0.19.3"

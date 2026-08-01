@@ -47,7 +47,7 @@
 ##     brief's vocabulary) so this recipe can drop to a custom shell
 ##     sequence (``tar -xf …; python3 configure.py --bootstrap;
 ##     install -Dm755 ninja $output/bin/ninja``). The DSL today does
-##     NOT expose such a surface — see ``meson`` recipe's
+##     NOT expose such a surface — see ``mesonSource`` recipe's
 ##     parallel deferral.
 ##
 ## v1 of THIS recipe therefore registers fetch + versions + executable
@@ -126,7 +126,7 @@ import repro_dsl_stdlib/packages/system_tools
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package ninja:
+package ninjaSource:
   ## From-source ninja — M9.N Batch C build-tool slice.
   ##
   ## REGISTRATION-ONLY recipe: see the module doc-comment's "Honest
@@ -181,7 +181,7 @@ package ninja:
     ## shell actions registered) and emits one ``BuildActionDef`` per
     ## shell line. ``$extracted`` resolves to ``<projectRoot>/src/``;
     ## ``$out`` resolves to
-    ## ``<projectRoot>/.repro/build/from-source-custom/ninja/``.
+    ## ``<projectRoot>/.repro/build/from-source-custom/ninjaSource/``.
     build:
       # Bootstrap ninja's C++ sources into the self-hosting binary at
       # the source root. ``cd $extracted`` is added by the convention's

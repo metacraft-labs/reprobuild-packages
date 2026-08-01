@@ -81,7 +81,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package graphene:
+package grapheneSource:
   ## From-source graphene — GNOME-stack foundation for gtk4 + mutter.
 
   versions:
@@ -128,7 +128,7 @@ package graphene:
     discard
 
   build:
-    setCurrentOwningPackageOverride("graphene")
+    setCurrentOwningPackageOverride("grapheneSource")
     try:
       let opts = @[
         "introspection=enabled",

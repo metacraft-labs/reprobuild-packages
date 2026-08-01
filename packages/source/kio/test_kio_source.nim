@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kio`` recipe.
+## Smoke test for the from-source ``kioSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-SEVENTH real
 ## production from-source recipe and the THIRD recipe in the THIRD
@@ -26,7 +26,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + cmake flags + library artifact under ``kio``
+# fetch spec + cmake flags + library artifact under ``kioSource``
 # at module init time.
 import ./repro
 
@@ -43,19 +43,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "kio — from-source recipe smoke test":
+suite "kioSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("kio")
-    check spec.packageName == "kio"
+    let spec = registeredFetchSpec("kioSource")
+    check spec.packageName == "kioSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 3,423,932-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("kio")
+    let spec = registeredFetchSpec("kioSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -64,7 +64,7 @@ suite "kio — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("kio")
+    let spec = registeredFetchSpec("kioSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -81,14 +81,14 @@ suite "kio — from-source recipe smoke test":
     # pins the per-library kind + identifier-casing (``Kio`` not
     # ``KIO`` — that mis-casing would also mis-route any consumer
     # recipe that depends on an artifact by identifier).
-    let arts = registeredArtifacts("kio")
+    let arts = registeredArtifacts("kioSource")
     check arts.len == 4
     var seenCore = false
     var seenGui = false
     var seenWidgets = false
     var seenFileWidgets = false
     for art in arts:
-      check art.packageName == "kio"
+      check art.packageName == "kioSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libKF6KIOCore": seenCore = true
@@ -103,7 +103,7 @@ suite "kio — from-source recipe smoke test":
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry.
-    let vs = registeredVersions("kio")
+    let vs = registeredVersions("kioSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

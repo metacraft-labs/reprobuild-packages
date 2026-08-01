@@ -8,7 +8,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kunitconversion:
+package kunitconversionSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -38,7 +38,7 @@ package kunitconversion:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kunitconversion")
+    setCurrentOwningPackageOverride("kunitconversionSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

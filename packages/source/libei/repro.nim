@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libei:
+package libeiSource:
   versions:
     "1.4.1":
       sourceRevision = "1.4.1"
@@ -25,7 +25,7 @@ package libei:
   library libeis:
     discard
   build:
-    setCurrentOwningPackageOverride("libei")
+    setCurrentOwningPackageOverride("libeiSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "documentation=[]",

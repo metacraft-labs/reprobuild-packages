@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``bash`` recipe.
+## Smoke test for the from-source ``bashSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-NINTH real
 ## production from-source recipe. bash's unique coverage angle vs the
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable artifact under
-# ``bash`` at module init time.
+# ``bashSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,19 +44,19 @@ const ExpectedConfigureFlags = @[
   "--enable-job-control",
 ]
 
-suite "bash — from-source recipe smoke test":
+suite "bashSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("bash")
-    check spec.packageName == "bash"
+    let spec = registeredFetchSpec("bashSource")
+    check spec.packageName == "bashSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 11,128,314-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("bash")
+    let spec = registeredFetchSpec("bashSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -65,7 +65,7 @@ suite "bash — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("bash")
+    let spec = registeredFetchSpec("bashSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -89,12 +89,12 @@ suite "bash — from-source recipe smoke test":
     # the M9.L install path; a regression that collapsed the
     # artifact-name partitioning would not produce two distinctly
     # named entries in declaration order.
-    let arts = registeredArtifacts("bash")
+    let arts = registeredArtifacts("bashSource")
     check arts.len == 2
-    check arts[0].packageName == "bash"
+    check arts[0].packageName == "bashSource"
     check arts[0].artifactName == "bash"
     check arts[0].kind == dakExecutable
-    check arts[1].packageName == "bash"
+    check arts[1].packageName == "bashSource"
     check arts[1].artifactName == "sh"
     check arts[1].kind == dakExecutable
 
@@ -104,7 +104,7 @@ suite "bash — from-source recipe smoke test":
     # points at the vendored copy. The repository points at the
     # canonical savannah.gnu.org mirror that hosts the bash source
     # tree.
-    let vs = registeredVersions("bash")
+    let vs = registeredVersions("bashSource")
     check vs.len == 1
     check vs[0].version == "5.2.37"
     check vs[0].sourceRevision == "bash-5.2.37"

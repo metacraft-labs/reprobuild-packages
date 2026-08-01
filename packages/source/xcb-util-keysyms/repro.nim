@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xcbUtilKeysyms:
+package xcbUtilKeysymsSource:
   versions:
     "0.4.1":
       sourceRevision = "xcb-util-keysyms-0.4.1"
@@ -26,7 +26,7 @@ package xcbUtilKeysyms:
   library libxcbKeysyms:
     discard
   build:
-    setCurrentOwningPackageOverride("xcbUtilKeysyms")
+    setCurrentOwningPackageOverride("xcbUtilKeysymsSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

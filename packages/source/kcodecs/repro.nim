@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kcodecs:
+package kcodecsSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -44,7 +44,7 @@ package kcodecs:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kcodecs")
+    setCurrentOwningPackageOverride("kcodecsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

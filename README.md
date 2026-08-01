@@ -10,9 +10,16 @@ repro build packages/source/bash
 repro build packages/source/curl
 ```
 
-The package declaration owns the public interface. Alternative realization
-catalogs can contribute Nix, Scoop, or tarball provisioning only when they
-target that interface fingerprint; they do not redefine the package.
+The directory selector is the public package name. Source recipes use a
+private `<name>Source` package identity so they can coexist with the module
+that owns the public interface. The from-source resolver maps the public
+selector to the recipe directory and its exported artifacts.
+
+Public interface modules live under `packages/interfaces`. Alternative
+realization catalogs can contribute Nix, Scoop, or tarball provisioning only
+when they target the public interface fingerprint; they do not redefine the
+package. Interfaces already owned by reprobuild's standard library are
+imported from there instead of being duplicated here.
 
 Set `REPROBUILD_SRC` when the sibling `reprobuild` checkout is not available at
 `../reprobuild`.

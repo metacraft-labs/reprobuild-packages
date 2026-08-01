@@ -1,13 +1,13 @@
-## Smoke test for the from-source ``gdkPixbuf`` recipe.
+## Smoke test for the from-source ``gdkPixbufSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWELFTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots`` /
-## ``sway`` / ``linuxKernel`` / ``libxkbcommon`` /
-## ``pixman`` / ``libinput`` / ``cairo`` /
-## ``pango``). gdk-pixbuf's unique coverage angle vs the prior
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
+## ``swaySource`` / ``linuxKernelSource`` / ``libxkbcommonSource`` /
+## ``pixmanSource`` / ``libinputSource`` / ``cairoSource`` /
+## ``pangoSource``). gdk-pixbuf's unique coverage angle vs the prior
 ## eleven is the kebab-to-camel package identifier mapping shape
-## (``gdk-pixbuf`` -> ``gdkPixbuf``) — the directory carries a
+## (``gdk-pixbuf`` -> ``gdkPixbufSource``) — the directory carries a
 ## hyphen but the Nim DSL identifier MUST camelCase it; a regression
 ## that mis-cased or hyphenated the package identifier would surface
 ## in the registry-lookup tests below.
@@ -30,7 +30,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library artifact under
-# ``gdkPixbuf`` at module init time.
+# ``gdkPixbufSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -47,19 +47,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "gdkPixbuf — from-source recipe smoke test":
+suite "gdkPixbufSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("gdkPixbuf")
-    check spec.packageName == "gdkPixbuf"
+    let spec = registeredFetchSpec("gdkPixbufSource")
+    check spec.packageName == "gdkPixbufSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 6,525,072-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("gdkPixbuf")
+    let spec = registeredFetchSpec("gdkPixbufSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -68,7 +68,7 @@ suite "gdkPixbuf — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnome.org release
     # tarballs use.
-    let spec = registeredFetchSpec("gdkPixbuf")
+    let spec = registeredFetchSpec("gdkPixbufSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,9 +85,9 @@ suite "gdkPixbuf — from-source recipe smoke test":
     # ``gdk-pixbuf-loaders.cache`` and are NOT separate link-time
     # artifacts. A regression that mis-tagged the artifact kind would
     # mis-route the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("gdkPixbuf")
+    let arts = registeredArtifacts("gdkPixbufSource")
     check arts.len == 1
-    check arts[0].packageName == "gdkPixbuf"
+    check arts[0].packageName == "gdkPixbufSource"
     check arts[0].artifactName == "libgdkPixbuf"
     check arts[0].kind == dakLibrary
 
@@ -97,7 +97,7 @@ suite "gdkPixbuf — from-source recipe smoke test":
     # live fetch points at the vendored copy. The repository points
     # at the canonical GNOME gitlab project that hosts the
     # gdk-pixbuf source tree.
-    let vs = registeredVersions("gdkPixbuf")
+    let vs = registeredVersions("gdkPixbufSource")
     check vs.len == 1
     check vs[0].version == "2.42.12"
     check vs[0].sourceRevision == "2.42.12"

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kdeclarative`` recipe (M9.R.15h.13).
+## Smoke test for the from-source ``kdeclarativeSource`` recipe (M9.R.15h.13).
 
 import std/[unittest]
 
@@ -12,18 +12,18 @@ const ExpectedUrl =
 const ExpectedHash =
   "db9eb2b5e615b484949e41ac5a05c5cea136e231d15a3de203902cedcdfd9e73"
 
-suite "kdeclarative — from-source recipe smoke test":
+suite "kdeclarativeSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("kdeclarative")
+    let spec = registeredFetchSpec("kdeclarativeSource")
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("kdeclarative")
+    let spec = registeredFetchSpec("kdeclarativeSource")
     check spec.hashHex == ExpectedHash
 
   test "artifacts register libKF6Declarative":
-    let arts = registeredArtifacts("kdeclarative")
+    let arts = registeredArtifacts("kdeclarativeSource")
     check arts.len == 1
     check arts[0].artifactName == "libKF6CalendarEvents"
     check arts[0].kind == dakLibrary

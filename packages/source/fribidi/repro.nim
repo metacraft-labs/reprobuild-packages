@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package fribidi:
+package fribidiSource:
   versions:
     "1.0.16":
       sourceRevision = "v1.0.16"
@@ -27,7 +27,7 @@ package fribidi:
     discard
 
   build:
-    setCurrentOwningPackageOverride("fribidi")
+    setCurrentOwningPackageOverride("fribidiSource")
     try:
       let pkg = meson_package(
         srcDir = "./src",

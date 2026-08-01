@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libacl:
+package libaclSource:
   versions:
     "2.3.2":
       sourceRevision = "v2.3.2"
@@ -26,7 +26,7 @@ package libacl:
   library libacl:
     discard
   build:
-    setCurrentOwningPackageOverride("libacl")
+    setCurrentOwningPackageOverride("libaclSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

@@ -3,7 +3,7 @@
 ## low-level cryptography library at the bottom of the GnuTLS stack and
 ## the primary crypto-primitives library for the GNU project's
 ## non-OpenSSL surface (GnuPG's libgcrypt is the higher-level wrapper).
-## Pairs with the sibling ``libgcrypt`` (recipe 53) + ``gnutls``
+## Pairs with the sibling ``libgcryptSource`` (recipe 53) + ``gnutlsSource``
 ## (recipe 54) to build out the GNU TLS / crypto stack independently of
 ## openssl.
 ##
@@ -111,10 +111,10 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package nettle:
+package nettleSource:
   ## From-source nettle — fifty-second M9.H/I/K production recipe.
   ## Two library artifact recipe driven by autotools — pairs with the
-  ## sibling ``libgcrypt`` (recipe 53) + ``gnutls``
+  ## sibling ``libgcryptSource`` (recipe 53) + ``gnutlsSource``
   ## (recipe 54) to build out the GNU TLS / crypto stack independently
   ## of openssl.
   ##
@@ -217,7 +217,7 @@ package nettle:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("nettle")
+    setCurrentOwningPackageOverride("nettleSource")
     try:
       let opts = @[
         "--disable-static",

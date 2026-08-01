@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``autoconf`` recipe.
+## Smoke test for the from-source ``autoconfSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the M9.N Batch D build-tool
 ## slice. autoconf's unique coverage angles vs the prior 77 from-
@@ -35,7 +35,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + seven executable artifacts under
-# ``autoconf`` at module init time.
+# ``autoconfSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -50,18 +50,18 @@ const ExpectedConfigureFlags = @[
   "--disable-static",
 ]
 
-suite "autoconf — from-source recipe smoke test":
+suite "autoconfSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("autoconf")
-    check spec.packageName == "autoconf"
+    let spec = registeredFetchSpec("autoconfSource")
+    check spec.packageName == "autoconfSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream ftp.gnu.org tarball; computed
     # locally + asserted exactly.
-    let spec = registeredFetchSpec("autoconf")
+    let spec = registeredFetchSpec("autoconfSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "autoconf — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("autoconf")
+    let spec = registeredFetchSpec("autoconfSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -88,7 +88,7 @@ suite "autoconf — from-source recipe smoke test":
     # ``dakExecutable``. A regression that flattened the kind
     # discriminator at the seven-artifact cardinality would surface
     # here.
-    let arts = registeredArtifacts("autoconf")
+    let arts = registeredArtifacts("autoconfSource")
     check arts.len == 7
     var seenAutoconf = false
     var seenAutoheader = false
@@ -98,7 +98,7 @@ suite "autoconf — from-source recipe smoke test":
     var seenAutoupdate = false
     var seenIfnames = false
     for art in arts:
-      check art.packageName == "autoconf"
+      check art.packageName == "autoconfSource"
       check art.kind == dakExecutable
       case art.artifactName
       of "autoconf":
@@ -130,7 +130,7 @@ suite "autoconf — from-source recipe smoke test":
     # recorded for ``repro update-source``. The repository points at
     # the canonical savannah.gnu.org mirror that hosts the autoconf
     # source tree.
-    let vs = registeredVersions("autoconf")
+    let vs = registeredVersions("autoconfSource")
     check vs.len == 1
     check vs[0].version == "2.72"
     check vs[0].sourceRevision == "v2.72"

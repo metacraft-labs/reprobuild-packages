@@ -1,7 +1,7 @@
 ## Source-from-tarball dbus recipe — the FORTIETH real from-source
 ## production recipe to exercise the M9.H/I/K trio. dbus is the
 ## **reference freedesktop D-Bus daemon** — distinct from the sibling
-## ``dbusBroker`` recipe (``recipes/packages/source/dbus-broker/``)
+## ``dbusBrokerSource`` recipe (``recipes/packages/source/dbus-broker/``)
 ## which packages the alternative bus1 broker implementation. Both
 ## ship an activation helper (``dbus-launch`` / ``dbus-broker-launch``)
 ## and both speak the same wire protocol on the system bus + the
@@ -130,11 +130,11 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package dbus:
+package dbusSource:
   ## From-source reference D-Bus daemon — fortieth M9.H/I/K production
   ## recipe. Upstream retired autotools before the 1.16 cut so this
   ## recipe drives the meson ``mesonOptions:`` channel (the sibling
-  ## ``dbusBroker`` covers the alternative bus1 broker
+  ## ``dbusBrokerSource`` covers the alternative bus1 broker
   ## implementation also via meson + ninja). Ships ONE executable
   ## (``dbusDaemon``) + ONE library (``libDbus1``) from a single
   ## ``meson setup`` + ``ninja`` invocation.
@@ -199,7 +199,7 @@ package dbus:
   buildDeps:
     ## expat is the SAX XML parser dbus uses for the introspection
     ## XML layer + the bus-config file parser. Sibling from-source
-    ## ``expat`` recipe pins ``>=2.6``.
+    ## ``expatSource`` recipe pins ``>=2.6``.
     "expat >=2.6"
     "systemd >=240"
 
@@ -232,7 +232,7 @@ package dbus:
     ## historical autotools shape produced ``../src/configure: No such
     ## file or directory`` on apply. Option names mapped 1:1 from
     ## ``recipes/packages/source/dbus/src/meson_options.txt``.
-    setCurrentOwningPackageOverride("dbus")
+    setCurrentOwningPackageOverride("dbusSource")
     try:
       let opts = @[
         "modular_tests=disabled",

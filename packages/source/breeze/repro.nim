@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package breeze:
+package breezeSource:
   versions:
     "6.2.5":
       sourceRevision = "v6.2.5"
@@ -78,7 +78,7 @@ package breeze:
   ## library artifact (cmake_package's library stage-copy probes
   ## $libdir for the literal SONAME — there isn't one).
   build:
-    setCurrentOwningPackageOverride("breeze")
+    setCurrentOwningPackageOverride("breezeSource")
     try:
       # v1 ships pure Qt6 — disable the Qt5 build branch so the
       # find_package(Qt5 5.15.2 REQUIRED ...) probe doesn't run

@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libusb:
+package libusbSource:
   versions:
     "1.0.28":
       sourceRevision = "v1.0.28"
@@ -26,7 +26,7 @@ package libusb:
   library libusb:
     discard
   build:
-    setCurrentOwningPackageOverride("libusb")
+    setCurrentOwningPackageOverride("libusbSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared", "--enable-udev",

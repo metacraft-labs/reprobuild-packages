@@ -62,7 +62,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package knotifications:
+package knotificationsSource:
   ## From-source knotifications — forty-fifth M9.H/I/K production
   ## recipe and the THIRD recipe in the SECOND KF6 module-sweep batch.
   ## Thirteenth CMake-driven recipe and the EIGHTH KF6 foundation
@@ -148,7 +148,7 @@ package knotifications:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("knotifications")
+    setCurrentOwningPackageOverride("knotificationsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

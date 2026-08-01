@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package p11Kit:
+package p11KitSource:
   versions:
     "0.25.5":
       sourceRevision = "0.25.5"
@@ -22,7 +22,7 @@ package p11Kit:
   library libP11Kit:
     discard
   build:
-    setCurrentOwningPackageOverride("p11Kit")
+    setCurrentOwningPackageOverride("p11KitSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "hash_impl=internal",

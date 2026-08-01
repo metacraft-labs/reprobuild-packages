@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package busybox:
+package busyboxSource:
   versions:
     "1.36.1":
       sourceRevision = "1_36_1"
@@ -28,7 +28,7 @@ package busybox:
     discard
 
   build:
-    setCurrentOwningPackageOverride("busybox")
+    setCurrentOwningPackageOverride("busyboxSource")
     try:
       let opts = @[
         "CC=musl-gcc",

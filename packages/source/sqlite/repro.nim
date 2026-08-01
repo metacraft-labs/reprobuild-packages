@@ -102,7 +102,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package sqlite:
+package sqliteSource:
   ## From-source sqlite — forty-first M9.H/I/K production recipe.
   ## SQLite ships its hand-rolled ``./configure`` script via the
   ## ``sqlite-autoconf-*.tar.gz`` amalgamation release; the convention
@@ -191,7 +191,7 @@ package sqlite:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("sqlite")
+    setCurrentOwningPackageOverride("sqliteSource")
     try:
       let opts = @[
         "--disable-static",

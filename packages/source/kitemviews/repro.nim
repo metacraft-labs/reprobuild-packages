@@ -12,7 +12,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kitemviews:
+package kitemviewsSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -41,7 +41,7 @@ package kitemviews:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kitemviews")
+    setCurrentOwningPackageOverride("kitemviewsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

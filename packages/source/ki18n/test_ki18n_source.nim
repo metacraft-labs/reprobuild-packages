@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``ki18n`` recipe.
+## Smoke test for the from-source ``ki18nSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-SEVENTH real
 ## production from-source recipe and the SECOND recipe in the KF6
@@ -24,7 +24,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + cmake flags + library artifact under ``ki18n``
+# fetch spec + cmake flags + library artifact under ``ki18nSource``
 # at module init time.
 import ./repro
 
@@ -41,19 +41,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "ki18n — from-source recipe smoke test":
+suite "ki18nSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("ki18n")
-    check spec.packageName == "ki18n"
+    let spec = registeredFetchSpec("ki18nSource")
+    check spec.packageName == "ki18nSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 3,112,804-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("ki18n")
+    let spec = registeredFetchSpec("ki18nSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -62,7 +62,7 @@ suite "ki18n — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("ki18n")
+    let spec = registeredFetchSpec("ki18nSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -76,9 +76,9 @@ suite "ki18n — from-source recipe smoke test":
     # M3 artifact registry: ``libKF6I18n`` is the only artifact and
     # must be tagged ``dakLibrary``. ki18n's CMake build emits one
     # shared object wrapping the gettext-bridge surface for KF6.
-    let arts = registeredArtifacts("ki18n")
+    let arts = registeredArtifacts("ki18nSource")
     check arts.len == 1
-    check arts[0].packageName == "ki18n"
+    check arts[0].packageName == "ki18nSource"
     check arts[0].artifactName == "libKF6I18n"
     check arts[0].kind == dakLibrary
 
@@ -88,7 +88,7 @@ suite "ki18n — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # canonical KDE invent.kde.org project that hosts the ki18n source
     # tree.
-    let vs = registeredVersions("ki18n")
+    let vs = registeredVersions("ki18nSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kxmlgui`` recipe.
+## Smoke test for the from-source ``kxmlguiSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-NINTH real
 ## production from-source recipe and the CLOSING recipe in the KF6
@@ -25,7 +25,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + cmake flags + library artifact under ``kxmlgui``
+# fetch spec + cmake flags + library artifact under ``kxmlguiSource``
 # at module init time.
 import ./repro
 
@@ -42,19 +42,19 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "kxmlgui — from-source recipe smoke test":
+suite "kxmlguiSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("kxmlgui")
-    check spec.packageName == "kxmlgui"
+    let spec = registeredFetchSpec("kxmlguiSource")
+    check spec.packageName == "kxmlguiSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,915,712-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("kxmlgui")
+    let spec = registeredFetchSpec("kxmlguiSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -63,7 +63,7 @@ suite "kxmlgui — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("kxmlgui")
+    let spec = registeredFetchSpec("kxmlguiSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -78,15 +78,15 @@ suite "kxmlgui — from-source recipe smoke test":
     # must be tagged ``dakLibrary``. A regression that mis-cased the
     # PascalCase brand on the library name (``libKF6XmlGui`` vs
     # ``libKF6XMLGui``) would not match the assertion below.
-    let arts = registeredArtifacts("kxmlgui")
+    let arts = registeredArtifacts("kxmlguiSource")
     check arts.len == 1
-    check arts[0].packageName == "kxmlgui"
+    check arts[0].packageName == "kxmlguiSource"
     check arts[0].artifactName == "libKF6XmlGui"
     check arts[0].kind == dakLibrary
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry.
-    let vs = registeredVersions("kxmlgui")
+    let vs = registeredVersions("kxmlguiSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

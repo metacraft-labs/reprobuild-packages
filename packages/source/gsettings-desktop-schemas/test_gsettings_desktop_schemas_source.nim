@@ -2,12 +2,12 @@ import std/[strutils, unittest]
 import repro_project_dsl
 import ./repro
 
-suite "gsettingsDesktopSchemas source recipe":
+suite "gsettingsDesktopSchemasSource source recipe":
   test "registers the GNOME 47 source":
-    let spec = registeredFetchSpec("gsettingsDesktopSchemas")
+    let spec = registeredFetchSpec("gsettingsDesktopSchemasSource")
     check spec.hashHex.len == 64
     check spec.url.endsWith("gsettings-desktop-schemas-47.1.tar.xz")
 
   test "declares GLib as a build and runtime dependency":
-    check "glib2 >=2.70" in registeredBuildDeps("gsettingsDesktopSchemas")
-    check "glib2 >=2.70" in registeredRuntimeDeps("gsettingsDesktopSchemas")
+    check "glib2 >=2.70" in registeredBuildDeps("gsettingsDesktopSchemasSource")
+    check "glib2 >=2.70" in registeredRuntimeDeps("gsettingsDesktopSchemasSource")

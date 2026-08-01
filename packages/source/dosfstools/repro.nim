@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package dosfstools:
+package dosfstoolsSource:
   versions:
     "4.2":
       sourceRevision = "v4.2"
@@ -47,7 +47,7 @@ package dosfstools:
     discard
 
   build:
-    setCurrentOwningPackageOverride("dosfstools")
+    setCurrentOwningPackageOverride("dosfstoolsSource")
     try:
       let opts = @[
         "--enable-compat-symlinks",

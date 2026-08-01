@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package nss:
+package nssSource:
   versions:
     "3.107":
       sourceRevision = "NSS_3_107_RTM"

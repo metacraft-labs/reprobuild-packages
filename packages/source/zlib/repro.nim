@@ -117,7 +117,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package zlib:
+package zlibSource:
   ## From-source zlib — twenty-ninth M9.H/I/K production recipe and the
   ## FIRST recipe in the corpus to drive a CUSTOM (non-autotools, non-
   ## meson, non-cmake) ``./configure`` script through the abstract
@@ -189,7 +189,7 @@ package zlib:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("zlib")
+    setCurrentOwningPackageOverride("zlibSource")
     try:
       let opts = @[
         "--shared",

@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gcr:
+package gcrSource:
   versions:
     "4.3.0":
       sourceRevision = "4.3.0"
@@ -31,7 +31,7 @@ package gcr:
   library libGck2:
     discard
   build:
-    setCurrentOwningPackageOverride("gcr")
+    setCurrentOwningPackageOverride("gcrSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "introspection=true",

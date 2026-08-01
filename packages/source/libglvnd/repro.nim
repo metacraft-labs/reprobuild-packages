@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libglvnd:
+package libglvndSource:
   versions:
     "1.7.0":
       sourceRevision = "v1.7.0"
@@ -45,7 +45,7 @@ package libglvnd:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libglvnd")
+    setCurrentOwningPackageOverride("libglvndSource")
     try:
       let opts = @["--disable-static", "--enable-shared", "--enable-x11"]
       let pkg = autotools_package(

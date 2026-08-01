@@ -37,7 +37,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package ianaTzdata:
+package ianaTzdataSource:
   versions:
     "2024b":
       sourceRevision = "2024b"
@@ -60,7 +60,7 @@ package ianaTzdata:
     discard
 
   build:
-    setCurrentOwningPackageOverride("ianaTzdata")
+    setCurrentOwningPackageOverride("ianaTzdataSource")
     try:
       ## M9.R.28.4 — tz Makefile's default CC is ``c99`` (POSIX
       ## conformance comment at the top of the file) which Nix-based

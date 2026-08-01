@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kpipewire:
+package kpipewireSource:
   versions:
     "6.2.5":
       sourceRevision = "v6.2.5"
@@ -62,7 +62,7 @@ package kpipewire:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kpipewire")
+    setCurrentOwningPackageOverride("kpipewireSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

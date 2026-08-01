@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xcbUtilWm:
+package xcbUtilWmSource:
   versions:
     "0.4.2":
       sourceRevision = "xcb-util-wm-0.4.2"
@@ -28,7 +28,7 @@ package xcbUtilWm:
   library libxcbEwmh:
     discard
   build:
-    setCurrentOwningPackageOverride("xcbUtilWm")
+    setCurrentOwningPackageOverride("xcbUtilWmSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

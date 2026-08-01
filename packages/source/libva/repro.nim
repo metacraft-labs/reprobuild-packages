@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libva:
+package libvaSource:
   versions:
     "2.22.0":
       sourceRevision = "2.22.0"
@@ -26,7 +26,7 @@ package libva:
   library libvaDrm:
     discard
   build:
-    setCurrentOwningPackageOverride("libva")
+    setCurrentOwningPackageOverride("libvaSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "disable_drm=false",

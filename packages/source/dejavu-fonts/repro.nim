@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package dejavuFonts:
+package dejavuFontsSource:
   versions:
     "2.37":
       sourceRevision = "version_2_37"
@@ -30,7 +30,7 @@ package dejavuFonts:
     discard
 
   build:
-    setCurrentOwningPackageOverride("dejavuFonts")
+    setCurrentOwningPackageOverride("dejavuFontsSource")
     try:
       let patches = @[
         "sed -i 's/^all : full sans lgc$/all : full-ttf/' src/Makefile",

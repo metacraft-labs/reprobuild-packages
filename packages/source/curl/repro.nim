@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package curl:
+package curlSource:
   versions:
     "8.14.1":
       sourceRevision = "curl-8_14_1"
@@ -27,7 +27,7 @@ package curl:
   executable curl:
     discard
   build:
-    setCurrentOwningPackageOverride("curl")
+    setCurrentOwningPackageOverride("curlSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static",

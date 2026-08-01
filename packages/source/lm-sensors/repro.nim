@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package lmSensors:
+package lmSensorsSource:
   versions:
     "3.6.0":
       sourceRevision = "V3-6-0"
@@ -25,7 +25,7 @@ package lmSensors:
   executable sensors:
     discard
   build:
-    setCurrentOwningPackageOverride("lmSensors")
+    setCurrentOwningPackageOverride("lmSensorsSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "PREFIX=/usr",

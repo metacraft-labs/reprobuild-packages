@@ -1,10 +1,10 @@
-## Smoke test for the from-source ``pango`` recipe.
+## Smoke test for the from-source ``pangoSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the ELEVENTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots`` /
-## ``sway`` / ``linuxKernel`` / ``libxkbcommon`` /
-## ``pixman`` / ``libinput`` / ``cairo``). pango's
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
+## ``swaySource`` / ``linuxKernelSource`` / ``libxkbcommonSource`` /
+## ``pixmanSource`` / ``libinputSource`` / ``cairoSource``). pango's
 ## unique coverage angle vs the prior ten is a TWO-library
 ## single-package shape (``libpango-1.0.so`` + ``libpangocairo-1.0.so``)
 ## where both artifacts share the same SONAME prefix but ship distinct
@@ -33,7 +33,7 @@ import std/[strutils, unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + build actions + library artifacts under ``pango``
+# fetch spec + build actions + library artifacts under ``pangoSource``
 # at module init time.
 import ./repro
 
@@ -76,19 +76,19 @@ const ExpectedBuildDeps = @[
   "cairo >=1.18.0",
 ]
 
-suite "pango — from-source recipe smoke test":
+suite "pangoSource — from-source recipe smoke test":
 
   test "fetch spec carries the canonical upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("pango")
-    check spec.packageName == "pango"
+    let spec = registeredFetchSpec("pangoSource")
+    check spec.packageName == "pangoSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # GNOME publishes this digest beside the 1.56.4 release tarball.
     # The test pins it locally rather than consulting the network at
     # runtime; the length check also guards against a malformed bump.
-    let spec = registeredFetchSpec("pango")
+    let spec = registeredFetchSpec("pangoSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -97,7 +97,7 @@ suite "pango — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnome.org release
     # tarballs use.
-    let spec = registeredFetchSpec("pango")
+    let spec = registeredFetchSpec("pangoSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -125,7 +125,7 @@ suite "pango — from-source recipe smoke test":
 
   test "retired build-flags registry cannot shadow explicit options":
     check not compiles((proc (): seq[string] =
-      result = registeredBuildFlags("pango", "", "meson"))())
+      result = registeredBuildFlags("pangoSource", "", "meson"))())
   test "artifacts register two libraries":
     # M3 artifact registry: BOTH ``libpango`` and ``libpangocairo``
     # must be tagged ``dakLibrary``. The unique coverage of THIS
@@ -133,12 +133,12 @@ suite "pango — from-source recipe smoke test":
     # that mis-attributed the second library or flattened the artifact
     # set to one entry would mis-route the M9.L install path (one .so
     # would silently disappear from the output set).
-    let arts = registeredArtifacts("pango")
+    let arts = registeredArtifacts("pangoSource")
     check arts.len == 2
     var seenPango = false
     var seenPangoCairo = false
     for art in arts:
-      check art.packageName == "pango"
+      check art.packageName == "pangoSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libpango":
@@ -155,13 +155,13 @@ suite "pango — from-source recipe smoke test":
     # tag is recorded for ``repro update-source`` and agrees with the
     # independently pinned fetch URL. The repository points at the
     # canonical GNOME gitlab project that hosts the pango source tree.
-    let vs = registeredVersions("pango")
+    let vs = registeredVersions("pangoSource")
     check vs.len == 1
     check vs[0].version == ExpectedVersion
     check vs[0].sourceRevision == ExpectedVersion
     check vs[0].sourceUrl == ExpectedUrl
     check vs[0].sourceRepository ==
       "https://gitlab.gnome.org/GNOME/pango"
-    check registeredNativeBuildDeps("pango") ==
+    check registeredNativeBuildDeps("pangoSource") ==
       ExpectedNativeBuildDeps
-    check registeredBuildDeps("pango") == ExpectedBuildDeps
+    check registeredBuildDeps("pangoSource") == ExpectedBuildDeps

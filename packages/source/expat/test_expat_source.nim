@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``expat`` recipe.
+## Smoke test for the from-source ``expatSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FOURTEENTH real production
 ## from-source recipe and the FIRST autotools-driven recipe. Prior
@@ -28,7 +28,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``expat`` at module init time.
+# ``expatSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,19 +44,19 @@ const ExpectedConfigureFlags = @[
   "--without-tests",
 ]
 
-suite "expat — from-source recipe smoke test":
+suite "expatSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("expat")
-    check spec.packageName == "expat"
+    let spec = registeredFetchSpec("expatSource")
+    check spec.packageName == "expatSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 493,060-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("expat")
+    let spec = registeredFetchSpec("expatSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -65,7 +65,7 @@ suite "expat — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("expat")
+    let spec = registeredFetchSpec("expatSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -82,9 +82,9 @@ suite "expat — from-source recipe smoke test":
     # namespace parser + the XML decoder helpers. A regression that
     # mis-tagged the artifact kind would mis-route the M9.L install
     # path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("expat")
+    let arts = registeredArtifacts("expatSource")
     check arts.len == 1
-    check arts[0].packageName == "expat"
+    check arts[0].packageName == "expatSource"
     check arts[0].artifactName == "libExpat"
     check arts[0].kind == dakLibrary
 
@@ -94,7 +94,7 @@ suite "expat — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the libexpat source
     # tree.
-    let vs = registeredVersions("expat")
+    let vs = registeredVersions("expatSource")
     check vs.len == 1
     check vs[0].version == "2.7.0"
     check vs[0].sourceRevision == "R_2_7_0"

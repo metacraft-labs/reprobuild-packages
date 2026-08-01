@@ -8,7 +8,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package plasmaActivitiesStats:
+package plasmaActivitiesStatsSource:
   versions:
     "6.2.5":
       sourceRevision = "v6.2.5"
@@ -40,7 +40,7 @@ package plasmaActivitiesStats:
     discard
 
   build:
-    setCurrentOwningPackageOverride("plasmaActivitiesStats")
+    setCurrentOwningPackageOverride("plasmaActivitiesStatsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

@@ -20,10 +20,10 @@
 ## serif with cyrillic + arabic coverage at 12pt regular" and gets back
 ## a list of /usr/share/fonts/.../X.ttf paths; freetype then opens
 ## those files and rasterises glyphs; harfbuzz arranges them. The
-## sibling ``pango`` recipe pins ``fontconfig >=2.13`` in its
+## sibling ``pangoSource`` recipe pins ``fontconfig >=2.13`` in its
 ## ``uses:`` block, so this recipe is the upstream-source side of that
 ## dependency edge. fontconfig also consumes libexpat (sibling
-## ``expat`` recipe) for parsing its ``fonts.conf`` XML config
+## ``expatSource`` recipe) for parsing its ``fonts.conf`` XML config
 ## file, closing a dependency triangle: expat -> fontconfig -> pango.
 ##
 ## ## sha256 strategy
@@ -114,7 +114,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package fontconfig:
+package fontconfigSource:
   ## From-source fontconfig — twenty-fifth M9.H/I/K production recipe
   ## and FOURTH autotools-driven recipe (expat, gdm, freetype precedents).
   ## The font-discovery + matching layer that sits above freetype's
@@ -185,7 +185,7 @@ package fontconfig:
   buildDeps:
     ## freetype is the font-glyph loader fontconfig uses to scan TTF /
     ## OTF font properties (family name, weight, slant, charset, etc.)
-    ## when building its font cache. The sibling ``freetype``
+    ## when building its font cache. The sibling ``freetypeSource``
     ## recipe vendors 2.13.3.
     "freetype >=2.10"
     ## libxml2 is the XML parser fontconfig consumes via the
@@ -209,7 +209,7 @@ package fontconfig:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("fontconfig")
+    setCurrentOwningPackageOverride("fontconfigSource")
     try:
       let opts = @[
         "--disable-static",

@@ -141,7 +141,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package openssl:
+package opensslSource:
   ## From-source openssl — thirtieth M9.H/I/K production recipe and the
   ## SECOND recipe in the corpus to drive a CUSTOM (non-autotools,
   ## non-meson, non-cmake) ``./Configure`` script through the abstract
@@ -202,7 +202,7 @@ package openssl:
   buildDeps:
     ## zlib is consumed by openssl's TLS record compression layer
     ## (historical, now off-by-default but still built unless explicitly
-    ## disabled with ``no-comp``). The sibling ``zlib`` recipe
+    ## disabled with ``no-comp``). The sibling ``zlibSource`` recipe
     ## vendors a compatible version.
     "zlib >=1.2.11"
 
@@ -248,7 +248,7 @@ package openssl:
     ## driver builds ``../src/Configure ...`` instead of the default
     ## ``../src/configure ...`` (which doesn't exist in the openssl
     ## tarball and trips the build with ``No such file or directory``).
-    setCurrentOwningPackageOverride("openssl")
+    setCurrentOwningPackageOverride("opensslSource")
     try:
       let target =
         if hostOS == "macosx":

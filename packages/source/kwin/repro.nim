@@ -141,7 +141,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kwin:
+package kwinSource:
   ## From-source kwin — twentieth M9.H/I/K production recipe and the
   ## SECOND recipe in the Plasma stack batch. Third CMake-driven
   ## recipe after json-c + kcoreaddons and the FIRST CMake recipe to
@@ -209,7 +209,7 @@ package kwin:
     "extra-cmake-modules >=6.0"
     ## kcoreaddons is the KF6 foundation library kwin links against
     ## for KJob / KAboutData / KPluginFactory plumbing. The sibling
-    ## ``kcoreaddons`` recipe vendors 6.10.0 to match the KF6
+    ## ``kcoreaddonsSource`` recipe vendors 6.10.0 to match the KF6
     ## 6.x ABI requirement.
     "kcoreaddons >=6.0"
     ## M9.R.15f.5 — kwin's CMakeLists explicitly find_package(KF6Config
@@ -233,7 +233,7 @@ package kwin:
     "plasma-framework >=6.0"
     ## wayland supplies the protocol scanner + libwayland-server kwin
     ## uses for its Wayland compositor implementation. The sibling
-    ## ``wayland`` recipe vendors a compatible version.
+    ## ``waylandSource`` recipe vendors a compatible version.
     "wayland >=1.20"
     ## qt6-base supplies QtCore / QtGui / QtQml / QtQuick which the
     ## modern kwin compositor (incl. the QML-based effect runtime)
@@ -263,7 +263,7 @@ package kwin:
     "qt6-sensors >=6.8"
     ## libdrm is the kernel DRM client library kwin's DRM backend uses
     ## to drive direct-rendering on tty consoles. The sibling
-    ## ``libdrm`` recipe vendors a compatible version.
+    ## ``libdrmSource`` recipe vendors a compatible version.
     "libdrm >=2.4"
     ## libinput is the input-event library kwin uses to handle
     ## evdev / libinput-mediated keyboard / mouse / touchpad / tablet
@@ -408,7 +408,7 @@ package kwin:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kwin")
+    setCurrentOwningPackageOverride("kwinSource")
     try:
       # M9.R.15q.6.5 — global -I flags for libwayland, libwayland-server
       # (used by Qt6's qt6_generate_wayland_protocol_client_sources auto-

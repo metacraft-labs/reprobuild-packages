@@ -12,7 +12,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kidletime:
+package kidletimeSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -43,7 +43,7 @@ package kidletime:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kidletime")
+    setCurrentOwningPackageOverride("kidletimeSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

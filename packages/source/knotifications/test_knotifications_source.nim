@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``knotifications`` recipe.
+## Smoke test for the from-source ``knotificationsSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-FIFTH real
 ## production from-source recipe and the THIRD recipe in the SECOND
@@ -26,7 +26,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + library artifact under
-# ``knotifications`` at module init time.
+# ``knotificationsSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -42,17 +42,17 @@ const ExpectedCmakeFlags = @[
   "-DCMAKE_BUILD_TYPE=Release",
 ]
 
-suite "knotifications — from-source recipe smoke test":
+suite "knotificationsSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("knotifications")
-    check spec.packageName == "knotifications"
+    let spec = registeredFetchSpec("knotificationsSource")
+    check spec.packageName == "knotificationsSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,335,588-byte tarball.
-    let spec = registeredFetchSpec("knotifications")
+    let spec = registeredFetchSpec("knotificationsSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -61,7 +61,7 @@ suite "knotifications — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream download.kde.org
     # release tarballs use.
-    let spec = registeredFetchSpec("knotifications")
+    let spec = registeredFetchSpec("knotificationsSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -76,15 +76,15 @@ suite "knotifications — from-source recipe smoke test":
     # artifact and must be tagged ``dakLibrary``. A regression that
     # mis-singularised the brand (``libKF6Notification`` vs
     # ``libKF6Notifications``) would not match the assertion below.
-    let arts = registeredArtifacts("knotifications")
+    let arts = registeredArtifacts("knotificationsSource")
     check arts.len == 1
-    check arts[0].packageName == "knotifications"
+    check arts[0].packageName == "knotificationsSource"
     check arts[0].artifactName == "libKF6Notifications"
     check arts[0].kind == dakLibrary
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry.
-    let vs = registeredVersions("knotifications")
+    let vs = registeredVersions("knotificationsSource")
     check vs.len == 1
     check vs[0].version == "6.10.0"
     check vs[0].sourceRevision == "v6.10.0"

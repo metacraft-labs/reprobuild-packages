@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxext:
+package libxextSource:
   versions:
     "1.3.6":
       sourceRevision = "libXext-1.3.6"
@@ -36,7 +36,7 @@ package libxext:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libxext")
+    setCurrentOwningPackageOverride("libxextSource")
     try:
       let pkg = autotools_package(srcDir = "./src",
         configureOptions = @["--disable-static", "--enable-shared"])

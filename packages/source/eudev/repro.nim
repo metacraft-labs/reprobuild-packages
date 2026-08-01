@@ -105,8 +105,8 @@
 ## ``libUdev``. The collision is intentional and load-bearing: both
 ## packages emit ``libudev.so`` with a compatible API, and the
 ## convention layer's artifact registry tracks (packageName,
-## artifactName) tuples — the (``systemd``, ``libUdev``) entry
-## and the (``eudev``, ``libUdev``) entry are DISTINCT entries
+## artifactName) tuples — the (``systemdSource``, ``libUdev``) entry
+## and the (``eudevSource``, ``libUdev``) entry are DISTINCT entries
 ## in the registry. A regression that flattened the tuple to
 ## ``artifactName`` alone (and merged the two entries) would mis-route
 ## the convention layer's install action and ship a corrupt
@@ -152,7 +152,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package eudev:
+package eudevSource:
   ## From-source eudev — thirty-fifth M9.H/I/K production recipe and
   ## the NINTH autotools-driven recipe (expat + gdm + freetype +
   ## fontconfig + zlib-custom + libxml2 + openssl-custom + util-linux
@@ -263,15 +263,15 @@ package eudev:
     ## with a compatible API and the variant resolver picks ONE at
     ## consumer-resolution time. The convention layer's artifact
     ## registry tracks (packageName, artifactName) tuples so the
-    ## (``systemd``, ``libUdev``) entry and the
-    ## (``eudev``, ``libUdev``) entry are DISTINCT entries in
+    ## (``systemdSource``, ``libUdev``) entry and the
+    ## (``eudevSource``, ``libUdev``) entry are DISTINCT entries in
     ## the registry.
     ## v1 records the artifact only.
     discard
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("eudev")
+    setCurrentOwningPackageOverride("eudevSource")
     try:
       let opts = @[
         "--disable-static",

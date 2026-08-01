@@ -63,7 +63,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kservice:
+package kserviceSource:
   ## From-source kservice — forty-third M9.H/I/K production recipe and
   ## the FIRST recipe in the SECOND KF6 module-sweep batch. Eleventh
   ## CMake-driven recipe and the SIXTH KF6 foundation module after
@@ -134,7 +134,7 @@ package kservice:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kservice")
+    setCurrentOwningPackageOverride("kserviceSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

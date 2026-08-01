@@ -141,7 +141,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package sddm:
+package sddmSource:
   ## From-source sddm — twenty-second M9.H/I/K production recipe and
   ## the CLOSING recipe in the Plasma stack batch. Fifth CMake-driven
   ## recipe after json-c + kcoreaddons + kwin + plasma-workspace, and
@@ -270,7 +270,7 @@ package sddm:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("sddm")
+    setCurrentOwningPackageOverride("sddmSource")
     try:
       let providerRoot = activeProviderProjectRoot()
       var opts = @[

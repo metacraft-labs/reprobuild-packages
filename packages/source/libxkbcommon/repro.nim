@@ -20,7 +20,7 @@
 ## libxkbcommon is the keyboard-keymap library every modern Wayland
 ## compositor links against to translate raw evdev keycodes into XKB
 ## keysyms — wlroots (and thus Sway), Mutter (GNOME), and KWin (Plasma)
-## all depend on it. The sibling ``wlroots`` recipe pins
+## all depend on it. The sibling ``wlrootsSource`` recipe pins
 ## ``libxkbcommon >=1.5`` in its ``uses:`` block, so this recipe is the
 ## upstream-source side of that dependency edge.
 ##
@@ -42,7 +42,7 @@
 ## — the project homepage at ``https://xkbcommon.org`` lists releases
 ## but links to the wayland-devel mailing-list announcement only and
 ## points consumers at the Git tag. We follow the precedent set by
-## ``sway`` and vendor the canonical
+## ``swaySource`` and vendor the canonical
 ## ``https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-1.13.2.tar.gz``
 ## artifact. This is the same artifact nixpkgs's
 ## ``pkgs/development/libraries/libxkbcommon/default.nix`` consumes
@@ -133,7 +133,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libxkbcommon:
+package libxkbcommonSource:
   ## From-source libxkbcommon — seventh M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -243,7 +243,7 @@ package libxkbcommon:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("libxkbcommon")
+    setCurrentOwningPackageOverride("libxkbcommonSource")
     try:
       let opts = @[
         "enable-docs=false",

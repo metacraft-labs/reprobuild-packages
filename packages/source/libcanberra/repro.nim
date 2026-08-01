@@ -120,7 +120,7 @@ import repro_dsl_stdlib/packages/system_tools
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libcanberra:
+package libcanberraSource:
   ## From-source libcanberra — seventy-fifth M9.H/I/K production recipe.
   ## Drives M9.R.15l.1: closes the libcanberra dependency gap for the
   ## KF6 knotifications module (CMakeLists.txt:83
@@ -232,7 +232,7 @@ package libcanberra:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("libcanberra")
+    setCurrentOwningPackageOverride("libcanberraSource")
     try:
       # M9.R.15p.2.1 — ``--with-systemdsystemunitdir=no`` silences the
       # systemd pkg-config probe (configure.ac:552-559). systemd is

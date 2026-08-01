@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``automake`` recipe.
+## Smoke test for the from-source ``automakeSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the M9.N Batch D build-tool
 ## slice. automake's unique coverage angles vs the prior 78 from-
@@ -29,7 +29,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two executable artifacts under
-# ``automake`` at module init time.
+# ``automakeSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -44,18 +44,18 @@ const ExpectedConfigureFlags = @[
   "--disable-static",
 ]
 
-suite "automake — from-source recipe smoke test":
+suite "automakeSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("automake")
-    check spec.packageName == "automake"
+    let spec = registeredFetchSpec("automakeSource")
+    check spec.packageName == "automakeSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream ftp.gnu.org tarball; computed
     # locally + asserted exactly.
-    let spec = registeredFetchSpec("automake")
+    let spec = registeredFetchSpec("automakeSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -64,7 +64,7 @@ suite "automake — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("automake")
+    let spec = registeredFetchSpec("automakeSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -79,12 +79,12 @@ suite "automake — from-source recipe smoke test":
   test "artifacts register two executables all tagged dakExecutable":
     # M3 artifact registry: automake + aclocal are both tagged
     # ``dakExecutable``.
-    let arts = registeredArtifacts("automake")
+    let arts = registeredArtifacts("automakeSource")
     check arts.len == 2
     var seenAutomake = false
     var seenAclocal = false
     for art in arts:
-      check art.packageName == "automake"
+      check art.packageName == "automakeSource"
       check art.kind == dakExecutable
       case art.artifactName
       of "automake":
@@ -100,7 +100,7 @@ suite "automake — from-source recipe smoke test":
     # M2 versions registry: the upstream ftp.gnu.org release tag is
     # recorded for ``repro update-source``. The repository points at
     # the canonical savannah.gnu.org mirror.
-    let vs = registeredVersions("automake")
+    let vs = registeredVersions("automakeSource")
     check vs.len == 1
     check vs[0].version == "1.17"
     check vs[0].sourceRevision == "v1.17"

@@ -12,7 +12,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xkeyboardConfig:
+package xkeyboardConfigSource:
   versions:
     "2.43":
       sourceRevision = "xkeyboard-config-2.43"
@@ -39,7 +39,7 @@ package xkeyboardConfig:
     discard
 
   build:
-    setCurrentOwningPackageOverride("xkeyboardConfig")
+    setCurrentOwningPackageOverride("xkeyboardConfigSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[])
       pkg.installTreeMirror()

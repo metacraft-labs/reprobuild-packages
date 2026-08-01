@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package parted:
+package partedSource:
   versions:
     "3.6":
       sourceRevision = "v3.6"
@@ -46,7 +46,7 @@ package parted:
     discard
 
   build:
-    setCurrentOwningPackageOverride("parted")
+    setCurrentOwningPackageOverride("partedSource")
     try:
       let opts = @[
         "--disable-static",

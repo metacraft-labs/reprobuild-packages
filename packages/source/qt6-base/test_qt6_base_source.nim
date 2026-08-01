@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``qt6Base`` recipe.
+## Smoke test for the from-source ``qt6BaseSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTY-SIXTH real
 ## production from-source recipe and the SIXTH CMake-driven recipe
@@ -38,7 +38,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + six library artifacts under
-# ``qt6Base`` at module init time.
+# ``qt6BaseSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -62,22 +62,22 @@ const ExpectedCmakeFlags = @[
   "-DFEATURE_widgets=ON",
 ]
 
-suite "qt6Base — from-source recipe smoke test":
+suite "qt6BaseSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
     # The 48-MB tarball is vendored (well under GitHub's 100-MB
     # single-file ceiling; the kernel-style upstream-URL fallback
     # would only kick in above ~90 MB).
-    let spec = registeredFetchSpec("qt6Base")
-    check spec.packageName == "qt6Base"
+    let spec = registeredFetchSpec("qt6BaseSource")
+    check spec.packageName == "qt6BaseSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 48,220,752-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("qt6Base")
+    let spec = registeredFetchSpec("qt6BaseSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -87,7 +87,7 @@ suite "qt6Base — from-source recipe smoke test":
     # ``--strip-components=1`` convention upstream download.qt.io
     # release tarballs use (top-level dir inside is
     # ``qtbase-everywhere-src-6.8.1/`` which we strip).
-    let spec = registeredFetchSpec("qt6Base")
+    let spec = registeredFetchSpec("qt6BaseSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -104,7 +104,7 @@ suite "qt6Base — from-source recipe smoke test":
     # collapsed the artifact-name partitioning at the six-artifact
     # cardinality would not produce six distinct entries with the
     # expected names below.
-    let arts = registeredArtifacts("qt6Base")
+    let arts = registeredArtifacts("qt6BaseSource")
     check arts.len == 7
     var seenCore = false
     var seenGui = false
@@ -114,7 +114,7 @@ suite "qt6Base — from-source recipe smoke test":
     var seenSql = false
     var seenOpenGL = false
     for art in arts:
-      check art.packageName == "qt6Base"
+      check art.packageName == "qt6BaseSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libQt6Core":
@@ -148,7 +148,7 @@ suite "qt6Base — from-source recipe smoke test":
     # casing (e.g. lowercased to ``libqt6core``) or stripped the
     # ``Qt6`` prefix would silently break the M3 -> M9.L install-path
     # lookup which keys on the exact artifact identifier.
-    let arts = registeredArtifacts("qt6Base")
+    let arts = registeredArtifacts("qt6BaseSource")
     var prefixMatches = 0
     for art in arts:
       if art.artifactName.len >= 5 and art.artifactName[0..4] == "libQt":
@@ -161,7 +161,7 @@ suite "qt6Base — from-source recipe smoke test":
     # points at the vendored copy. The repository points at the
     # canonical code.qt.io qtbase git repository that hosts the
     # qt6-base source tree.
-    let vs = registeredVersions("qt6Base")
+    let vs = registeredVersions("qt6BaseSource")
     check vs.len == 1
     check vs[0].version == "6.8.1"
     check vs[0].sourceRevision == "v6.8.1"

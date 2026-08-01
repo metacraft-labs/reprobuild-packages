@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libbsd:
+package libbsdSource:
   versions:
     "0.12.2":
       sourceRevision = "0.12.2"
@@ -26,7 +26,7 @@ package libbsd:
   library libbsd:
     discard
   build:
-    setCurrentOwningPackageOverride("libbsd")
+    setCurrentOwningPackageOverride("libbsdSource")
     try:
       # Upstream emits an ld script with /usr/lib/<soname> in GROUP().
       # Keep the soname relative so consumers can link against the staged

@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package atSpi2Core:
+package atSpi2CoreSource:
   versions:
     "2.54.1":
       sourceRevision = "2.54.1"
@@ -40,7 +40,7 @@ package atSpi2Core:
     discard
 
   build:
-    setCurrentOwningPackageOverride("atSpi2Core")
+    setCurrentOwningPackageOverride("atSpi2CoreSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "docs=false",

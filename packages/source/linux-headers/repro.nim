@@ -6,7 +6,7 @@
 
 import repro_project_dsl
 
-package linuxHeaders:
+package linuxHeadersSource:
   versions:
     "6.6.142":
       sourceRevision = "v6.6.142"

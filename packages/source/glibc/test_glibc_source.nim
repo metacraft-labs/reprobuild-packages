@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``glibc`` recipe.
+## Smoke test for the from-source ``glibcSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FORTY-SECOND real
 ## production from-source recipe. glibc's unique coverage angle vs
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + six library + one executable
-# artifacts under ``glibc`` at module init time.
+# artifacts under ``glibcSource`` at module init time.
 import ./repro
 
 # Keep this fixture aligned with the source runtime used by the image.
@@ -50,17 +50,17 @@ const ExpectedConfigureFlags = @[
   "--without-selinux",
 ]
 
-suite "glibc — from-source recipe smoke test":
+suite "glibcSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("glibc")
-    check spec.packageName == "glibc"
+    let spec = registeredFetchSpec("glibcSource")
+    check spec.packageName == "glibcSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # The release tarball hash must move in lockstep with its URL.
-    let spec = registeredFetchSpec("glibc")
+    let spec = registeredFetchSpec("glibcSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -69,7 +69,7 @@ suite "glibc — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("glibc")
+    let spec = registeredFetchSpec("glibcSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -89,7 +89,7 @@ suite "glibc — from-source recipe smoke test":
     # vs ``bin/``); a regression that collapsed the artifact-name
     # partitioning at the seven-artifact cardinality would not produce
     # seven distinct entries with the expected names below.
-    let arts = registeredArtifacts("glibc")
+    let arts = registeredArtifacts("glibcSource")
     check arts.len == 7
     var seenLibC = false
     var seenLibM = false
@@ -99,7 +99,7 @@ suite "glibc — from-source recipe smoke test":
     var seenLibCrypt = false
     var seenLdso = false
     for art in arts:
-      check art.packageName == "glibc"
+      check art.packageName == "glibcSource"
       case art.artifactName
       of "libC":
         seenLibC = true
@@ -137,7 +137,7 @@ suite "glibc — from-source recipe smoke test":
     # recorded for ``repro update-source``. The repository points at the
     # canonical sourceware.org git mirror that hosts the glibc source
     # tree.
-    let vs = registeredVersions("glibc")
+    let vs = registeredVersions("glibcSource")
     check vs.len == 1
     check vs[0].version == "2.42"
     check vs[0].sourceRevision == "glibc-2.42"

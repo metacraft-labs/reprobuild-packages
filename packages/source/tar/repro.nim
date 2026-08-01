@@ -6,7 +6,7 @@
 ## invokes to materialise ``.tar`` / ``.tar.gz`` / ``.tar.xz`` /
 ## ``.tar.bz2`` archives.
 ##
-## GNU tar joins ``grep`` + ``sed`` + ``gawk`` in the
+## GNU tar joins ``grepSource`` + ``sedSource`` + ``gawkSource`` in the
 ## GNU text-processing + archiving CLI batch — the four pillar GNU
 ## userland binaries every shell script + every Makefile + every
 ## install script consumes.
@@ -108,7 +108,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package tar:
+package tarSource:
   ## From-source GNU tar — seventy-first M9.H/I/K production recipe.
   ## THE canonical archive packer/unpacker on every modern Linux
   ## distribution — ``/usr/bin/tar`` is what every installer / backup
@@ -179,7 +179,7 @@ package tar:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("tar")
+    setCurrentOwningPackageOverride("tarSource")
     try:
       let opts = @[
         "--without-selinux",

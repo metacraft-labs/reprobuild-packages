@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``mutter`` recipe.
+## Smoke test for the from-source ``mutterSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTEENTH real production
 ## from-source recipe and the FIRST recipe in the GNOME stack batch.
@@ -30,7 +30,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library + executable artifacts under
-# ``mutter`` at module init time.
+# ``mutterSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -52,19 +52,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "mutter — from-source recipe smoke test":
+suite "mutterSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("mutter")
-    check spec.packageName == "mutter"
+    let spec = registeredFetchSpec("mutterSource")
+    check spec.packageName == "mutterSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 6,860,276-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("mutter")
+    let spec = registeredFetchSpec("mutterSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -73,7 +73,7 @@ suite "mutter — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnome.org release
     # tarballs use.
-    let spec = registeredFetchSpec("mutter")
+    let spec = registeredFetchSpec("mutterSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -91,12 +91,12 @@ suite "mutter — from-source recipe smoke test":
     # discriminators correctly distinguished WITHIN a single package's
     # artifact set — a regression that flattened the kind discriminator
     # would mis-route the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("mutter")
+    let arts = registeredArtifacts("mutterSource")
     check arts.len == 2
     var seenLib = false
     var seenBin = false
     for art in arts:
-      check art.packageName == "mutter"
+      check art.packageName == "mutterSource"
       case art.artifactName
       of "libMutter":
         seenLib = true
@@ -115,7 +115,7 @@ suite "mutter — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at the
     # canonical GNOME gitlab project that hosts the mutter source
     # tree.
-    let vs = registeredVersions("mutter")
+    let vs = registeredVersions("mutterSource")
     check vs.len == 1
     check vs[0].version == "47.10"
     check vs[0].sourceRevision == "47.10"

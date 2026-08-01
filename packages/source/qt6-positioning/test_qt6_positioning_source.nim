@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``qt6Positioning`` recipe (M9.R.15q.9.1).
+## Smoke test for the from-source ``qt6PositioningSource`` recipe (M9.R.15q.9.1).
 ##
 ## Pins the M9.H/I/K trio's behaviour on the qt6-positioning module
 ## that unblocks the KF6/Plasma cascade (plasma-workspace's
@@ -19,7 +19,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + library artifacts under ``qt6Positioning`` at
+# fetch spec + library artifacts under ``qt6PositioningSource`` at
 # module init time.
 import ./repro
 
@@ -29,36 +29,36 @@ const ExpectedUrl =
 const ExpectedHash =
   "e310e7232591d4beb1785bfff8ff3e77430bdf5e9a17f56694b732f5267df78d"
 
-suite "qt6Positioning — from-source recipe smoke test":
+suite "qt6PositioningSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("qt6Positioning")
-    check spec.packageName == "qt6Positioning"
+    let spec = registeredFetchSpec("qt6PositioningSource")
+    check spec.packageName == "qt6PositioningSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("qt6Positioning")
+    let spec = registeredFetchSpec("qt6PositioningSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("qt6Positioning")
+    let spec = registeredFetchSpec("qt6PositioningSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
   test "artifacts register the TWO Qt6 Positioning libraries":
-    let arts = registeredArtifacts("qt6Positioning")
+    let arts = registeredArtifacts("qt6PositioningSource")
     check arts.len == 2
     for a in arts:
-      check a.packageName == "qt6Positioning"
+      check a.packageName == "qt6PositioningSource"
       check a.kind == dakLibrary
     let names = @[arts[0].artifactName, arts[1].artifactName]
     check "libQt6Positioning" in names
     check "libQt6PositioningQuick" in names
 
   test "versions block records the upstream tag + URL + repository":
-    let vs = registeredVersions("qt6Positioning")
+    let vs = registeredVersions("qt6PositioningSource")
     check vs.len == 1
     check vs[0].version == "6.8.1"
     check vs[0].sourceRevision == "v6.8.1"

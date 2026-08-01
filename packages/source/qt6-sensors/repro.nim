@@ -15,7 +15,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package qt6Sensors:
+package qt6SensorsSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
@@ -49,7 +49,7 @@ package qt6Sensors:
     discard
 
   build:
-    setCurrentOwningPackageOverride("qt6Sensors")
+    setCurrentOwningPackageOverride("qt6SensorsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

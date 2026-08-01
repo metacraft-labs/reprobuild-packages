@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package audit:
+package auditSource:
   versions:
     "4.1.0":
       sourceRevision = "v4.1.0"
@@ -28,7 +28,7 @@ package audit:
   library libauparse:
     discard
   build:
-    setCurrentOwningPackageOverride("audit")
+    setCurrentOwningPackageOverride("auditSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-zos-remote",

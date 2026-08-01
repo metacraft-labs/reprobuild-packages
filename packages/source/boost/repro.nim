@@ -104,7 +104,7 @@ import repro_dsl_stdlib/packages/system_tools
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package boost:
+package boostSource:
   ## From-source boost — the FIRST C++ multi-module library to land in the
   ## from-source corpus and the prereq for plasma-activities ->
   ## plasma-framework -> kwin / plasma-workspace / sddm.
@@ -113,7 +113,7 @@ package boost:
   ## ``build:`` block records the bootstrap.sh + b2 + stage-copy shell
   ## sequence as verbatim shell actions. ``$extracted`` resolves to
   ## ``<projectRoot>/src/``; ``$out`` resolves to ``<projectRoot>/.repro/
-  ## build/from-source-custom/boost/``. The shared install-tree
+  ## build/from-source-custom/boostSource/``. The shared install-tree
   ## under ``$out/install/usr/`` carries all per-library .so files + the
   ## headers tree.
 

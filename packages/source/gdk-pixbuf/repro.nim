@@ -13,7 +13,7 @@
 ## artifact (``libgdk_pixbuf-2.0.so``) — the fourth single-library
 ## recipe (wlroots + pixman + cairo were the first three), exercising
 ## the package-identifier kebab-to-camel mapping shape
-## (``gdk-pixbuf`` -> ``gdkPixbuf``) against the M3 artifact
+## (``gdk-pixbuf`` -> ``gdkPixbufSource``) against the M3 artifact
 ## registry's identifier hygiene.
 ##
 ## ## Why gdk-pixbuf matters for the NDE-H Sway / NDE-G1 GNOME / NDE-K1
@@ -23,7 +23,7 @@
 ## GTK + GNOME's icon-loading and image-decode pipelines. It is a
 ## transitive dependency of every GTK-based desktop application and is
 ## consumed by sway's swaybg helper for wallpaper image decoding. The
-## sibling ``sway`` recipe pins ``gdk-pixbuf >=2.40`` in its
+## sibling ``swaySource`` recipe pins ``gdk-pixbuf >=2.40`` in its
 ## ``uses:`` block, so this recipe is the upstream-source side of that
 ## dependency edge.
 ##
@@ -116,7 +116,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gdkPixbuf:
+package gdkPixbufSource:
   ## From-source gdk-pixbuf — twelfth M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -202,7 +202,7 @@ package gdkPixbuf:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("gdkPixbuf")
+    setCurrentOwningPackageOverride("gdkPixbufSource")
     try:
       let opts = @[
         "tests=false",

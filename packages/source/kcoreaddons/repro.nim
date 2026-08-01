@@ -116,7 +116,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kcoreaddons:
+package kcoreaddonsSource:
   ## From-source kcoreaddons — nineteenth M9.H/I/K production recipe
   ## and the FIRST recipe in the Plasma stack batch (kcoreaddons /
   ## kwin / plasma-workspace / sddm). Second CMake-driven recipe after
@@ -199,7 +199,7 @@ package kcoreaddons:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kcoreaddons")
+    setCurrentOwningPackageOverride("kcoreaddonsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

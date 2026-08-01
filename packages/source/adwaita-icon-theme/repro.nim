@@ -61,7 +61,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package adwaitaIconTheme:
+package adwaitaIconThemeSource:
   ## From-source adwaita-icon-theme — GNOME-stack icon assets.
 
   versions:
@@ -99,7 +99,7 @@ package adwaitaIconTheme:
     discard
 
   build:
-    setCurrentOwningPackageOverride("adwaitaIconTheme")
+    setCurrentOwningPackageOverride("adwaitaIconThemeSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[])
       pkg.installTreeMirror()

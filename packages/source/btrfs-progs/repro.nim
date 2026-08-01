@@ -12,7 +12,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package btrfsProgs:
+package btrfsProgsSource:
   versions:
     "7.0":
       sourceRevision = "v7.0"
@@ -41,7 +41,7 @@ package btrfsProgs:
     # M9.R.29.12 — libext2fs (mkfs.btrfs --rootdir support) deferred;
     # the sibling-recipe resolver doesn't currently bridge to the
     # 'e2fsprogs' from-source recipe (different selector naming
-    # vs the project_dsl 'e2fsprogs' identifier), and we
+    # vs the project_dsl 'e2fsprogsSource' identifier), and we
     # don't ship a nix-fallback stub either. The installer doesn't
     # need --rootdir; configure with --disable-ext2 instead.
 
@@ -55,7 +55,7 @@ package btrfsProgs:
     discard
 
   build:
-    setCurrentOwningPackageOverride("btrfsProgs")
+    setCurrentOwningPackageOverride("btrfsProgsSource")
     try:
       let opts = @[
         "--disable-static",

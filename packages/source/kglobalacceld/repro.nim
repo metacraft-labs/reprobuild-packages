@@ -17,7 +17,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kglobalacceld:
+package kglobalacceldSource:
   versions:
     "6.2.5":
       sourceRevision = "v6.2.5"
@@ -79,7 +79,7 @@ package kglobalacceld:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kglobalacceld")
+    setCurrentOwningPackageOverride("kglobalacceldSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

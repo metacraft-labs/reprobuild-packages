@@ -6,8 +6,8 @@
 ## Ethernet hot-plug response, VPN routing, and the per-application
 ## network-status indicators.
 ##
-## NetworkManager joins ``alsaLib`` + ``pipewire`` +
-## ``wireplumber`` in the network + audio infrastructure batch
+## NetworkManager joins ``alsaLibSource`` + ``pipewireSource`` +
+## ``wireplumberSource`` in the network + audio infrastructure batch
 ## adding the four runtime daemons + libraries every modern desktop
 ## (sway / GNOME / Plasma) consumes.
 ##
@@ -138,7 +138,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package networkManager:
+package networkManagerSource:
   ## From-source NetworkManager — seventieth M9.H/I/K production
   ## recipe. THE canonical network configuration daemon on modern
   ## Linux desktops: every NDE-K1 v1 desktop consumes its D-Bus API
@@ -257,7 +257,7 @@ package networkManager:
 
   build:
     ## NetworkManager 1.56 ships Meson metadata and no configure script.
-    setCurrentOwningPackageOverride("networkManager")
+    setCurrentOwningPackageOverride("networkManagerSource")
     try:
       let opts = @[
         "default_library=shared",

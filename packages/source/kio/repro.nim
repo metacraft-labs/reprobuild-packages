@@ -65,7 +65,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kio:
+package kioSource:
   ## From-source kio — fifty-seventh M9.H/I/K production recipe and
   ## the THIRD recipe in the THIRD KF6 module-sweep batch (ksvg /
   ## ksolid / kio / kded). Fifteenth CMake-driven recipe and the
@@ -123,8 +123,8 @@ package kio:
     ## to localise protocol-error messages + file-dialog prompts.
     "ki18n >=6.0"
     ## kservice is the desktop-entry / sycoca cache kio uses for
-    ## open-with-dialog application discovery (kio's reason for
-    ## linking against the sibling ``kservice`` recipe's
+    ## open-with-dialog application discovery (kioSource's reason for
+    ## linking against the sibling ``kserviceSource`` recipe's
     ## library artifact).
     "kservice >=6.0"
     ## ksolid supplies the hardware-abstraction layer kio's
@@ -210,7 +210,7 @@ package kio:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kio")
+    setCurrentOwningPackageOverride("kioSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

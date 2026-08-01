@@ -19,7 +19,7 @@
 ## ld.so.conf.d overlay). That recipe assumes the ``sway``,
 ## ``swaybar``, ``swaynag``, and ``swaymsg`` binaries already exist
 ## on PATH — in v1 they come from the (deferred) apt-jammy .deb. This
-## recipe (``sway``) is the COMPLEMENT — it builds those four
+## recipe (``swaySource``) is the COMPLEMENT — it builds those four
 ## binaries from the upstream tarball via meson/ninja. The two recipes
 ## live at different paths so the NDE-H1 config-emission cache key is
 ## isolated from the upstream tarball sha256 (a 1.11 → 1.12 source
@@ -29,13 +29,13 @@
 ##
 ## Sway transitively consumes EVERY prior from-source Wayland recipe:
 ##
-##   * ``wlroots`` — Sway 1.11 hard-links against wlroots 0.19;
+##   * ``wlrootsSource`` — Sway 1.11 hard-links against wlroots 0.19;
 ##     mismatched wlroots versions don't compile.
-##   * ``wayland`` — libwayland-client / libwayland-server are
+##   * ``waylandSource`` — libwayland-client / libwayland-server are
 ##     linked directly; ``wayland-scanner`` is invoked at build time
 ##     to emit protocol marshalling stubs for sway-protocols /
 ##     wlr-protocols XML files.
-##   * (transitively via wlroots) ``libdrm`` for the DRM backend
+##   * (transitively via wlroots) ``libdrmSource`` for the DRM backend
 ##     and (would-be) Wayland for the protocol XML stubs the wlroots
 ##     scene-graph layer registers.
 ##
@@ -60,10 +60,10 @@
 ##
 ## Sway 1.11 is the current upstream stable line and is the version
 ## that links against wlroots 0.19 (the version pinned in the sibling
-## ``wlroots`` recipe). The version pair is load-bearing — Sway
+## ``wlrootsSource`` recipe). The version pair is load-bearing — Sway
 ## upstream pins a specific wlroots stable line per release and won't
 ## compile against any other. A future bump to Sway 1.12 must move
-## in lockstep with a wlroots 0.20 bump in ``wlroots``.
+## in lockstep with a wlroots 0.20 bump in ``wlrootsSource``.
 ##
 ## nixpkgs's ``pkgs/by-name/sw/sway-unwrapped/package.nix`` currently
 ## also pins 1.11 (consuming the GitHub archive tarball). The version
@@ -158,7 +158,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package sway:
+package swaySource:
   ## From-source Sway — fifth M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -224,7 +224,7 @@ package sway:
     ## wlroots is the modular Wayland compositor library Sway links
     ## against for its backend / renderer / scene-graph / protocol
     ## implementations. 0.19 is the line Sway 1.11 pins; the sibling
-    ## ``wlroots`` recipe vendors 0.19.3 to match.
+    ## ``wlrootsSource`` recipe vendors 0.19.3 to match.
     "wlroots >=0.19"
     ## libdrm is the user-space DRM ioctl wrapper. Sway's C sources
     ## directly ``#include <xf86drm.h>`` (via ``sway/output.c`` and
@@ -287,7 +287,7 @@ package sway:
     ## setup fails at ``src/meson.build:67:17`` because sway tries
     ## to fall back to a subproject clone when the pkg-config probe
     ## misses and wrap-based downloads are disabled. Matches the
-    ## sibling ``wlroots`` recipe's dependency declaration.
+    ## sibling ``wlrootsSource`` recipe's dependency declaration.
     "wayland-protocols >=1.31"
     ## libevdev is the userspace evdev event-handling library; sway
     ## 1.11's meson build probes for it directly (in addition to
@@ -303,7 +303,7 @@ package sway:
     ## ``src/sway/xdg_decoration.c:3`` with
     ## ``libudev.h: No such file or directory``. The eudev recipe
     ## provides the ABI-compatible libudev.so via the ``libudev``
-    ## resolver name (matches the sibling ``libinput``
+    ## resolver name (matches the sibling ``libinputSource``
     ## declaration).
     "libudev >=232"
     ## libpng + libjpeg are transitive link-time dependencies of the
@@ -352,7 +352,7 @@ package sway:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("sway")
+    setCurrentOwningPackageOverride("swaySource")
     try:
       let opts = @[
         # M9.R.14h.9 — sway 1.11's meson_options dropped the

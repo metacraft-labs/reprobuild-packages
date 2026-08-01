@@ -77,7 +77,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libepoxy:
+package libepoxySource:
   ## From-source libepoxy — GNOME-stack foundation for gtk4.
 
   versions:
@@ -120,7 +120,7 @@ package libepoxy:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libepoxy")
+    setCurrentOwningPackageOverride("libepoxySource")
     try:
       let opts = @[
         "egl=yes",

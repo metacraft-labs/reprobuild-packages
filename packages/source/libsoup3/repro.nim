@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libsoup3:
+package libsoup3Source:
   versions:
     "3.6.5":
       sourceRevision = "3.6.5"
@@ -28,7 +28,7 @@ package libsoup3:
   library libSoup3:
     discard
   build:
-    setCurrentOwningPackageOverride("libsoup3")
+    setCurrentOwningPackageOverride("libsoup3Source")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "gssapi=disabled", "ntlm=disabled", "brotli=disabled",

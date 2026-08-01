@@ -111,7 +111,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package bash:
+package bashSource:
   ## From-source GNU bash — fifty-ninth M9.H/I/K production recipe.
   ## THE canonical POSIX shell; ``/bin/bash`` is the login shell on
   ## every major Linux distribution + the shebang line at the top of
@@ -190,7 +190,7 @@ package bash:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("bash")
+    setCurrentOwningPackageOverride("bashSource")
     try:
       let opts = @[
         "--disable-static",

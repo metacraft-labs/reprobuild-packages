@@ -6,7 +6,7 @@
 ## file-search backend invokes to filter text streams against regex
 ## patterns.
 ##
-## GNU grep joins ``tar`` + ``sed`` + ``gawk`` in
+## GNU grep joins ``tarSource`` + ``sedSource`` + ``gawkSource`` in
 ## the GNU text-processing + archiving CLI batch — the four pillar
 ## GNU userland binaries every shell script + every Makefile + every
 ## install script consumes.
@@ -100,7 +100,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package grep:
+package grepSource:
   ## From-source GNU grep — seventy-second M9.H/I/K production
   ## recipe. THE canonical line-matching CLI on every modern Linux
   ## distribution — every shell pipeline / every log scanner / every
@@ -171,7 +171,7 @@ package grep:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("grep")
+    setCurrentOwningPackageOverride("grepSource")
     try:
       let opts = @[
         "--disable-perl-regexp",

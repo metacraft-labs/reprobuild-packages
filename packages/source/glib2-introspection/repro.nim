@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package glib2Introspection:
+package glib2IntrospectionSource:
   versions:
     "2.82.5":
       sourceRevision = "2.82.5"
@@ -32,7 +32,7 @@ package glib2Introspection:
     name: "glib2-introspection"
     discard
   build:
-    setCurrentOwningPackageOverride("glib2Introspection")
+    setCurrentOwningPackageOverride("glib2IntrospectionSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "tests=false",

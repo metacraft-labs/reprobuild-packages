@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``qt6Tools`` recipe.
+## Smoke test for the from-source ``qt6ToolsSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the qt6-tools recipe added in
 ## M9.R.15f.2 to unblock the KF6 cascade (every KF6 module declares
@@ -20,7 +20,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + cmake flags + three executable artifacts under
-# ``qt6Tools`` at module init time.
+# ``qt6ToolsSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -29,19 +29,19 @@ const ExpectedUrl =
 const ExpectedHash =
   "9d43d409be08b8681a0155a9c65114b69c9a3fc11aef6487bb7fdc5b283c432d"
 
-suite "qt6Tools — from-source recipe smoke test":
+suite "qt6ToolsSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("qt6Tools")
-    check spec.packageName == "qt6Tools"
+    let spec = registeredFetchSpec("qt6ToolsSource")
+    check spec.packageName == "qt6ToolsSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 10,293,192-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("qt6Tools")
+    let spec = registeredFetchSpec("qt6ToolsSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -51,7 +51,7 @@ suite "qt6Tools — from-source recipe smoke test":
     # ``--strip-components=1`` convention upstream download.qt.io
     # release tarballs use (top-level dir inside is
     # ``qttools-everywhere-src-6.8.1/`` which we strip).
-    let spec = registeredFetchSpec("qt6Tools")
+    let spec = registeredFetchSpec("qt6ToolsSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -64,12 +64,12 @@ suite "qt6Tools — from-source recipe smoke test":
     # ``<prefix>/libexec/`` which the slicer doesn't probe; KF6
     # consumers discover qhelpgenerator natively via Qt6ToolsTools
     # find_package.
-    let arts = registeredArtifacts("qt6Tools")
+    let arts = registeredArtifacts("qt6ToolsSource")
     check arts.len == 2
     var seenLupdate = false
     var seenLrelease = false
     for art in arts:
-      check art.packageName == "qt6Tools"
+      check art.packageName == "qt6ToolsSource"
       check art.kind == dakExecutable
       case art.artifactName
       of "lupdate":
@@ -83,7 +83,7 @@ suite "qt6Tools — from-source recipe smoke test":
     # M2 versions registry: the upstream download.qt.io release tag
     # is recorded for ``repro update-source``. The repository points
     # at the canonical code.qt.io qttools project.
-    let vs = registeredVersions("qt6Tools")
+    let vs = registeredVersions("qt6ToolsSource")
     check vs.len == 1
     check vs[0].version == "6.8.1"
     check vs[0].sourceRevision == "v6.8.1"

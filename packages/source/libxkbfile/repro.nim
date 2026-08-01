@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxkbfile:
+package libxkbfileSource:
   versions:
     "1.1.3":
       sourceRevision = "libxkbfile-1.1.3"
@@ -41,7 +41,7 @@ package libxkbfile:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libxkbfile")
+    setCurrentOwningPackageOverride("libxkbfileSource")
     try:
       let opts = @["--disable-static", "--enable-shared"]
       let pkg = autotools_package(srcDir = "./src", configureOptions = opts)

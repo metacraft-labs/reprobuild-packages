@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kconfigwidgets:
+package kconfigwidgetsSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -47,7 +47,7 @@ package kconfigwidgets:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kconfigwidgets")
+    setCurrentOwningPackageOverride("kconfigwidgetsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

@@ -40,7 +40,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xwayland:
+package xwaylandSource:
   ## From-source xwayland — closes M9.R.26 Gap 4. Tier-2b c_cpp_meson
   ## convention consumer.
 
@@ -114,7 +114,7 @@ package xwayland:
     discard
 
   build:
-    setCurrentOwningPackageOverride("xwayland")
+    setCurrentOwningPackageOverride("xwaylandSource")
     try:
       let opts = @[
         # Pure-Wayland posture: drop the X11 server's TCP listener

@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libseccomp:
+package libseccompSource:
   versions:
     "2.6.0":
       sourceRevision = "v2.6.0"
@@ -21,7 +21,7 @@ package libseccomp:
   library libseccomp:
     discard
   build:
-    setCurrentOwningPackageOverride("libseccomp")
+    setCurrentOwningPackageOverride("libseccompSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

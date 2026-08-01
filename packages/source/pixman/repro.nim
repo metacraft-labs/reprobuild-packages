@@ -17,7 +17,7 @@
 ##
 ## pixman is the 2D pixel-manipulation library every modern Wayland
 ## compositor consumes for software-renderer fallback + scene-graph
-## damage tracking. The sibling ``wlroots`` recipe pins
+## damage tracking. The sibling ``wlrootsSource`` recipe pins
 ## ``pixman >=0.42`` in its ``uses:`` block, so this recipe is the
 ## upstream-source side of that dependency edge. Cairo, X11 servers,
 ## and many image-processing toolkits also link against pixman, but
@@ -105,7 +105,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package pixman:
+package pixmanSource:
   ## From-source pixman — eighth M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -173,7 +173,7 @@ package pixman:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("pixman")
+    setCurrentOwningPackageOverride("pixmanSource")
     try:
       let opts = @[
         "tests=disabled",

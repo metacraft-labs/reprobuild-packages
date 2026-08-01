@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gsettingsDesktopSchemas:
+package gsettingsDesktopSchemasSource:
   versions:
     "47.1":
       sourceRevision = "47.1"
@@ -32,7 +32,7 @@ package gsettingsDesktopSchemas:
     discard
 
   build:
-    setCurrentOwningPackageOverride("gsettingsDesktopSchemas")
+    setCurrentOwningPackageOverride("gsettingsDesktopSchemasSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "introspection=true",

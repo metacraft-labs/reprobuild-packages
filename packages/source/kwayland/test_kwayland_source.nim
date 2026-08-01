@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``kwayland`` recipe
+## Smoke test for the from-source ``kwaylandSource`` recipe
 ## (M9.R.15q.6.1).
 ##
 ## Pins the M9.H/I/K trio's behaviour on the kwayland recipe — the
@@ -11,7 +11,7 @@ import std/[unittest]
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers fetch
-# spec + cmake flags + library artifact under ``kwayland`` at
+# spec + cmake flags + library artifact under ``kwaylandSource`` at
 # module init time.
 import ./repro
 
@@ -21,33 +21,33 @@ const ExpectedUrl =
 const ExpectedHash =
   "2a17a8ce5643fd51c3cf787542032c1050da3a1fb00dcc9a32dea288bd38d7d2"
 
-suite "kwayland — from-source recipe smoke test":
+suite "kwaylandSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("kwayland")
-    check spec.packageName == "kwayland"
+    let spec = registeredFetchSpec("kwaylandSource")
+    check spec.packageName == "kwaylandSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the upstream sha256":
-    let spec = registeredFetchSpec("kwayland")
+    let spec = registeredFetchSpec("kwaylandSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("kwayland")
+    let spec = registeredFetchSpec("kwaylandSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
   test "library artifact registered with the upstream SONAME":
-    let arts = registeredArtifacts("kwayland")
+    let arts = registeredArtifacts("kwaylandSource")
     check arts.len == 1
-    check arts[0].packageName == "kwayland"
+    check arts[0].packageName == "kwaylandSource"
     check arts[0].artifactName == "libKWaylandClient"
     check arts[0].kind == dakLibrary
 
   test "versions block records the upstream tag + URL + repository":
-    let vs = registeredVersions("kwayland")
+    let vs = registeredVersions("kwaylandSource")
     check vs.len == 1
     check vs[0].version == "6.2.5"
     check vs[0].sourceRevision == "v6.2.5"

@@ -61,7 +61,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kcmutils:
+package kcmutilsSource:
   ## From-source kcmutils — M9.R.15q.1.3 production recipe. Closes the
   ## ``KF6KCMUtils`` find_package gap on plasma-framework's configure
   ## step. Tier-2b c_cpp_cmake convention consumer. Single library
@@ -157,7 +157,7 @@ package kcmutils:
     ## M9.R.15q.1.3 — explicit `build:` block invoking the
     ## ``cmake_package(...)`` high-level constructor. Same modern-
     ## desktop baseline as the sibling KF6 recipes.
-    setCurrentOwningPackageOverride("kcmutils")
+    setCurrentOwningPackageOverride("kcmutilsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

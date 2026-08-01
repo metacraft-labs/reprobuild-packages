@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libpsl:
+package libpslSource:
   versions:
     "0.21.5":
       sourceRevision = "0.21.5"
@@ -23,7 +23,7 @@ package libpsl:
   library libPsl:
     discard
   build:
-    setCurrentOwningPackageOverride("libpsl")
+    setCurrentOwningPackageOverride("libpslSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "runtime=no", "builtin=true", "docs=false", "tests=false",

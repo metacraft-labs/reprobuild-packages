@@ -116,7 +116,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package iproute2:
+package iproute2Source:
   ## From-source iproute2 — forty-ninth M9.H/I/K production recipe.
   ## The canonical Linux networking-utilities userland: ``ip`` + ``tc``
   ## + ``ss`` + ``bridge`` all built from one Makefile + ``./configure``
@@ -213,7 +213,7 @@ package iproute2:
     discard
 
   build:
-    setCurrentOwningPackageOverride("iproute2")
+    setCurrentOwningPackageOverride("iproute2Source")
     try:
       # iproute2's configure script is hand-written and assumes it runs in
       # the source tree. Configure there first, then let skipConfigure copy

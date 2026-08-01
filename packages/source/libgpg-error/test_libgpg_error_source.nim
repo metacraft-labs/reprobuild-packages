@@ -10,10 +10,10 @@ const
   ExpectedHash =
     "be0f1b2db6b93eed55369cdf79f19f72750c8c7c39fc20b577e724545427e6b2"
 
-suite "libgpgError from-source recipe":
+suite "libgpgErrorSource from-source recipe":
   test "fetch metadata pins the upstream release":
-    let spec = registeredFetchSpec("libgpgError")
-    check spec.packageName == "libgpgError"
+    let spec = registeredFetchSpec("libgpgErrorSource")
+    check spec.packageName == "libgpgErrorSource"
     check spec.url == ExpectedUrl
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -21,10 +21,10 @@ suite "libgpgError from-source recipe":
     check spec.extractStrip == 1
 
   test "build tools and artifact are registered":
-    check registeredNativeBuildDeps("libgpgError") == @[
+    check registeredNativeBuildDeps("libgpgErrorSource") == @[
       "make", "gcc >=11", "pkg-config",
     ]
-    let artifacts = registeredArtifacts("libgpgError")
+    let artifacts = registeredArtifacts("libgpgErrorSource")
     check artifacts.len == 1
     check artifacts[0].artifactName == "libGpgError"
     check artifacts[0].kind == dakLibrary

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``readline`` recipe.
+## Smoke test for the from-source ``readlineSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-FOURTH real
 ## production from-source recipe. readline's unique coverage angle vs
@@ -29,7 +29,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two library artifacts under
-# ``readline`` at module init time.
+# ``readlineSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -43,19 +43,19 @@ const ExpectedConfigureFlags = @[
   "--enable-shared",
 ]
 
-suite "readline — from-source recipe smoke test":
+suite "readlineSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("readline")
-    check spec.packageName == "readline"
+    let spec = registeredFetchSpec("readlineSource")
+    check spec.packageName == "readlineSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 3,043,945-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("readline")
+    let spec = registeredFetchSpec("readlineSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -63,7 +63,7 @@ suite "readline — from-source recipe smoke test":
   test "fetch spec is the tarball variant with extractStrip = 1":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream release tarballs use.
-    let spec = registeredFetchSpec("readline")
+    let spec = registeredFetchSpec("readlineSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,12 +85,12 @@ suite "readline — from-source recipe smoke test":
     # regression that collapsed the artifact-name partitioning at the
     # two-of-a-kind cardinality would surface as either a missing
     # entry or one entry shadowing the other.
-    let arts = registeredArtifacts("readline")
+    let arts = registeredArtifacts("readlineSource")
     check arts.len == 2
     var seenReadline = false
     var seenHistory = false
     for art in arts:
-      check art.packageName == "readline"
+      check art.packageName == "readlineSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libReadline":
@@ -107,7 +107,7 @@ suite "readline — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # savannah.gnu.org git mirror that hosts the readline source tree.
-    let vs = registeredVersions("readline")
+    let vs = registeredVersions("readlineSource")
     check vs.len == 1
     check vs[0].version == "8.2"
     check vs[0].sourceRevision == "readline-8.2"

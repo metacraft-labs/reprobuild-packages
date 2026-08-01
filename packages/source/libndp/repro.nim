@@ -6,7 +6,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libndp:
+package libndpSource:
   versions:
     "1.9":
       sourceRevision = "v1.9"
@@ -36,7 +36,7 @@ package libndp:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libndp")
+    setCurrentOwningPackageOverride("libndpSource")
     try:
       let opts = @[
         "--disable-static",

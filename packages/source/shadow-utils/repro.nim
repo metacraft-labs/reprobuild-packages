@@ -44,7 +44,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package shadowUtils:
+package shadowUtilsSource:
   ## From-source shadow-utils — closes M9.R.27 Gap 4. Tier-2b
   ## c_cpp_autotools convention consumer.
 
@@ -76,7 +76,7 @@ package shadowUtils:
     "libxcrypt"
     ## pam is the authentication framework login / passwd / su consume
     ## for user authentication. Stub routes through the sibling
-    ## pam recipe / pam stdlib stub.
+    ## pamSource recipe / pam stdlib stub.
     "pam"
     ## libcap is the POSIX capabilities library a few helper binaries
     ## (``newuidmap`` / ``newgidmap``) link against to manage their
@@ -111,7 +111,7 @@ package shadowUtils:
     discard
 
   build:
-    setCurrentOwningPackageOverride("shadowUtils")
+    setCurrentOwningPackageOverride("shadowUtilsSource")
     try:
       let opts = @[
         "--disable-static",

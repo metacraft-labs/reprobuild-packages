@@ -104,7 +104,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qcoro6:
+package qcoro6Source:
   ## From-source qcoro6 --- M9.R.33.1 production recipe closing the
   ## "QCoro6 not found" fresh-configure trip documented in
   ## ``recipes/reproos-iso/run-evidence/m9r32_complete.txt`` G5.
@@ -182,7 +182,7 @@ package qcoro6:
     ## M9.R.5b --- explicit `build:` block constructed from the inlined
     ## verbatim cmake-flag set.  Calls the M9.R.2b high-level
     ## `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("qcoro6")
+    setCurrentOwningPackageOverride("qcoro6Source")
     try:
       let opts = @[
         # M9.R.33.1.1 --- BUILD_SHARED_LIBS=ON.  QCoro defaults to static

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``glib2`` recipe.
+## Smoke test for the from-source ``glib2Source`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTEENTH real production
 ## from-source recipe. glib2's unique coverage angle vs the prior
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + four library artifacts under
-# ``glib2`` at module init time.
+# ``glib2Source`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -76,7 +76,7 @@ when defined(reproProviderMode):
     ProviderGraphRequest(
       kind: prkGraphInvocation,
       providerArtifactId: "test-provider",
-      entryPointId: "glib2.root",
+      entryPointId: "glib2Source.root",
       entryPointBodyHash: "test-body",
       reason: girExplicitUserRequest,
       arguments: projectRoot,
@@ -108,19 +108,19 @@ when defined(reproProviderMode):
       return argv[2]
     ""
 
-suite "glib2 — from-source recipe smoke test":
+suite "glib2Source — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("glib2")
-    check spec.packageName == "glib2"
+    let spec = registeredFetchSpec("glib2Source")
+    check spec.packageName == "glib2Source"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 5,554,704-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("glib2")
+    let spec = registeredFetchSpec("glib2Source")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -129,7 +129,7 @@ suite "glib2 — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnome.org release
     # tarballs use.
-    let spec = registeredFetchSpec("glib2")
+    let spec = registeredFetchSpec("glib2Source")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -161,8 +161,8 @@ suite "glib2 — from-source recipe smoke test":
     check "./src" notin setupAction.declaredOutputs
 
   test "native build deps include pkg-config for meson dependency probes":
-    let native = registeredNativeBuildDeps("glib2")
-    let deps = registeredBuildDeps("glib2")
+    let native = registeredNativeBuildDeps("glib2Source")
+    let deps = registeredBuildDeps("glib2Source")
     check "pkg-config" in native
     check "pcre2 >=10.34" notin native
     check "pcre2 >=10.34" in deps
@@ -175,14 +175,14 @@ suite "glib2 — from-source recipe smoke test":
     # ``libgmodule-2.0.so``). A regression that collapsed multi-
     # library packages or dropped one of the four would surface in
     # the artifact-count + per-artifact name pinning below.
-    let arts = registeredArtifacts("glib2")
+    let arts = registeredArtifacts("glib2Source")
     check arts.len == 4
     var seenGlib2 = false
     var seenGObject = false
     var seenGio = false
     var seenGModule = false
     for art in arts:
-      check art.packageName == "glib2"
+      check art.packageName == "glib2Source"
       check art.kind == dakLibrary
       case art.artifactName
       of "libGlib2":
@@ -204,7 +204,7 @@ suite "glib2 — from-source recipe smoke test":
     test "stage-copy probes lib64 letters-only SONAME for libGlib2":
       let projectRoot = currentSourcePath.parentDir
       let pkg = PackageDef(
-        packageName: "glib2",
+        packageName: "glib2Source",
         sourceFile: projectRoot / "repro.nim",
         hasDevEnv: false,
         devEnvBodyHash: "",
@@ -214,7 +214,7 @@ suite "glib2 — from-source recipe smoke test":
         includeDefault = false)
       let actions = extractActions(fragment)
       let stage = findById(actions,
-        "autotools-stage-library-glib2-libGlib2")
+        "autotools-stage-library-glib2Source-libGlib2")
       let script = stage.inlineScriptOf()
       let usrLib = (projectRoot / "build" / "out" / "usr" / "lib").
         replace("\\", "/")
@@ -235,7 +235,7 @@ suite "glib2 — from-source recipe smoke test":
     # live fetch points at the vendored copy. The repository points
     # at the canonical GNOME gitlab project that hosts the glib
     # source tree.
-    let vs = registeredVersions("glib2")
+    let vs = registeredVersions("glib2Source")
     check vs.len == 1
     check vs[0].version == "2.82.5"
     check vs[0].sourceRevision == "2.82.5"

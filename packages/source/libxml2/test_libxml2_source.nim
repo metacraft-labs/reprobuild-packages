@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``libxml2`` recipe.
+## Smoke test for the from-source ``libxml2Source`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the TWENTY-EIGHTH real
 ## production from-source recipe and the SIXTH autotools-driven recipe
@@ -27,7 +27,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``libxml2`` at module init time.
+# ``libxml2Source`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -45,19 +45,19 @@ const ExpectedConfigureFlags = @[
   "--without-mem-debug",
 ]
 
-suite "libxml2 — from-source recipe smoke test":
+suite "libxml2Source — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libxml2")
-    check spec.packageName == "libxml2"
+    let spec = registeredFetchSpec("libxml2Source")
+    check spec.packageName == "libxml2Source"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 2,586,872-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libxml2")
+    let spec = registeredFetchSpec("libxml2Source")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -66,7 +66,7 @@ suite "libxml2 — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnome.org release
     # tarballs use.
-    let spec = registeredFetchSpec("libxml2")
+    let spec = registeredFetchSpec("libxml2Source")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -83,9 +83,9 @@ suite "libxml2 — from-source recipe smoke test":
     # parser, the XPath + XPointer evaluators, and the I/O helpers.
     # A regression that mis-tagged the artifact kind would mis-route
     # the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("libxml2")
+    let arts = registeredArtifacts("libxml2Source")
     check arts.len == 1
-    check arts[0].packageName == "libxml2"
+    check arts[0].packageName == "libxml2Source"
     check arts[0].artifactName == "libXml2"
     check arts[0].kind == dakLibrary
 
@@ -95,7 +95,7 @@ suite "libxml2 — from-source recipe smoke test":
     # live fetch points at the vendored copy. The repository points
     # at the canonical GNOME gitlab project that hosts the libxml2
     # source tree post-freedesktop-migration.
-    let vs = registeredVersions("libxml2")
+    let vs = registeredVersions("libxml2Source")
     check vs.len == 1
     check vs[0].version == "2.13.5"
     check vs[0].sourceRevision == "v2.13.5"

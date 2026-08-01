@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``gnutls`` recipe.
+## Smoke test for the from-source ``gnutlsSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-FOURTH real
 ## production from-source recipe and the CLOSING recipe in the crypto-
@@ -32,7 +32,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``gnutls`` at module init time.
+# ``gnutlsSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -50,19 +50,19 @@ const ExpectedConfigureFlags = @[
   "--disable-tests",
 ]
 
-suite "gnutls — from-source recipe smoke test":
+suite "gnutlsSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("gnutls")
-    check spec.packageName == "gnutls"
+    let spec = registeredFetchSpec("gnutlsSource")
+    check spec.packageName == "gnutlsSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 6,696,460-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("gnutls")
+    let spec = registeredFetchSpec("gnutlsSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -71,7 +71,7 @@ suite "gnutls — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnupg.org release
     # tarballs use.
-    let spec = registeredFetchSpec("gnutls")
+    let spec = registeredFetchSpec("gnutlsSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -94,9 +94,9 @@ suite "gnutls — from-source recipe smoke test":
     # PSK / anonymous KEX layers. A regression that mis-tagged the
     # artifact kind would mis-route the M9.L install path (``lib/``
     # vs ``bin/``).
-    let arts = registeredArtifacts("gnutls")
+    let arts = registeredArtifacts("gnutlsSource")
     check arts.len == 1
-    check arts[0].packageName == "gnutls"
+    check arts[0].packageName == "gnutlsSource"
     check arts[0].artifactName == "libGnutls"
     check arts[0].kind == dakLibrary
 
@@ -107,7 +107,7 @@ suite "gnutls — from-source recipe smoke test":
     # the canonical gitlab.com project that hosts the GnuTLS source
     # tree (the upstream moved off git.gnupg.org for development in
     # 2018).
-    let vs = registeredVersions("gnutls")
+    let vs = registeredVersions("gnutlsSource")
     check vs.len == 1
     check vs[0].version == "3.8.8"
     check vs[0].sourceRevision == "gnutls_3_8_8"

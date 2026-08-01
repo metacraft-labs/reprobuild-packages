@@ -9,10 +9,10 @@ const ExpectedUrl =
 const ExpectedHash =
   "6f213700dbf96b5cc4499ca70cb15ecd69c09f405b06785bb4a1a10b572b6276"
 
-suite "iputils from-source recipe":
+suite "iputilsSource from-source recipe":
   test "pins the official release asset":
-    let spec = registeredFetchSpec("iputils")
-    check spec.packageName == "iputils"
+    let spec = registeredFetchSpec("iputilsSource")
+    check spec.packageName == "iputilsSource"
     check spec.url == ExpectedUrl
     check spec.hashAlg == dshaSha256
     check spec.hashHex == ExpectedHash

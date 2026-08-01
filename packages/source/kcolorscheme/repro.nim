@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package kcolorscheme:
+package kcolorschemeSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -43,7 +43,7 @@ package kcolorscheme:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kcolorscheme")
+    setCurrentOwningPackageOverride("kcolorschemeSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

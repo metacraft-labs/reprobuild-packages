@@ -16,7 +16,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package extraCmakeModules:
+package extraCmakeModulesSource:
   versions:
     "6.10.0":
       sourceRevision = "v6.10.0"
@@ -44,7 +44,7 @@ package extraCmakeModules:
   # so consumers' CMAKE_PREFIX_PATH probe finds ECMConfig.cmake.
 
   build:
-    setCurrentOwningPackageOverride("extraCmakeModules")
+    setCurrentOwningPackageOverride("extraCmakeModulesSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

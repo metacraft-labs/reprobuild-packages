@@ -92,7 +92,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gobjectIntrospection:
+package gobjectIntrospectionSource:
   ## From-source gobject-introspection — GNOME-stack foundation for
   ## gtk4 (build-time only in v1) and every downstream introspected
   ## library.
@@ -162,7 +162,7 @@ package gobjectIntrospection:
     discard
 
   build:
-    setCurrentOwningPackageOverride("gobjectIntrospection")
+    setCurrentOwningPackageOverride("gobjectIntrospectionSource")
     try:
       let opts = @[
         "cairo=disabled",

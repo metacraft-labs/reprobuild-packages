@@ -110,7 +110,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package pam:
+package pamSource:
   ## From-source Linux-PAM — thirty-third M9.H/I/K production recipe
   ## and the EIGHTH autotools-driven recipe (expat + gdm + freetype +
   ## fontconfig + zlib-custom + libxml2 + openssl-custom + util-linux
@@ -219,7 +219,7 @@ package pam:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("pam")
+    setCurrentOwningPackageOverride("pamSource")
     try:
       let opts = @[
         "--disable-static",

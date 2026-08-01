@@ -118,7 +118,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gnutls:
+package gnutlsSource:
   ## From-source gnutls — fifty-fourth M9.H/I/K production recipe.
   ## CLOSING recipe in the crypto-and-FFI batch (libffi + nettle +
   ## libgcrypt + gnutls). Single library artifact recipe driven by
@@ -191,7 +191,7 @@ package gnutls:
 
   buildDeps:
     ## nettle is gnutls's symmetric-cipher + hash backend (sibling
-    ## ``nettle`` recipe 52 vendors a compatible version).
+    ## ``nettleSource`` recipe 52 vendors a compatible version).
     "nettle >=3.7"
     ## GnuTLS and Nettle's Hogweed primitives require GMP integers.
     ## Configure fails early when this direct dependency is omitted.
@@ -217,7 +217,7 @@ package gnutls:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("gnutls")
+    setCurrentOwningPackageOverride("gnutlsSource")
     try:
       let opts = @[
         "--disable-static",

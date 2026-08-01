@@ -1,8 +1,8 @@
-## Smoke test for the from-source ``wayland`` recipe.
+## Smoke test for the from-source ``waylandSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRD real production
-## from-source recipe (the first was ``dbusBroker``, the second
-## ``libdrm``). Where dbus-broker exercised executable artifacts
+## from-source recipe (the first was ``dbusBrokerSource``, the second
+## ``libdrmSource``). Where dbus-broker exercised executable artifacts
 ## only and libdrm exercised library artifacts only, this one
 ## exercises BOTH kinds off the same package — the M3 artifact registry
 ## must keep ``dakLibrary`` and ``dakExecutable`` discriminators
@@ -17,7 +17,7 @@
 ##     spot-check (the ``cmake`` channel must NOT see the meson flags).
 ##   * MIXED artifact registration (M3) — three libraries
 ##     (``dakLibrary``) plus one executable (``dakExecutable``), all
-##     attributed to ``wayland``, kind discriminators preserved
+##     attributed to ``waylandSource``, kind discriminators preserved
 ##     per-artifact (the unique-coverage aspect of this third recipe).
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
@@ -28,7 +28,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library + executable artifacts under
-# ``wayland`` at module init time.
+# ``waylandSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -46,19 +46,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "wayland — from-source recipe smoke test":
+suite "waylandSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("wayland")
-    check spec.packageName == "wayland"
+    let spec = registeredFetchSpec("waylandSource")
+    check spec.packageName == "waylandSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 609,628-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("wayland")
+    let spec = registeredFetchSpec("waylandSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -67,7 +67,7 @@ suite "wayland — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream uses for
     # freedesktop.org gitlab release tarballs.
-    let spec = registeredFetchSpec("wayland")
+    let spec = registeredFetchSpec("waylandSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -84,14 +84,14 @@ suite "wayland — from-source recipe smoke test":
     # discriminators correctly distinguished WITHIN a single package's
     # artifact set — a regression that flattened the kind discriminator
     # would mis-route the M9.L install path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("wayland")
+    let arts = registeredArtifacts("waylandSource")
     check arts.len == 4
     var seenClient = false
     var seenServer = false
     var seenCursor = false
     var seenScanner = false
     for art in arts:
-      check art.packageName == "wayland"
+      check art.packageName == "waylandSource"
       case art.artifactName
       of "libwaylandClient":
         seenClient = true
@@ -118,7 +118,7 @@ suite "wayland — from-source recipe smoke test":
     # the live fetch points at the vendored copy. The repository
     # points at the canonical gitlab project that hosts the Wayland
     # source tree.
-    let vs = registeredVersions("wayland")
+    let vs = registeredVersions("waylandSource")
     check vs.len == 1
     check vs[0].version == "1.25.0"
     check vs[0].sourceRevision == "1.25.0"

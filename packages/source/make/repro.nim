@@ -99,7 +99,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package make:
+package makeSource:
   ## From-source make — M9.N Batch E compiler-chain slice.
   ##
   ## Tier-2b from-source-autotools convention consumer: the
@@ -160,7 +160,7 @@ package make:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("make")
+    setCurrentOwningPackageOverride("makeSource")
     try:
       let opts = @[
         "--disable-nls",

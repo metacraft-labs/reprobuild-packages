@@ -69,7 +69,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package ki18n:
+package ki18nSource:
   ## From-source ki18n — thirty-seventh M9.H/I/K production recipe and
   ## the SECOND recipe in the KF6 module-sweep batch. Eighth CMake-
   ## driven recipe and the THIRD KF6 foundation module after
@@ -152,7 +152,7 @@ package ki18n:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("ki18n")
+    setCurrentOwningPackageOverride("ki18nSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

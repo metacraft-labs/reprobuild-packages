@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package nspr:
+package nsprSource:
   versions:
     "4.36":
       sourceRevision = "NSPR_4_36_RTM"
@@ -24,7 +24,7 @@ package nspr:
   library libPlds4:
     discard
   build:
-    setCurrentOwningPackageOverride("nspr")
+    setCurrentOwningPackageOverride("nsprSource")
     try:
       let pkg = autotools_package(srcDir = "./src/nspr", configureOptions = @[
         "--enable-64bit", "--with-pthreads", "--enable-optimize=-O2",

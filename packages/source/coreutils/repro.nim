@@ -112,7 +112,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package coreutils:
+package coreutilsSource:
   ## From-source GNU coreutils — forty-third M9.H/I/K production recipe.
   ## Ships ~100 binaries from a single ``./configure`` + ``make``
   ## invocation; v1 records the SIX most-used (ls / cp / mv / rm / cat
@@ -216,7 +216,7 @@ package coreutils:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("coreutils")
+    setCurrentOwningPackageOverride("coreutilsSource")
     try:
       let opts = @[
         "--disable-static",

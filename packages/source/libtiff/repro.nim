@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libtiff:
+package libtiffSource:
   versions:
     "4.7.0":
       sourceRevision = "v4.7.0"
@@ -27,7 +27,7 @@ package libtiff:
   library libtiff:
     discard
   build:
-    setCurrentOwningPackageOverride("libtiff")
+    setCurrentOwningPackageOverride("libtiffSource")
     try:
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
         cacheVars = @[

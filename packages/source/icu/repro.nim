@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package icu:
+package icuSource:
   versions:
     "76.1":
       sourceRevision = "release-76-1"
@@ -25,7 +25,7 @@ package icu:
   library libIcuData:
     discard
   build:
-    setCurrentOwningPackageOverride("icu")
+    setCurrentOwningPackageOverride("icuSource")
     try:
       let pkg = autotools_package(srcDir = "./src/source",
         configureOptions = @[

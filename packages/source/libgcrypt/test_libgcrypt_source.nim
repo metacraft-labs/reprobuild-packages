@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``libgcrypt`` recipe.
+## Smoke test for the from-source ``libgcryptSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTY-THIRD real production
 ## from-source recipe and the THIRD recipe in the crypto-and-FFI batch
@@ -30,7 +30,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + library artifact under
-# ``libgcrypt`` at module init time.
+# ``libgcryptSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -45,19 +45,19 @@ const ExpectedConfigureFlags = @[
   "--disable-padlock-support",
 ]
 
-suite "libgcrypt — from-source recipe smoke test":
+suite "libgcryptSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libgcrypt")
-    check spec.packageName == "libgcrypt"
+    let spec = registeredFetchSpec("libgcryptSource")
+    check spec.packageName == "libgcryptSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 4,180,345-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libgcrypt")
+    let spec = registeredFetchSpec("libgcryptSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "libgcrypt — from-source recipe smoke test":
     # bunzip2 decompressor based on the URL suffix. A regression that
     # defaulted the decompressor back to gzip / xz would surface in
     # the extract phase; the suffix check below is the DSL-time pin.
-    let spec = registeredFetchSpec("libgcrypt")
+    let spec = registeredFetchSpec("libgcryptSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
     check spec.url.endsWith(".tar.bz2")
@@ -91,9 +91,9 @@ suite "libgcrypt — from-source recipe smoke test":
     # the libgpg-error helper library. A regression that mis-tagged
     # the artifact kind would mis-route the M9.L install path
     # (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("libgcrypt")
+    let arts = registeredArtifacts("libgcryptSource")
     check arts.len == 1
-    check arts[0].packageName == "libgcrypt"
+    check arts[0].packageName == "libgcryptSource"
     check arts[0].artifactName == "libGcrypt"
     check arts[0].kind == dakLibrary
 
@@ -103,7 +103,7 @@ suite "libgcrypt — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical git.gnupg.org mirror that hosts the libgcrypt
     # source tree.
-    let vs = registeredVersions("libgcrypt")
+    let vs = registeredVersions("libgcryptSource")
     check vs.len == 1
     check vs[0].version == "1.11.0"
     check vs[0].sourceRevision == "libgcrypt-1.11.0"

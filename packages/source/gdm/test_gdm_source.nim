@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``gdm`` recipe.
+## Smoke test for the from-source ``gdmSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SEVENTEENTH real production
 ## from-source recipe and the SECOND recipe in the GNOME stack batch.
@@ -31,7 +31,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + executable artifacts under
-# ``gdm`` at module init time.
+# ``gdmSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -49,19 +49,19 @@ const ExpectedConfigureFlags = @[
   "--enable-gdm-xsession",
 ]
 
-suite "gdm — from-source recipe smoke test":
+suite "gdmSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("gdm")
-    check spec.packageName == "gdm"
+    let spec = registeredFetchSpec("gdmSource")
+    check spec.packageName == "gdmSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 936,172-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("gdm")
+    let spec = registeredFetchSpec("gdmSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -70,7 +70,7 @@ suite "gdm — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream gnome.org release
     # tarballs use.
-    let spec = registeredFetchSpec("gdm")
+    let spec = registeredFetchSpec("gdmSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -94,12 +94,12 @@ suite "gdm — from-source recipe smoke test":
     # harvested into the package output); a regression that mis-tagged
     # the kind would route the binary to ``lib/`` instead of ``bin/`` /
     # ``libexec/``.
-    let arts = registeredArtifacts("gdm")
+    let arts = registeredArtifacts("gdmSource")
     check arts.len == 2
     var seenGdm = false
     var seenWorker = false
     for art in arts:
-      check art.packageName == "gdm"
+      check art.packageName == "gdmSource"
       check art.kind == dakExecutable
       case art.artifactName
       of "gdm":
@@ -117,7 +117,7 @@ suite "gdm — from-source recipe smoke test":
     # live fetch points at the vendored copy. The repository points
     # at the canonical GNOME gitlab project that hosts the gdm
     # source tree.
-    let vs = registeredVersions("gdm")
+    let vs = registeredVersions("gdmSource")
     check vs.len == 1
     check vs[0].version == "47.0"
     check vs[0].sourceRevision == "47.0"

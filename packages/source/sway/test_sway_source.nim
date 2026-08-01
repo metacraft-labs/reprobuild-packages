@@ -1,8 +1,8 @@
-## Smoke test for the from-source ``sway`` recipe.
+## Smoke test for the from-source ``swaySource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the FIFTH real production
-## from-source recipe (predecessors: ``dbusBroker`` /
-## ``libdrm`` / ``wayland`` / ``wlroots``). Sway's
+## from-source recipe (predecessors: ``dbusBrokerSource`` /
+## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource``). Sway's
 ## specific coverage angle vs the prior four is FOUR executable
 ## artifacts off a meson build whose dependency surface is the WIDEST
 ## yet (10 entries in ``uses:`` covering meson/ninja/gcc + wlroots +
@@ -21,7 +21,7 @@
 ##     spot-check (the ``cmake`` channel must NOT see the meson flags).
 ##   * FOUR executable artifact registration (M3) — ``sway`` +
 ##     ``swaybar`` + ``swaynag`` + ``swaymsg`` all attributed to
-##     ``sway`` with kind ``dakExecutable``.
+##     ``swaySource`` with kind ``dakExecutable``.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
@@ -31,7 +31,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + executable artifacts under
-# ``sway`` at module init time.
+# ``swaySource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -48,19 +48,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "sway — from-source recipe smoke test":
+suite "swaySource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("sway")
-    check spec.packageName == "sway"
+    let spec = registeredFetchSpec("swaySource")
+    check spec.packageName == "swaySource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 5,583,731-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("sway")
+    let spec = registeredFetchSpec("swaySource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -69,7 +69,7 @@ suite "sway — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream uses for GitHub
     # tag tarballs.
-    let spec = registeredFetchSpec("sway")
+    let spec = registeredFetchSpec("swaySource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -85,14 +85,14 @@ suite "sway — from-source recipe smoke test":
     # binary would never get harvested into the package output);
     # a regression that mis-tagged the kind would route the binary
     # to ``lib/`` instead of ``bin/``.
-    let arts = registeredArtifacts("sway")
+    let arts = registeredArtifacts("swaySource")
     check arts.len == 4
     var seenSway = false
     var seenSwaybar = false
     var seenSwaynag = false
     var seenSwaymsg = false
     for art in arts:
-      check art.packageName == "sway"
+      check art.packageName == "swaySource"
       check art.kind == dakExecutable
       case art.artifactName
       of "sway":    seenSway    = true
@@ -110,7 +110,7 @@ suite "sway — from-source recipe smoke test":
     # ``repro update-source`` even though the live fetch points at the
     # vendored copy. The repository points at the canonical GitHub
     # project that hosts the Sway source tree.
-    let vs = registeredVersions("sway")
+    let vs = registeredVersions("swaySource")
     check vs.len == 1
     check vs[0].version == "1.11"
     check vs[0].sourceRevision == "1.11"

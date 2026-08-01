@@ -21,7 +21,7 @@
 ## introspection XML parser, fontconfig's font-cache XML reader,
 ## shared-mime-info's MIME-database parser, and the GNOME accessibility
 ## stack's at-spi XML message decoder. It is a transitive dependency
-## of every modern Linux desktop. The sibling ``dbusBroker`` +
+## of every modern Linux desktop. The sibling ``dbusBrokerSource`` +
 ## ``fontconfig`` consumers pin ``expat >=2.6`` in their ``uses:``
 ## blocks (added when the desktop story closes), so this recipe is the
 ## upstream-source side of those dependency edges.
@@ -112,7 +112,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package expat:
+package expatSource:
   ## From-source expat — fourteenth M9.H/I/K production recipe and
   ## FIRST autotools-driven from-source recipe (every prior recipe used
   ## meson, make, or CMake).
@@ -189,7 +189,7 @@ package expat:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("expat")
+    setCurrentOwningPackageOverride("expatSource")
     try:
       let opts = @[
         "--disable-static",

@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xcbUtilImage:
+package xcbUtilImageSource:
   versions:
     "0.4.1":
       sourceRevision = "xcb-util-image-0.4.1"
@@ -27,7 +27,7 @@ package xcbUtilImage:
   library libxcbImage:
     discard
   build:
-    setCurrentOwningPackageOverride("xcbUtilImage")
+    setCurrentOwningPackageOverride("xcbUtilImageSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

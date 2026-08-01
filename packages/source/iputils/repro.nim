@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package iputils:
+package iputilsSource:
   versions:
     "20250605":
       sourceRevision = "20250605"
@@ -32,7 +32,7 @@ package iputils:
     discard
 
   build:
-    setCurrentOwningPackageOverride("iputils")
+    setCurrentOwningPackageOverride("iputilsSource")
     try:
       let opts = @[
         "USE_CAP=false",

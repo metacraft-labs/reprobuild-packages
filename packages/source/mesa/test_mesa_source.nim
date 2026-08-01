@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``mesa`` recipe.
+## Smoke test for the from-source ``mesaSource`` recipe.
 ##
 ## Drives M9.R.15m.1 (the MAJOR OpenGL/EGL/GBM gap blocking kwin +
 ## mutter compositors). Mesa is the canonical open-source 3D graphics
@@ -23,7 +23,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library artifacts under
-# ``mesa`` at module init time.
+# ``mesaSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -43,32 +43,32 @@ proc encodedValues(arg: PublicCliArg): seq[string] =
     return @[]
   arg.encodedValue.split("\x1f")
 
-suite "mesa — from-source recipe smoke test":
+suite "mesaSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
-    let spec = registeredFetchSpec("mesa")
-    check spec.packageName == "mesa"
+    let spec = registeredFetchSpec("mesaSource")
+    check spec.packageName == "mesaSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
-    let spec = registeredFetchSpec("mesa")
+    let spec = registeredFetchSpec("mesaSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
 
   test "fetch spec is the tarball variant with extractStrip = 1":
-    let spec = registeredFetchSpec("mesa")
+    let spec = registeredFetchSpec("mesaSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
   test "library artifacts register all three shared objects":
-    let arts = registeredArtifacts("mesa")
+    let arts = registeredArtifacts("mesaSource")
     check arts.len == 3
     var seenEGL = false
     var seenGLESv2 = false
     var seenGbm = false
     for art in arts:
-      check art.packageName == "mesa"
+      check art.packageName == "mesaSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libEGL":
@@ -84,7 +84,7 @@ suite "mesa — from-source recipe smoke test":
     check seenGbm
 
   test "M9.R.80 enables LLVM-backed llvmpipe":
-    let native = registeredNativeBuildDeps("mesa")
+    let native = registeredNativeBuildDeps("mesaSource")
     check "llvm-config" in native
 
     resetBuildActionRegistry()
@@ -107,7 +107,7 @@ suite "mesa — from-source recipe smoke test":
       check not ("shared-llvm=disabled" in opts)
 
   test "versions block records the upstream tag + URL + repository":
-    let vs = registeredVersions("mesa")
+    let vs = registeredVersions("mesaSource")
     check vs.len == 1
     check vs[0].version == "24.0.9"
     check vs[0].sourceRevision == "mesa-24.0.9"

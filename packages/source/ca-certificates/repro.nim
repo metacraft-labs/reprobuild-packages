@@ -7,7 +7,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package caCertificates:
+package caCertificatesSource:
   versions:
     "2026-07-16":
       sourceRevision = "2026-07-16"
@@ -34,7 +34,7 @@ package caCertificates:
     discard
 
   build:
-    setCurrentOwningPackageOverride("caCertificates")
+    setCurrentOwningPackageOverride("caCertificatesSource")
     try:
       let patches = @[
         "printf '%b\\n' 'all:' '\\t@:' 'install:' " &

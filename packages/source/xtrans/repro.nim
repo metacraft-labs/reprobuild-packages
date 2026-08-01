@@ -12,7 +12,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xtrans:
+package xtransSource:
   versions:
     "1.6.0":
       sourceRevision = "xtrans-1.6.0"
@@ -39,7 +39,7 @@ package xtrans:
     discard
 
   build:
-    setCurrentOwningPackageOverride("xtrans")
+    setCurrentOwningPackageOverride("xtransSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[])
       ## M9.R.29.13 — header-only autotools package; emit the install

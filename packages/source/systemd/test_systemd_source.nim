@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``systemd`` recipe.
+## Smoke test for the from-source ``systemdSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the THIRTY-FIRST real
 ## production from-source recipe. systemd's unique coverage angle vs
@@ -35,7 +35,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + four executable + two library
-# artifacts under ``systemd`` at module init time.
+# artifacts under ``systemdSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -61,19 +61,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "systemd — from-source recipe smoke test":
+suite "systemdSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("systemd")
-    check spec.packageName == "systemd"
+    let spec = registeredFetchSpec("systemdSource")
+    check spec.packageName == "systemdSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 16,184,128-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("systemd")
+    let spec = registeredFetchSpec("systemdSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -82,7 +82,7 @@ suite "systemd — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream GitHub release
     # tarballs use.
-    let spec = registeredFetchSpec("systemd")
+    let spec = registeredFetchSpec("systemdSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -103,7 +103,7 @@ suite "systemd — from-source recipe smoke test":
     # collapsed the artifact-name partitioning at the six-artifact
     # cardinality would not produce six distinct entries with the
     # expected names below.
-    let arts = registeredArtifacts("systemd")
+    let arts = registeredArtifacts("systemdSource")
     check arts.len == 6
     var seenInit = false
     var seenSystemctl = false
@@ -112,7 +112,7 @@ suite "systemd — from-source recipe smoke test":
     var seenLibSystemd = false
     var seenLibUdev = false
     for art in arts:
-      check art.packageName == "systemd"
+      check art.packageName == "systemdSource"
       case art.artifactName
       of "systemdInit":
         seenInit = true
@@ -147,7 +147,7 @@ suite "systemd — from-source recipe smoke test":
     # fetch points at the vendored copy. The repository points at
     # the canonical GitHub project that hosts the systemd source
     # tree.
-    let vs = registeredVersions("systemd")
+    let vs = registeredVersions("systemdSource")
     check vs.len == 1
     check vs[0].version == "257"
     check vs[0].sourceRevision == "v257"

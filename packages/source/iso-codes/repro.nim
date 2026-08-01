@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package isoCodes:
+package isoCodesSource:
   versions:
     "4.18.0":
       sourceRevision = "v4.18.0"
@@ -26,7 +26,7 @@ package isoCodes:
     discard
 
   build:
-    setCurrentOwningPackageOverride("isoCodes")
+    setCurrentOwningPackageOverride("isoCodesSource")
     try:
       let pkg = autotools_package(srcDir = "./src")
       pkg.installTreeMirror()

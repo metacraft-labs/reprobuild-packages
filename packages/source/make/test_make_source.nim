@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``make`` recipe.
+## Smoke test for the from-source ``makeSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the M9.N Batch E compiler-
 ## chain slice. make's unique coverage angles vs the prior 83 from-
@@ -38,7 +38,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + one executable artifact under
-# ``make`` at module init time.
+# ``makeSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -53,18 +53,18 @@ const ExpectedConfigureFlags = @[
   "--disable-nls",
 ]
 
-suite "make — from-source recipe smoke test":
+suite "makeSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("make")
-    check spec.packageName == "make"
+    let spec = registeredFetchSpec("makeSource")
+    check spec.packageName == "makeSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream ftp.gnu.org tarball; computed
     # locally + asserted exactly.
-    let spec = registeredFetchSpec("make")
+    let spec = registeredFetchSpec("makeSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -74,7 +74,7 @@ suite "make — from-source recipe smoke test":
     # ``--strip-components=1`` convention. The fetch-spec ``kind``
     # discriminator is ``dfkTarball`` regardless of the compressor
     # (``.tar.gz`` here vs the more-common ``.tar.xz``).
-    let spec = registeredFetchSpec("make")
+    let spec = registeredFetchSpec("makeSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -90,9 +90,9 @@ suite "make — from-source recipe smoke test":
     # M3 artifact registry: make tagged ``dakExecutable``. The
     # SIMPLEST possible artifact cardinality — single executable
     # under a from-source-autotools recipe.
-    let arts = registeredArtifacts("make")
+    let arts = registeredArtifacts("makeSource")
     check arts.len == 1
-    check arts[0].packageName == "make"
+    check arts[0].packageName == "makeSource"
     check arts[0].artifactName == "make"
     check arts[0].kind == dakExecutable
 
@@ -100,7 +100,7 @@ suite "make — from-source recipe smoke test":
     # M2 versions registry: the upstream ftp.gnu.org release tag is
     # recorded for ``repro update-source``. The repository points at
     # the canonical savannah.gnu.org mirror.
-    let vs = registeredVersions("make")
+    let vs = registeredVersions("makeSource")
     check vs.len == 1
     check vs[0].version == "4.4.1"
     check vs[0].sourceRevision == "v4.4.1"

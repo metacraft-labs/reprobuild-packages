@@ -166,7 +166,7 @@ import repro_dsl_stdlib/packages/clang
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gcc:
+package gccSource:
   ## From-source gcc — M9.N Batch E compiler-chain slice.
   ##
   ## ``from-source-custom`` convention consumer: the recipe's
@@ -174,7 +174,7 @@ package gcc:
   ## build-install pipeline as a verbatim shell sequence under the
   ## ``gcc`` artifact. ``$extracted`` resolves to ``<projectRoot>/src/
   ## ``; ``$out`` resolves to ``<projectRoot>/.repro/build/from-source-
-  ## custom/gcc/``. The three executable + two library artifacts
+  ## custom/gccSource/``. The three executable + two library artifacts
   ## share the same install-tree (all five binaries land under
   ## ``$out/bin/`` + ``$out/lib/``); the convention's stage-copy step
   ## probes ``$out/bin/<member>`` per executable artifact and

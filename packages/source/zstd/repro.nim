@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package zstd:
+package zstdSource:
   versions:
     "1.5.7":
       sourceRevision = "v1.5.7"
@@ -20,7 +20,7 @@ package zstd:
   library libzstd:
     discard
   build:
-    setCurrentOwningPackageOverride("zstd")
+    setCurrentOwningPackageOverride("zstdSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "PREFIX=/usr",

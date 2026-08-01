@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package xcbUtilCursor:
+package xcbUtilCursorSource:
   versions:
     "0.1.5":
       sourceRevision = "xcb-util-cursor-0.1.5"
@@ -28,7 +28,7 @@ package xcbUtilCursor:
   library libxcbCursor:
     discard
   build:
-    setCurrentOwningPackageOverride("xcbUtilCursor")
+    setCurrentOwningPackageOverride("xcbUtilCursorSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

@@ -4,7 +4,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package rsync:
+package rsyncSource:
   versions:
     "3.4.4":
       sourceRevision = "v3.4.4"
@@ -30,7 +30,7 @@ package rsync:
     discard
 
   build:
-    setCurrentOwningPackageOverride("rsync")
+    setCurrentOwningPackageOverride("rsyncSource")
     try:
       # ReproOS image installation preserves ACLs and extended attributes.
       # The libacl package also exposes the libattr development files used by

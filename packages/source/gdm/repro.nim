@@ -84,7 +84,7 @@
 ## We register the daemon under the package-level identifier ``gdm``
 ## (the upstream binary name matches the package name; no
 ## disambiguation needed because the package identifier here is
-## ``gdm``, not ``gdm``), and the greeter under
+## ``gdmSource``, not ``gdm``), and the greeter under
 ## ``gdmGreeterSession`` (camelCased from the hyphenated upstream
 ## binary name per the gdk-pixbuf -> gdkPixbuf precedent).
 ##
@@ -142,7 +142,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gdm:
+package gdmSource:
   ## From-source gdm — seventeenth M9.H/I/K production recipe and the
   ## SECOND autotools-driven from-source recipe (expat was the first).
   ## First autotools recipe to ship TWO executable artifacts from a
@@ -210,7 +210,7 @@ package gdm:
     ## glib2 is the foundation library gdm's daemon + greeter consume
     ## (GMainLoop event loop, GDBus client/server for accountsservice
     ## + logind IPC, GSettings for configuration). The sibling
-    ## ``glib2`` recipe vendors 2.82.5 to match.
+    ## ``glib2Source`` recipe vendors 2.82.5 to match.
     "glib2 >=2.62"
     ## pam is the authentication-stack library gdm's greeter consumes
     ## to authenticate logins against ``/etc/pam.d/gdm``.
@@ -230,7 +230,7 @@ package gdm:
     ## M9.R.15e.14 — gobject-introspection is required by gdm 47.x's
     ## libgdm sub-tree (src/libgdm/meson.build:89) — there's no
     ## ``-Dintrospection=disabled`` option to gate it. Backed by the
-    ## sibling gobjectIntrospection recipe.
+    ## sibling gobjectIntrospectionSource recipe.
     "gobject-introspection"
     ## M9.R.15g.2 — libsystemd ships ``systemd/sd-login.h`` which
     ## ``src/common/gdm-common.c`` + ``src/libgdm/gdm-sessions.c``
@@ -286,7 +286,7 @@ package gdm:
     ## M9.R.15e.10 — gdm 47.x uses meson; switched the constructor +
     ## option set. Boolean options use true/false (meson convention);
     ## the v1 baseline drops Plymouth, X11, runtime-systemd integration.
-    setCurrentOwningPackageOverride("gdm")
+    setCurrentOwningPackageOverride("gdmSource")
     try:
       let opts = @[
         # Drop Plymouth boot-splash integration (NDE-G1 deferred).

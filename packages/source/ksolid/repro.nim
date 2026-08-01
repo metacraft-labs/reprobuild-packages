@@ -11,10 +11,10 @@
 ## NOTE on the upstream vs package naming asymmetry: the canonical
 ## download.kde.org tarball is published as ``solid-6.10.0.tar.xz``
 ## (no ``k`` prefix; the project predates the ``KF6*`` naming
-## convention). We register the package as ``ksolid`` for
+## convention). We register the package as ``ksolidSource`` for
 ## consistency with the rest of the KF6 module-sweep batch — every
 ## other from-source KF6 recipe uses a ``k<name>Source`` identifier,
-## and a bare ``solid`` would alphabetise outside the KF6
+## and a bare ``solidSource`` would alphabetise outside the KF6
 ## cluster in artifact registries. The SONAME / library file the
 ## CMake build emits is unaffected (``libKF6Solid.so``).
 ##
@@ -71,7 +71,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package ksolid:
+package ksolidSource:
   ## From-source ksolid — fifty-sixth M9.H/I/K production recipe and
   ## the SECOND recipe in the THIRD KF6 module-sweep batch (ksvg /
   ## ksolid / kio / kded). Fourteenth CMake-driven recipe and the
@@ -158,7 +158,7 @@ package ksolid:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("ksolid")
+    setCurrentOwningPackageOverride("ksolidSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

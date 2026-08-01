@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package pcre2:
+package pcre2Source:
   versions:
     "10.46":
       sourceRevision = "pcre2-10.46"
@@ -22,7 +22,7 @@ package pcre2:
   executable pcre2grep:
     discard
   build:
-    setCurrentOwningPackageOverride("pcre2")
+    setCurrentOwningPackageOverride("pcre2Source")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static",

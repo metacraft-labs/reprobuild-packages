@@ -81,10 +81,10 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6Svg:
+package qt6SvgSource:
   ## From-source qt6-svg — M9.R.15k.1 KF6/Plasma blocker. Sibling to
-  ## qt6-base (qt6Base), qt6-tools (qt6Tools), and
-  ## qt6-declarative (qt6Declarative); shares the same 6.8.1 pin.
+  ## qt6-base (qt6BaseSource), qt6-tools (qt6ToolsSource), and
+  ## qt6-declarative (qt6DeclarativeSource); shares the same 6.8.1 pin.
 
   versions:
     "6.8.1":
@@ -121,7 +121,7 @@ package qt6Svg:
     discard
 
   build:
-    setCurrentOwningPackageOverride("qt6Svg")
+    setCurrentOwningPackageOverride("qt6SvgSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

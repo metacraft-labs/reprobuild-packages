@@ -59,7 +59,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kirigami:
+package kirigamiSource:
   ## From-source kirigami — M9.R.15p.3.1 KF6/Plasma blocker.
   ## Tier-2b c_cpp_cmake convention consumer. Single library artifact
   ## recipe. M9.R.15p.0's package-macro auto-injection handles
@@ -159,7 +159,7 @@ package kirigami:
   build:
     ## M9.R.15p.3.1 — explicit `build:` block invoking the
     ## ``cmake_package(...)`` high-level constructor.
-    setCurrentOwningPackageOverride("kirigami")
+    setCurrentOwningPackageOverride("kirigamiSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

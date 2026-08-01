@@ -6,7 +6,7 @@
 ## ``./configure`` script invokes to perform in-place substitutions
 ## against text streams.
 ##
-## GNU sed joins ``tar`` + ``grep`` + ``gawk`` in
+## GNU sed joins ``tarSource`` + ``grepSource`` + ``gawkSource`` in
 ## the GNU text-processing + archiving CLI batch — the four pillar
 ## GNU userland binaries every shell script + every Makefile + every
 ## install script consumes.
@@ -92,7 +92,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package sed:
+package sedSource:
   ## From-source GNU sed — seventy-third M9.H/I/K production recipe.
   ## THE canonical stream-editor CLI on every modern Linux
   ## distribution — every shell pipeline + every Makefile substitution
@@ -166,7 +166,7 @@ package sed:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("sed")
+    setCurrentOwningPackageOverride("sedSource")
     try:
       let opts = @[
         "--disable-acl",

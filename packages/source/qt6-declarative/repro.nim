@@ -81,9 +81,9 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6Declarative:
+package qt6DeclarativeSource:
   ## From-source qt6-declarative — M9.R.15j.1 KF6/Plasma blocker.
-  ## Sibling to qt6-base (qt6Base) and qt6-tools (qt6Tools);
+  ## Sibling to qt6-base (qt6BaseSource) and qt6-tools (qt6ToolsSource);
   ## shares the same 6.8.1 pin.
   ##
   ## Tier-2b c_cpp_cmake convention consumer: the convention layer
@@ -145,14 +145,14 @@ package qt6Declarative:
     ## qt6-base supplies QtCore + QtGui + QtNetwork + QtQml-runtime
     ## C++ underpinnings — qt6-declarative links against every one for
     ## the Qml/Quick/QuickControls2 libraries. The sibling
-    ## ``qt6Base`` recipe vendors 6.8.1.
+    ## ``qt6BaseSource`` recipe vendors 6.8.1.
     "qt6-base >=6.8"
     ## M9.R.15n.2 — qt6-shadertools supplies the ``qsb`` shader-bundle
     ## tool qt6-declarative's configure probes for at build time. Without
     ## qsb the configure prints "Qt Quick modules not built due to not
     ## finding the qtshadertools 'qsb' tool" and SKIPS libQt6Quick.so +
     ## libQt6QuickControls2.so artifacts entirely. The sibling
-    ## ``qt6ShaderTools`` recipe vendors 6.8.1.
+    ## ``qt6ShaderToolsSource`` recipe vendors 6.8.1.
     "qt6-shadertools >=6.8"
 
   config:
@@ -179,7 +179,7 @@ package qt6Declarative:
   build:
     ## M9.R.15j.1 — explicit `build:` block invoking the
     ## ``cmake_package(...)`` high-level constructor.
-    setCurrentOwningPackageOverride("qt6Declarative")
+    setCurrentOwningPackageOverride("qt6DeclarativeSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

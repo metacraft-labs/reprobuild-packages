@@ -1,7 +1,7 @@
-## Smoke test for the from-source ``libdrm`` recipe.
+## Smoke test for the from-source ``libdrmSource`` recipe.
 ##
 ## Pins the M9.H/I/K trio's behaviour on the SECOND real production
-## from-source recipe (the first was ``dbusBroker``). Where the
+## from-source recipe (the first was ``dbusBrokerSource``). Where the
 ## dbus-broker test exercised executable artifacts, this one exercises
 ## the M3 ``library`` artifact family — both kinds plug into the same
 ## artifact registry but the kind discriminator differs (dakLibrary vs
@@ -16,7 +16,7 @@
 ##     sequence equality on the production flag set + channel-isolation
 ##     spot-check (the ``cmake`` channel must NOT see the meson flags).
 ##   * ``library`` artifact registration (M3) — three libraries, all
-##     tagged ``dakLibrary``, all attributed to ``libdrm``.
+##     tagged ``dakLibrary``, all attributed to ``libdrmSource``.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
@@ -26,7 +26,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + meson options + library artifacts under
-# ``libdrm`` at module init time.
+# ``libdrmSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -50,19 +50,19 @@ const ExpectedMesonOptions = @[
   "--buildtype=release",
 ]
 
-suite "libdrm — from-source recipe smoke test":
+suite "libdrmSource — from-source recipe smoke test":
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("libdrm")
-    check spec.packageName == "libdrm"
+    let spec = registeredFetchSpec("libdrmSource")
+    check spec.packageName == "libdrmSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is a 64-char sha256 hex string":
     # sha256 over the vendored 436,912-byte tarball; length check
     # guards against a future bump that forgets to widen the hash
     # alongside the URL.
-    let spec = registeredFetchSpec("libdrm")
+    let spec = registeredFetchSpec("libdrmSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -71,7 +71,7 @@ suite "libdrm — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream uses for
     # freedesktop.org tag tarballs.
-    let spec = registeredFetchSpec("libdrm")
+    let spec = registeredFetchSpec("libdrmSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -87,13 +87,13 @@ suite "libdrm — from-source recipe smoke test":
     # ``dakExecutable``) — that distinction drives the M9.L install
     # path (``lib/`` rather than ``bin/``) and the per-artifact
     # downstream linkage propagation.
-    let arts = registeredArtifacts("libdrm")
+    let arts = registeredArtifacts("libdrmSource")
     check arts.len == 3
     var seenCore = false
     var seenAmdgpu = false
     var seenNouveau = false
     for art in arts:
-      check art.packageName == "libdrm"
+      check art.packageName == "libdrmSource"
       check art.kind == dakLibrary
       case art.artifactName
       of "libdrm":
@@ -113,7 +113,7 @@ suite "libdrm — from-source recipe smoke test":
     # recorded for ``repro update-source`` even though the live fetch
     # points at the vendored copy. The repository points at the
     # gitlab mirror that hosts the Mesa ``drm`` source tree.
-    let vs = registeredVersions("libdrm")
+    let vs = registeredVersions("libdrmSource")
     check vs.len == 1
     check vs[0].version == "2.4.133"
     check vs[0].sourceRevision == "libdrm-2.4.133"

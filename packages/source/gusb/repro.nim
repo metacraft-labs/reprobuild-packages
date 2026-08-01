@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package gusb:
+package gusbSource:
   versions:
     "0.4.9":
       sourceRevision = "0.4.9"
@@ -26,7 +26,7 @@ package gusb:
   library libgusb:
     discard
   build:
-    setCurrentOwningPackageOverride("gusb")
+    setCurrentOwningPackageOverride("gusbSource")
     try:
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "tests=false",

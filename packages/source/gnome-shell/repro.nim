@@ -38,7 +38,7 @@
 ## was first with libwayland + waylandScanner, mutter was second with
 ## libMutter + mutterBin). The unique coverage angle for this third
 ## library+executable meson recipe is the kebab-to-camel package-
-## identifier mapping (``gnome-shell`` -> ``gnomeShell``)
+## identifier mapping (``gnome-shell`` -> ``gnomeShellSource``)
 ## combined with the library+executable artifact split: this is the
 ## first recipe to combine BOTH a multi-word-kebab package name AND a
 ## mixed-kind artifact set, exercising the M3 registry's name-mangling
@@ -70,7 +70,7 @@
 ## download.gnome.org publishes gnome-shell releases at
 ## ``https://download.gnome.org/sources/gnome-shell/`` and 47.10 is
 ## the current stable in the 47.x line as of mid-2026, matching the
-## sibling ``mutter`` recipe's 47.10 pin. The 47.x ABI line
+## sibling ``mutterSource`` recipe's 47.10 pin. The 47.x ABI line
 ## consumes ``libmutter-15.so`` so the mutter/gnome-shell minor lines
 ## must stay in lockstep.
 ##
@@ -118,7 +118,7 @@
 ## ``gnomeShell`` (camelCased from the hyphenated upstream binary
 ## name, also matching the gdk-pixbuf -> gdkPixbuf precedent; no
 ## ``Bin`` suffix is needed here because the package identifier is
-## ``gnomeShell`` — distinct from the artifact identifier).
+## ``gnomeShellSource`` — distinct from the artifact identifier).
 ##
 ## ## Configurables
 ##
@@ -163,12 +163,12 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package gnomeShell:
+package gnomeShellSource:
   ## From-source gnome-shell — eighteenth M9.H/I/K production recipe
   ## and the CLOSING recipe in the GNOME stack batch. Third meson
   ## recipe to ship a library + an executable from the same
   ## ``package`` macro, and the first recipe to combine a multi-word-
-  ## kebab package name (``gnome-shell`` -> ``gnomeShell``)
+  ## kebab package name (``gnome-shell`` -> ``gnomeShellSource``)
   ## with a mixed-kind artifact set.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -228,7 +228,7 @@ package gnomeShell:
     ## entire GObject hierarchy + GMainLoop + GSettings + GDBus.
     "glib2 >=2.62"
     ## mutter is the compositor library gnome-shell links against for
-    ## its compositor glue; the sibling ``mutter`` recipe
+    ## its compositor glue; the sibling ``mutterSource`` recipe
     ## vendors 47.10 to match the gnome-shell 47.x ABI requirement.
     "mutter >=47"
     ## gjs is the GNOME JavaScript engine gnome-shell uses for its
@@ -296,7 +296,7 @@ package gnomeShell:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("gnomeShell")
+    setCurrentOwningPackageOverride("gnomeShellSource")
     try:
       let opts = @[
         "gtk_doc=false",

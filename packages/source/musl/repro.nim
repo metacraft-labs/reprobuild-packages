@@ -8,7 +8,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package musl:
+package muslSource:
   versions:
     "1.2.6":
       sourceRevision = "v1.2.6"
@@ -31,7 +31,7 @@ package musl:
     discard
 
   build:
-    setCurrentOwningPackageOverride("musl")
+    setCurrentOwningPackageOverride("muslSource")
     try:
       let opts = @[
         "--disable-shared",

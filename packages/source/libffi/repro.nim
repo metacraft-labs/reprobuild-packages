@@ -118,7 +118,7 @@ const LibffiAutotoolsBuildDir = ".repro/build/libffi-autotools"
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libffi:
+package libffiSource:
   ## From-source libffi — fifty-first M9.H/I/K production recipe.
   ## FIRST recipe in the crypto-and-FFI batch (libffi + nettle +
   ## libgcrypt + gnutls). Single library artifact recipe driven by
@@ -200,7 +200,7 @@ package libffi:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("libffi")
+    setCurrentOwningPackageOverride("libffiSource")
     try:
       let opts = @[
         "--disable-static",

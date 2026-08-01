@@ -11,7 +11,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libxshmfence:
+package libxshmfenceSource:
   versions:
     "1.3.3":
       sourceRevision = "libxshmfence-1.3.3"
@@ -40,7 +40,7 @@ package libxshmfence:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libxshmfence")
+    setCurrentOwningPackageOverride("libxshmfenceSource")
     try:
       let opts = @["--disable-static", "--enable-shared"]
       let pkg = autotools_package(srcDir = "./src", configureOptions = opts)

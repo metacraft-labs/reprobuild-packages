@@ -6,8 +6,8 @@
 ## ultimately routes through ``libasound.so`` for the kernel /dev/snd/*
 ## ioctl surface.
 ##
-## alsa-lib joins ``pipewire`` + ``wireplumber`` +
-## ``networkManager`` in the network + audio infrastructure batch
+## alsa-lib joins ``pipewireSource`` + ``wireplumberSource`` +
+## ``networkManagerSource`` in the network + audio infrastructure batch
 ## adding the four runtime daemons + libraries every modern desktop
 ## (sway / GNOME / Plasma) consumes for sound + networking.
 ##
@@ -113,7 +113,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package alsaLib:
+package alsaLibSource:
   ## From-source alsa-lib — sixty-seventh M9.H/I/K production recipe.
   ## The C library half of ALSA — every modern Linux audio stack routes
   ## through ``libasound.so`` for the kernel /dev/snd/* ioctl surface.
@@ -192,7 +192,7 @@ package alsaLib:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
-    setCurrentOwningPackageOverride("alsaLib")
+    setCurrentOwningPackageOverride("alsaLibSource")
     try:
       let opts = @[
         "--disable-static",

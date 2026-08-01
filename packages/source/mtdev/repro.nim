@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package mtdev:
+package mtdevSource:
   versions:
     "1.1.7":
       sourceRevision = "v1.1.7"
@@ -20,7 +20,7 @@ package mtdev:
   library libmtdev:
     discard
   build:
-    setCurrentOwningPackageOverride("mtdev")
+    setCurrentOwningPackageOverride("mtdevSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static", "--enable-shared",

@@ -1,4 +1,4 @@
-## Smoke test for the from-source ``gcc`` recipe.
+## Smoke test for the from-source ``gccSource`` recipe.
 ##
 ## Pins the M9.H/I + M3 registry behaviour on the M9.N Batch E
 ## compiler-chain slice. gcc's unique coverage angles vs the prior 81
@@ -42,7 +42,7 @@ import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + three executable + two library artifacts + four shell
-# actions under ``gcc`` at module init time.
+# actions under ``gccSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
@@ -53,18 +53,18 @@ const ExpectedUrl =
 const ExpectedHash =
   "a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9"
 
-suite "gcc — from-source recipe smoke test":
+suite "gccSource — from-source recipe smoke test":
 
   test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
-    let spec = registeredFetchSpec("gcc")
-    check spec.packageName == "gcc"
+    let spec = registeredFetchSpec("gccSource")
+    check spec.packageName == "gccSource"
     check spec.url == ExpectedUrl
 
   test "fetch spec hash is the real sha256 over the upstream tarball":
     # Real sha256 over the upstream ftp.gnu.org tarball; computed
     # locally + asserted exactly.
-    let spec = registeredFetchSpec("gcc")
+    let spec = registeredFetchSpec("gccSource")
     check spec.hashHex.len == 64
     check spec.hashHex == ExpectedHash
     check spec.hashAlg == dshaSha256
@@ -73,7 +73,7 @@ suite "gcc — from-source recipe smoke test":
     # Tarball vs git-archive discriminant + the canonical
     # ``--strip-components=1`` convention upstream ftp.gnu.org release
     # tarballs use.
-    let spec = registeredFetchSpec("gcc")
+    let spec = registeredFetchSpec("gccSource")
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
@@ -91,7 +91,7 @@ suite "gcc — from-source recipe smoke test":
     # A regression that flattened the kind discriminator at the
     # (3, 2) mixed cardinality would surface here (mis-routing the
     # M9.L install path: ``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("gcc")
+    let arts = registeredArtifacts("gccSource")
     check arts.len == 5
     var seenGcc = false
     var seenGxx = false
@@ -99,7 +99,7 @@ suite "gcc — from-source recipe smoke test":
     var seenLibgccS = false
     var seenLibstdcxx = false
     for art in arts:
-      check art.packageName == "gcc"
+      check art.packageName == "gccSource"
       case art.artifactName
       of "gcc":
         seenGcc = true
@@ -128,7 +128,7 @@ suite "gcc — from-source recipe smoke test":
     # M2 versions registry: the upstream ftp.gnu.org release tag is
     # recorded for ``repro update-source``. The repository points at
     # the canonical gcc.gnu.org git tree.
-    let vs = registeredVersions("gcc")
+    let vs = registeredVersions("gccSource")
     check vs.len == 1
     check vs[0].version == "14.2.0"
     check vs[0].sourceRevision == "releases/gcc-14.2.0"
@@ -142,10 +142,10 @@ suite "gcc — from-source recipe smoke test":
     # shell actions: ``mkdir -p $extracted/build`` + out-of-tree
     # configure + build + install. The from-source-custom convention
     # consumes the sequence verbatim.
-    let rows = registeredShellActions("gcc")
+    let rows = registeredShellActions("gccSource")
     check rows.len == 4
     for r in rows:
-      check r.packageName == "gcc"
+      check r.packageName == "gccSource"
       check r.artifactName == "gcc"
     check rows[0].command == "mkdir -p $extracted/build"
     check rows[1].command ==
@@ -157,9 +157,9 @@ suite "gcc — from-source recipe smoke test":
     # M9.N Batch C.1 — auto-generated ids follow the
     # ``<package>-<artifact>-<seq>`` shape; sequence increments per
     # artifact.
-    let rows = registeredShellActions("gcc")
+    let rows = registeredShellActions("gccSource")
     check rows.len == 4
-    check rows[0].id == "gcc-gcc-1"
-    check rows[1].id == "gcc-gcc-2"
-    check rows[2].id == "gcc-gcc-3"
-    check rows[3].id == "gcc-gcc-4"
+    check rows[0].id == "gccSource-gcc-1"
+    check rows[1].id == "gccSource-gcc-2"
+    check rows[2].id == "gccSource-gcc-3"
+    check rows[3].id == "gccSource-gcc-4"

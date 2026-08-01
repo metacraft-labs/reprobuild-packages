@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libjpeg:
+package libjpegSource:
   versions:
     "3.0.4":
       sourceRevision = "3.0.4"
@@ -24,7 +24,7 @@ package libjpeg:
   library libturbojpeg:
     discard
   build:
-    setCurrentOwningPackageOverride("libjpeg")
+    setCurrentOwningPackageOverride("libjpegSource")
     try:
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
         cacheVars = @[

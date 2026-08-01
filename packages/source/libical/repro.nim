@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libical:
+package libicalSource:
   versions:
     "3.0.19":
       sourceRevision = "v3.0.19"
@@ -37,7 +37,7 @@ package libical:
     discard
 
   build:
-    setCurrentOwningPackageOverride("libical")
+    setCurrentOwningPackageOverride("libicalSource")
     try:
       let opts = @[
         "WITH_CXX_BINDINGS=OFF",

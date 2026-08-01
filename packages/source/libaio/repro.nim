@@ -2,7 +2,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-package libaio:
+package libaioSource:
   versions:
     "0.3.113":
       sourceRevision = "libaio-0.3.113"
@@ -20,7 +20,7 @@ package libaio:
   library libaio:
     discard
   build:
-    setCurrentOwningPackageOverride("libaio")
+    setCurrentOwningPackageOverride("libaioSource")
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "prefix=/usr", "libdir=/usr/lib",

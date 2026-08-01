@@ -39,7 +39,7 @@
 ## libinput is the input-device abstraction layer every modern
 ## Wayland compositor links against to consume evdev events with
 ## consistent palm-rejection, gesture, and pointer-acceleration
-## semantics. The sibling ``wlroots`` recipe pins
+## semantics. The sibling ``wlrootsSource`` recipe pins
 ## ``libinput >=1.14`` in its ``uses:`` block, so this recipe is the
 ## upstream-source side of that dependency edge. Mutter (GNOME) and
 ## KWin (Plasma) also link against libinput.
@@ -139,7 +139,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package libinput:
+package libinputSource:
   ## From-source libinput — ninth M9.H/I/K production recipe.
   ##
   ## Tier-2b c_cpp_meson convention consumer: the convention layer
@@ -232,7 +232,7 @@ package libinput:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `meson_package(...)` constructor.
-    setCurrentOwningPackageOverride("libinput")
+    setCurrentOwningPackageOverride("libinputSource")
     try:
       let opts = @[
         "documentation=false",

@@ -61,7 +61,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kauth:
+package kauthSource:
   ## From-source kauth — M9.R.15p.4.1 KF6/Plasma blocker. Tier-2b
   ## c_cpp_cmake convention consumer. Single library artifact recipe.
   ## M9.R.15p.0's package-macro auto-injection handles libxkbcommon +
@@ -126,7 +126,7 @@ package kauth:
     ## ``cmake_package(...)`` high-level constructor. KAUTH_BACKEND_NAME
     ## is pinned to FAKE so the configure step doesn't trip on a
     ## missing PolkitQt6-1 dep (see the doc block above for rationale).
-    setCurrentOwningPackageOverride("kauth")
+    setCurrentOwningPackageOverride("kauthSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

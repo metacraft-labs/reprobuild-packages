@@ -25,7 +25,7 @@ when defined(windows):
 else:
   import posix
 
-package sudo:
+package sudoSource:
   versions:
     "1.9.16p2":
       sourceRevision = "SUDO_1_9_16p2"
@@ -57,7 +57,7 @@ package sudo:
     discard
 
   build:
-    setCurrentOwningPackageOverride("sudo")
+    setCurrentOwningPackageOverride("sudoSource")
     try:
       ## M9.R.29.3 — sudo's configure probes for ``mv``, ``vi``,
       ## ``sendmail``, and ``sh`` in PATH and bakes the absolute path

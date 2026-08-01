@@ -6,7 +6,7 @@
 import repro_project_dsl
 import repro_dsl_stdlib/types
 
-package clingo:
+package clingoSource:
   versions:
     "5.8.0":
       sourceRevision = "v5.8.0"

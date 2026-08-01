@@ -74,7 +74,7 @@ import repro_dsl_stdlib/packages/sh
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package qt6QuickControls2:
+package qt6QuickControls2Source:
   ## Shim qt6-quickcontrols2 -- M9.R.19.1 ReproOS Installer blocker.
   ## Re-exports qt6-declarative's QuickControls2 artifacts via a
   ## deterministic copy so the from-source tool resolver matches the
@@ -100,7 +100,7 @@ package qt6QuickControls2:
     ## The shell action stages from the sibling qt6-declarative recipe's
     ## install mirror.  The process env supplies the named roots while
     ## the action metadata uses the same resolver-backed concrete paths.
-    setCurrentOwningPackageOverride("qt6QuickControls2")
+    setCurrentOwningPackageOverride("qt6QuickControls2Source")
     try:
       let qtdeclRoot = dependencyInstallMirrorRoot("qt6-declarative")
       let selfMirrorRoot = currentPackageInstallMirrorRoot()
@@ -164,7 +164,7 @@ package qt6QuickControls2:
         "echo \"[qt6-quickcontrols2 shim] staged from $SRC -> $DST\""
       let stageAction = shell(
         command = cmd,
-        actionId = "qt6QuickControls2.shim_stage",
+        actionId = "qt6QuickControls2Source.shim_stage",
         extraInputs = @[
           # The sibling qt6-declarative install mirror.  Listing it as an
           # extraInput tells the engine to rebuild this shim whenever the
@@ -182,13 +182,13 @@ package qt6QuickControls2:
           selfMirrorRoot &
             "/usr/lib/cmake/Qt6QuickControls2/Qt6QuickControls2Config.cmake",
         ],
-        actionId = "qt6QuickControls2.publish_interface",
+        actionId = "qt6QuickControls2Source.publish_interface",
         after = @[stageAction])
       setRegisteredActionDeclaredOutputs(publishAction.id, @[selfMirrorRoot])
       setRegisteredActionPublish(publishAction.id, true,
         some(sourceCacheEntryIdentity(
           activeProviderProjectRoot(),
-          "qt6QuickControls2",
+          "qt6QuickControls2Source",
           "6.8.1",
           "custom")))
     finally:

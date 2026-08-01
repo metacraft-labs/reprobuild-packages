@@ -47,7 +47,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kitemmodels:
+package kitemmodelsSource:
   ## From-source kitemmodels — M9.R.15q.1.7 production recipe. Closes
   ## the ``KCategorizedSortFilterProxyModel`` find_package gap on
   ## kcmutils. Tier-2b c_cpp_cmake convention consumer. Single library
@@ -89,7 +89,7 @@ package kitemmodels:
     discard
 
   build:
-    setCurrentOwningPackageOverride("kitemmodels")
+    setCurrentOwningPackageOverride("kitemmodelsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",

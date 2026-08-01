@@ -57,7 +57,7 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
-package kwidgetsaddons:
+package kwidgetsaddonsSource:
   ## From-source kwidgetsaddons — thirty-eighth M9.H/I/K production
   ## recipe and the THIRD recipe in the KF6 module-sweep batch. Ninth
   ## CMake-driven recipe and the FOURTH KF6 foundation module after
@@ -121,7 +121,7 @@ package kwidgetsaddons:
 
   build:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `cmake_package(...)` constructor.
-    setCurrentOwningPackageOverride("kwidgetsaddons")
+    setCurrentOwningPackageOverride("kwidgetsaddonsSource")
     try:
       let opts = @[
         "BUILD_TESTING=OFF",
