@@ -195,6 +195,10 @@ package sddmSource:
     "ninja >=1.10"
     ## gcc is the host C/C++ toolchain — sddm is C++17.
     "gcc >=11"
+    ## SDDM probes Xau and systemd through CMake's FindPkgConfig module.
+    ## Declaring the tool keeps the configure step on the provisioned
+    ## toolchain instead of falling back to the host /usr/bin/pkg-config.
+    "pkg-config"
 
   buildDeps:
     ## qt6-base supplies QtCore / QtGui / QtDBus which the daemon +
@@ -336,6 +340,17 @@ package sddmSource:
         if providerRoot.len > 0: parentDir(providerRoot)
         else: getEnv("REPROBUILD_RECIPE_ROOT",
           "/opt/repro/reprobuild/recipes/packages/source")
+      # Qt installs one component config directory per module. Qt6Config from
+      # qt6-base cannot infer modules installed in sibling package prefixes,
+      # so identify the components SDDM requests explicitly.
+      let qtDeclarativeCmake = recipeRoot / "qt6-declarative" / ".repro" /
+        "output" / "install" / "usr" / "lib" / "cmake"
+      opts.add("Qt6Qml_DIR=" & qtDeclarativeCmake / "Qt6Qml")
+      opts.add("Qt6Quick_DIR=" & qtDeclarativeCmake / "Qt6Quick")
+      opts.add("Qt6QuickTest_DIR=" & qtDeclarativeCmake / "Qt6QuickTest")
+      let qtToolsCmake = recipeRoot / "qt6-tools" / ".repro" / "output" /
+        "install" / "usr" / "lib" / "cmake"
+      opts.add("Qt6LinguistTools_DIR=" & qtToolsCmake / "Qt6LinguistTools")
       # SDDM's bundled FindPAM module does not consistently honor the
       # action's CMAKE_PREFIX_PATH when PAM uses a lib64 layout. Pin the
       # two cache entries to the realized sibling mirror.
