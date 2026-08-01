@@ -112,6 +112,8 @@ package gobjectIntrospectionSource:
     "meson >=0.62"
     "ninja >=1.10"
     "gcc >=11"
+    ## Meson resolves glib2 and libffi through their generated .pc files.
+    "pkg-config"
     ## flex generates the GIR lexer at build time.
     "flex"
     ## bison generates the GIR parser at build time.

@@ -31,6 +31,10 @@ suite "gobjectIntrospectionSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
+  test "native build dependencies include pkg-config":
+    check "pkg-config" in
+      registeredNativeBuildDeps("gobjectIntrospectionSource")
+
   test "one library + two executable artifacts registered":
     let arts = registeredArtifacts("gobjectIntrospectionSource")
     check arts.len == 4
