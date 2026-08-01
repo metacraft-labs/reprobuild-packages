@@ -62,7 +62,9 @@ package llvmSource:
         "LLVM_ENABLE_LIBPFM=OFF",
       ]
       let pkg = cmake_package(srcDir = "./src/llvm", generator = "Ninja",
-        cacheVars = opts, allowSourceWrites = true)
+        cacheVars = opts,
+        extraEnv = @[("CMAKE_BUILD_PARALLEL_LEVEL", "8")],
+        allowSourceWrites = true)
       discard pkg.executable("llvm-config")
       discard pkg.library("libLLVM")
     finally:
