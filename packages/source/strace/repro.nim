@@ -20,9 +20,6 @@ package straceSource:
     "make"
     "gcc >=11"
 
-  buildDeps:
-    "linux-headers >=4.19"
-
   config:
     discard
 
