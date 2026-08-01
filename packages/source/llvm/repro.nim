@@ -23,11 +23,6 @@ package llvmSource:
     "binutils >=2.39"
     "python3 >=3.8"
 
-  buildDeps:
-    # GCC needs the target libc startup objects when CMake verifies the
-    # provisioned compiler and when LLVM links its shared runtime.
-    "glibc >=2.36"
-
   config:
     discard
 
