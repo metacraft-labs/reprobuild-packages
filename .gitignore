@@ -2,4 +2,5 @@
 build/
 result
 result-*
-
+/tools/package_interface_fingerprints
+/tools/package_interface_fingerprints.exe
