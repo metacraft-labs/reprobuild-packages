@@ -43,6 +43,7 @@ package llvmSource:
         "BUILD_SHARED_LIBS=OFF",
         "LLVM_BUILD_LLVM_DYLIB=ON",
         "LLVM_LINK_LLVM_DYLIB=ON",
+        "LLVM_ENABLE_RTTI=ON",
         "LLVM_TARGETS_TO_BUILD=X86",
         "LLVM_INCLUDE_TESTS=OFF",
         "LLVM_INCLUDE_EXAMPLES=OFF",
