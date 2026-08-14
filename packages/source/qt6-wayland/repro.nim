@@ -144,6 +144,12 @@ package qt6WaylandSource:
     "perl"
     ## python is invoked by Qt's syncqt + code-generation helpers.
     "python3"
+    ## Qt6Gui's exported CMake package resolves its required XKB target
+    ## through FindXKB.cmake, which uses pkg-config to locate the
+    ## from-source libxkbcommon prefix. Without this tool Qt6Gui is
+    ## treated as an unavailable optional component and qtwayland skips
+    ## its entire build.
+    "pkg-config"
     ## qt6-tools supplies ``qhelpgenerator`` for QCH generation (the Qt
     ## docs-build helper). Matches the sibling qt6-svg / qt6-declarative
     ## native dep set.
@@ -233,5 +239,6 @@ package qt6WaylandSource:
       discard pkg.library("libQt6WaylandClient")
       discard pkg.library("libQt6WaylandCompositor")
       discard pkg.library("libQt6WaylandEglClientHwIntegration")
+      pkg.installTreeMirror()
     finally:
       clearCurrentOwningPackageOverride()
