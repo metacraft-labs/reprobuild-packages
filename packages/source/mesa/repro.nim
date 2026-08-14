@@ -22,9 +22,10 @@
 ##
 ## Mesa is a HEAVY meson-driven C/C++ stack with over a hundred build
 ## options. The v1 recipe targets the MINIMAL feature set sufficient to
-## satisfy compositor link requirements: software rasterizer only
-## (``swrast``), Wayland platform only, no Vulkan, no X11. Hardware
-## acceleration is OUT OF SCOPE for v1 — the goal is to publish the
+## satisfy compositor and QEMU scanout requirements: the software
+## rasterizer (``swrast``) plus the paravirtualized ``virgl`` driver,
+## Wayland platform only, no Vulkan, no X11. Physical GPU acceleration
+## is OUT OF SCOPE for v1 — the goal is to publish the
 ## libGL / libEGL / libGLESv2 / libgbm ABIs so downstream KF6 / Qt6 /
 ## GNOME consumers can link.
 ##
@@ -93,7 +94,8 @@
 ##                                 vendor backends; the swrast software
 ##                                 rasterizer satisfies compositor
 ##                                 startup probes without GPU).
-##   * ``gallium-drivers=swrast`` — software rasterizer ONLY. Mesa
+##   * ``gallium-drivers=swrast,virgl`` — software rasterizer plus the
+##                                 QEMU virtio-gpu/virgl driver. Mesa
 ##                                 24.0.x still ships ``swrast`` as a
 ##                                 native gallium-drivers choice
 ##                                 (verified against 24.0.9
@@ -102,9 +104,11 @@
 ##                                 enabled, ``swrast`` builds the
 ##                                 llvmpipe software path that wlroots
 ##                                 can use against QEMU's KMS
-##                                 framebuffer. No hardware drivers
+##                                 framebuffer. Virgl exposes the
+##                                 ``virtio_gpu_dri.so`` loader target
+##                                 used by QEMU; physical GPU drivers
 ##                                 (i915, iris, radeon, nouveau, etc.)
-##                                 are shipped.
+##                                 are not shipped.
 ##   * ``platforms=wayland``     — Wayland platform support ONLY. No
 ##                                 X11 (xcb/xlib) — the v1 desktop is
 ##                                 Wayland-native.
@@ -243,7 +247,7 @@ package mesaSource:
     try:
       let opts = @[
         "vulkan-drivers=",
-        "gallium-drivers=swrast",
+        "gallium-drivers=swrast,virgl",
         "platforms=wayland",
         "glx=disabled",
         "gles1=disabled",
