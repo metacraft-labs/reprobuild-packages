@@ -46,6 +46,11 @@ package kbdSource:
           "--without-lzma",
           "--without-zstd",
         ],
+        installMakeVars = @[
+          "SRC_KEYMAPDIR=$(abs_srcdir)/keymaps",
+          "SRC_FONTDIR=$(abs_srcdir)/consolefonts",
+          "SRC_PARTIALDIR=$(abs_srcdir)/partialfonts",
+        ],
       )
       discard pkg.executable("loadkeys")
     finally:
