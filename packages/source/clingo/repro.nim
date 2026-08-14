@@ -3,8 +3,10 @@
 ## bootable image must provide the library independently of the build
 ## environment used to compile the CLI.
 
+import std/os
 import repro_project_dsl
-import repro_dsl_stdlib/types
+import repro_dsl_stdlib/constructors
+import repro_dsl_stdlib/types/package_result
 
 package clingoSource:
   versions:
@@ -28,14 +30,44 @@ package clingoSource:
     discard
 
   library libclingo:
-    build:
-      # Clingo generates libclingo/clingo.h in its source directory.
-      # Build from a writable copy while preserving the fetched tree as
-      # an immutable input to the monitored action.
-      shell "rm -rf $out/source $out/build; mkdir -p $out/source $out/build; cp -a $extracted/. $out/source/"
-      shell "cmake -S $out/source -B $out/build -G Ninja -DCMAKE_INSTALL_PREFIX=$out -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCLINGO_BUILD_TESTS=OFF -DCLINGO_BUILD_EXAMPLES=OFF -DCLINGO_BUILD_APPS=OFF -DCLINGO_BUILD_SHARED=ON -DCLINGO_BUILD_WITH_PYTHON=OFF -DCLINGO_BUILD_WITH_LUA=OFF"
-      shell "cmake --build $out/build -j8"
-      shell "cmake --install $out/build"
+    discard
+
+  build:
+    setCurrentOwningPackageOverride("clingoSource")
+    try:
+      let providerRoot = activeProviderProjectRoot()
+      var opts = @[
+        "CMAKE_BUILD_TYPE=Release",
+        "CMAKE_INSTALL_LIBDIR=lib",
+        "CLINGO_BUILD_TESTS=OFF",
+        "CLINGO_BUILD_EXAMPLES=OFF",
+        "CLINGO_BUILD_APPS=OFF",
+        "CLINGO_BUILD_SHARED=ON",
+        "CLINGO_BUILD_WITH_PYTHON=OFF",
+        "CLINGO_BUILD_WITH_LUA=OFF",
+      ]
+      var patches: seq[string] = @[]
+      if providerRoot.len > 0:
+        let re2cWrapper = providerRoot / "src" / "repro-re2c"
+        opts.add("RE2C_EXECUTABLE=" & re2cWrapper)
+        patches.add(
+          "printf '%s\\n' '#!/bin/sh' 'unset LD_LIBRARY_PATH' " &
+          "'exec /usr/bin/re2c \"$@\"' > src/repro-re2c && " &
+          "chmod +x src/repro-re2c")
+      let pkg = cmake_package(
+        srcDir = "./src",
+        generator = "Ninja",
+        cacheVars = opts,
+        # Clingo generates libclingo/clingo.h below its source tree.
+        allowSourceWrites = true,
+        # Tool provisioning also exposes the source GCC runtime through
+        # LD_LIBRARY_PATH. Host re2c must retain its host glibc/libstdc++ pair.
+        extraEnv = @[("LD_LIBRARY_PATH", "")],
+        srcPatches = patches)
+      discard pkg.library("libclingo")
+      pkg.installTreeMirror()
+    finally:
+      clearCurrentOwningPackageOverride()
 
   runtimeDeps:
     discard
