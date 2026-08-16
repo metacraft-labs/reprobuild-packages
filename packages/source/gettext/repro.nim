@@ -248,9 +248,7 @@ package gettextSource:
         configureOptions = opts,
         allowSourceWrites = true,
         extraEnv = @[
-          ("NIX_LDFLAGS", ""),
           ("LDFLAGS", "-Wl,-rpath," &
-            sourcePackageInstallPath("glibc", "usr", "lib64") & ":" &
             sourcePackageInstallPath("gettext", "usr", "lib")),
         ])
       discard pkg.executable("msgfmt")
