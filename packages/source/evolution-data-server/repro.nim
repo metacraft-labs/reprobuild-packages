@@ -65,7 +65,12 @@ package evolutionDataServerSource:
         sourcePackageInstallPath("nss", "usr", "include", "nss"),
         sourcePackageInstallPath("icu", "usr", "include"),
       ].join(":")
+      let icuInclude = sourcePackageInstallPath("icu", "usr", "include")
+      let icuLib = sourcePackageInstallPath("icu", "usr", "lib")
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
+        srcPatches = @[
+          "sed -i '/pkg_check_modules(ICU icu-i18n icu-uc)/a\\set(ICU_CFLAGS \"\")\\nset(ICU_INCLUDE_DIRS \"$ENV{ICU_SOURCE_INCLUDE}\")\\nset(ICU_LDFLAGS \"-L$ENV{ICU_SOURCE_LIB};-licui18n;-licuuc\")' src/CMakeLists.txt",
+        ],
         cacheVars = @[
           "ENABLE_GTK=OFF",
           "ENABLE_GTK4=OFF",
@@ -89,8 +94,8 @@ package evolutionDataServerSource:
           "CMAKE_POLICY_VERSION_MINIMUM=3.5",
         ], allowSourceWrites = true, extraEnv = @[
           ("CPATH", cpath),
-          ("PKG_CONFIG_ALLOW_SYSTEM_CFLAGS", "0"),
-          ("PKG_CONFIG_ALLOW_SYSTEM_LIBS", "0"),
+          ("ICU_SOURCE_INCLUDE", icuInclude),
+          ("ICU_SOURCE_LIB", icuLib),
         ])
       discard pkg.library("libEDataServer")
       discard pkg.library("libEBackend")
