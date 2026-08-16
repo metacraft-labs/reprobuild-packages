@@ -212,6 +212,8 @@ package gdmSource:
     ## + logind IPC, GSettings for configuration). The sibling
     ## ``glib2Source`` recipe vendors 2.82.5 to match.
     "glib2 >=2.62"
+    ## GDM compiles the greeter defaults database with `dconf compile`.
+    "dconf >=0.40"
     ## pam is the authentication-stack library gdm's greeter consumes
     ## to authenticate logins against ``/etc/pam.d/gdm``.
     "pam >=1.5"
