@@ -63,6 +63,7 @@ package evolutionDataServerSource:
         sourcePackageInstallPath("libical", "usr", "include"),
         sourcePackageInstallPath("nspr", "usr", "include", "nspr"),
         sourcePackageInstallPath("nss", "usr", "include", "nss"),
+        sourcePackageInstallPath("icu", "usr", "include"),
       ].join(":")
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
         cacheVars = @[
@@ -86,7 +87,11 @@ package evolutionDataServerSource:
           "WITH_LIBDB=OFF",
           "CMAKE_BUILD_TYPE=Release",
           "CMAKE_POLICY_VERSION_MINIMUM=3.5",
-        ], allowSourceWrites = true, extraEnv = @[("CPATH", cpath)])
+        ], allowSourceWrites = true, extraEnv = @[
+          ("CPATH", cpath),
+          ("PKG_CONFIG_ALLOW_SYSTEM_CFLAGS", "0"),
+          ("PKG_CONFIG_ALLOW_SYSTEM_LIBS", "0"),
+        ])
       discard pkg.library("libEDataServer")
       discard pkg.library("libEBackend")
       discard pkg.library("libECal")
