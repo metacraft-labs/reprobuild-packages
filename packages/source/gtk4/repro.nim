@@ -262,8 +262,13 @@ package gtk4Source:
             it, "usr", "share", "gir-1.0")).join(":")),
           ("LIBRARY_PATH", sourcePackageInstallPath(
             "freetype", "usr", "lib")),
-          ("LD_LIBRARY_PATH", sourcePackageInstallPath(
-            "freetype", "usr", "lib")),
+          # GTK's generators execute against the source-built GLib closure
+          # during compilation. Keep source glibc out of this path so host
+          # build tools continue to use their compatible runtime loader.
+          ("LD_LIBRARY_PATH", @[
+            "glib2", "zlib", "libxml2", "freetype",
+          ].mapIt(sourcePackageInstallPath(
+            it, "usr", "lib")).join(":")),
           ("CPATH", sourcePackageInstallPath(
             "wayland", "usr", "include"))])
       discard pkg.library("libGtk4")
