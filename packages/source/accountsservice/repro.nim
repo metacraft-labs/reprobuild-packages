@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package accountsserviceSource:
   versions:
     "23.13.9":
@@ -32,6 +34,8 @@ package accountsserviceSource:
   build:
     setCurrentOwningPackageOverride("accountsserviceSource")
     try:
+      let glib2 = sourcePackageInstallRoot("glib2")
+      let polkit = sourcePackageInstallRoot("polkit")
       let patches = @[
         "sed -i 's|^    VERSION_FROM_DIR_NAME=.*|    VERSION_FROM_DIR_NAME=23.13.9|' src/generate-version.sh",
         "mv src/data/org.freedesktop.accounts.policy.in src/data/org.freedesktop.accounts.policy",
@@ -47,9 +51,10 @@ package accountsserviceSource:
         "gtk_doc=false",
       ], extraEnv = @[
         ("PKG_CONFIG_ALLOW_SYSTEM_CFLAGS", "1"),
-        ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib64/glib-2.0/include"),
+        ("CPATH", glib2 & "/usr/include/glib-2.0:" &
+          glib2 & "/usr/lib64/glib-2.0/include"),
         ("CFLAGS", "-Wno-error=implicit-function-declaration"),
-        ("GETTEXTDATADIRS", "/opt/repro/reprobuild/recipes/packages/source/polkit/.repro/output/install/usr/share/gettext"),
+        ("GETTEXTDATADIRS", polkit & "/usr/share/gettext"),
       ], srcPatches = patches)
       discard pkg.library("libaccountsservice")
     finally:

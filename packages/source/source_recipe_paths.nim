@@ -16,6 +16,12 @@ proc sourceRecipeRoot*(): string =
 proc sourcePackageRoot*(packageName: string): string =
   joinPath(sourceRecipeRoot(), packageName)
 
+proc sourcePackagePath*(packageName: string,
+                        pathParts: varargs[string]): string =
+  result = sourcePackageRoot(packageName)
+  for pathPart in pathParts:
+    result = joinPath(result, pathPart)
+
 proc sourcePackageInstallRoot*(packageName: string): string =
   packageInstallMirrorRoot(sourceRecipeRoot(), packageName)
 
