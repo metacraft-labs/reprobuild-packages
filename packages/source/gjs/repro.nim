@@ -40,6 +40,9 @@ package gjsSource:
         sourcePackageInstallRoot("gobject-introspection")
       let glib2Introspection =
         sourcePackageInstallRoot("glib2-introspection")
+      let mozjs = sourcePackageInstallRoot("mozjs128")
+      let zlib = sourcePackageInstallRoot("zlib")
+      let glibc = sourcePackageInstallRoot("glibc")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "readline=disabled",
         "profiler=disabled",
@@ -54,7 +57,11 @@ package gjsSource:
         ("GI_GIR_PATH", glib2Introspection & "/usr/share/gir-1.0"),
         ("GI_TYPELIB_PATH", glib2Introspection &
           "/usr/lib/girepository-1.0"),
-        ("LD_LIBRARY_PATH", glib2 & "/usr/lib:" &
+        ("LDFLAGS", "-Wl,-rpath-link," & zlib & "/usr/lib " &
+          "-Wl,-rpath-link," & glibc & "/usr/lib64"),
+        ("LD_LIBRARY_PATH", mozjs & "/usr/lib:" &
+          zlib & "/usr/lib:" &
+          glib2 & "/usr/lib:" &
           gobjectIntrospection & "/usr/lib:" &
           sourcePackageInstallRoot("libffi") & "/usr/lib:" &
           sourcePackageInstallRoot("pcre2") & "/usr/lib"),
