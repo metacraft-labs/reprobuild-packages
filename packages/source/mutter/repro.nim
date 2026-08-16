@@ -312,8 +312,9 @@ package mutterSource:
     ## buildDeps row did not cover. Each maps to a stdlib stub
     ## pointing at the matching nixpkgs derivation.
     ##
-    ## * ``atk`` (line 126) — GNOME accessibility toolkit, via
-    ##   ``nixpkgs#atk`` (aliased to at-spi2-core upstream).
+    ## * ``atk`` (line 126) — GNOME accessibility toolkit, provided by
+    ##   the sibling at-spi2-core source recipe (which installs atk.pc and
+    ##   Atk-1.0.gir).
     ## * ``colord`` (line 127) — color-management daemon.
     ## * ``lcms2`` (line 128) — Little CMS 2 color transforms.
     ## * ``libei`` + ``libeis`` (lines 130-131) — Emulated Input
@@ -326,7 +327,7 @@ package mutterSource:
     ##   GBM userspace via ``nixpkgs#libgbm``.
     ## * ``gudev`` (line 237) + ``udev`` (line 238) — libgudev GLib
     ##   wrapper + udev.pc from systemd's -dev output.
-    "atk"
+    "at-spi2-core >=2.54"
     "colord"
     "lcms2"
     "libei"
