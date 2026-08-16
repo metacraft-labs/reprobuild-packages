@@ -1,6 +1,10 @@
+import std/strutils
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 package evolutionDataServerSource:
   versions:
@@ -46,6 +50,20 @@ package evolutionDataServerSource:
   build:
     setCurrentOwningPackageOverride("evolutionDataServerSource")
     try:
+      let cpath = @[
+        sourcePackageInstallPath("glib2", "usr", "include", "glib-2.0"),
+        sourcePackageInstallPath(
+          "glib2", "usr", "lib", "glib-2.0", "include"),
+        sourcePackageInstallPath("libxml2", "usr", "include", "libxml2"),
+        sourcePackageInstallPath(
+          "json-glib", "usr", "include", "json-glib-1.0"),
+        sourcePackageInstallPath("util-linux", "usr", "include"),
+        sourcePackageInstallPath(
+          "libsecret", "usr", "include", "libsecret-1"),
+        sourcePackageInstallPath("libical", "usr", "include"),
+        sourcePackageInstallPath("nspr", "usr", "include", "nspr"),
+        sourcePackageInstallPath("nss", "usr", "include", "nss"),
+      ].join(":")
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
         cacheVars = @[
           "ENABLE_GTK=OFF",
@@ -68,9 +86,7 @@ package evolutionDataServerSource:
           "WITH_LIBDB=OFF",
           "CMAKE_BUILD_TYPE=Release",
           "CMAKE_POLICY_VERSION_MINIMUM=3.5",
-        ], allowSourceWrites = true, extraEnv = @[
-          ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib/glib-2.0/include:/opt/repro/reprobuild/recipes/packages/source/libxml2/.repro/output/install/usr/include/libxml2:/opt/repro/reprobuild/recipes/packages/source/json-glib/.repro/output/install/usr/include/json-glib-1.0:/opt/repro/reprobuild/recipes/packages/source/util-linux/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/libsecret/.repro/output/install/usr/include/libsecret-1:/opt/repro/reprobuild/recipes/packages/source/libical/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/nspr/.repro/output/install/usr/include/nspr:/opt/repro/reprobuild/recipes/packages/source/nss/.repro/output/install/usr/include/nss"),
-        ])
+        ], allowSourceWrites = true, extraEnv = @[("CPATH", cpath)])
       discard pkg.library("libEDataServer")
       discard pkg.library("libEBackend")
       discard pkg.library("libECal")

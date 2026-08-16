@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package libsoup3Source:
   versions:
     "3.6.5":
@@ -30,6 +32,7 @@ package libsoup3Source:
   build:
     setCurrentOwningPackageOverride("libsoup3Source")
     try:
+      let glib2 = sourcePackageInstallRoot("glib2")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "gssapi=disabled", "ntlm=disabled", "brotli=disabled",
         "tls_check=false", "introspection=disabled", "vapi=disabled",
@@ -37,7 +40,12 @@ package libsoup3Source:
         "installed_tests=false", "sysprof=disabled", "fuzzing=disabled",
         "pkcs11_tests=disabled",
       ], extraEnv = @[
-        ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib/glib-2.0/include:/opt/repro/reprobuild/recipes/packages/source/nghttp2/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/sqlite/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/libpsl/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/zlib/.repro/output/install/usr/include"),
+        ("CPATH", glib2 & "/usr/include/glib-2.0:" &
+          glib2 & "/usr/lib/glib-2.0/include:" &
+          sourcePackageInstallPath("nghttp2", "usr", "include") & ":" &
+          sourcePackageInstallPath("sqlite", "usr", "include") & ":" &
+          sourcePackageInstallPath("libpsl", "usr", "include") & ":" &
+          sourcePackageInstallPath("zlib", "usr", "include")),
       ])
       discard pkg.library("libSoup3")
     finally:

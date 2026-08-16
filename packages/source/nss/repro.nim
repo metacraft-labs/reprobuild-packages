@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package nssSource:
   versions:
     "3.107":
@@ -26,7 +28,19 @@ package nssSource:
     discard
   library libNss3:
     build:
-      shell "NSPR=/opt/repro/reprobuild/recipes/packages/source/nspr/.repro/output/install/usr; SQLITE=/opt/repro/reprobuild/recipes/packages/source/sqlite/.repro/output/install/usr; ZLIB=/opt/repro/reprobuild/recipes/packages/source/zlib/.repro/output/install/usr; export CPATH=$NSPR/include/nspr:$SQLITE/include:$ZLIB/include LIBRARY_PATH=$NSPR/lib:$SQLITE/lib:$ZLIB/lib PKG_CONFIG_PATH=$NSPR/lib/pkgconfig:$SQLITE/lib/pkgconfig:$ZLIB/lib/pkgconfig; mkdir -p dist/Release/lib; ln -sf $NSPR/lib/libnspr4.so $NSPR/lib/libplc4.so $NSPR/lib/libplds4.so dist/Release/lib/; cd nss; ./build.sh -v --opt --gcc --disable-tests --with-nspr=$NSPR/include/nspr:$NSPR/lib --system-sqlite; rm -f ../dist/Release/lib/libnspr4.so ../dist/Release/lib/libplc4.so ../dist/Release/lib/libplds4.so"
+      let nspr = sourcePackageInstallPath("nspr", "usr")
+      let sqlite = sourcePackageInstallPath("sqlite", "usr")
+      let zlib = sourcePackageInstallPath("zlib", "usr")
+      shell ("NSPR=" & nspr & "; SQLITE=" & sqlite & "; ZLIB=" & zlib &
+        "; export CPATH=$NSPR/include/nspr:$SQLITE/include:$ZLIB/include" &
+        " LIBRARY_PATH=$NSPR/lib:$SQLITE/lib:$ZLIB/lib" &
+        " PKG_CONFIG_PATH=$NSPR/lib/pkgconfig:$SQLITE/lib/pkgconfig:$ZLIB/lib/pkgconfig;" &
+        " mkdir -p dist/Release/lib;" &
+        " ln -sf $NSPR/lib/libnspr4.so $NSPR/lib/libplc4.so $NSPR/lib/libplds4.so dist/Release/lib/;" &
+        " cd nss; ./build.sh -v --opt --gcc --disable-tests" &
+        " --with-nspr=$NSPR/include/nspr:$NSPR/lib --system-sqlite;" &
+        " rm -f ../dist/Release/lib/libnspr4.so ../dist/Release/lib/libplc4.so" &
+        " ../dist/Release/lib/libplds4.so")
       shell "mkdir -p $out/install/usr/lib/pkgconfig $out/install/usr/include/nss; cp -a dist/Release/lib/*.so* $out/install/usr/lib/; cp -a dist/public/nss/. $out/install/usr/include/nss/; printf 'prefix=%s\\nexec_prefix=${prefix}\\nlibdir=${prefix}/lib\\nincludedir=${prefix}/include/nss\\n\\nName: NSS\\nDescription: Network Security Services\\nVersion: 3.107\\nRequires: nspr >= 4.36\\nLibs: -L${libdir} -lssl3 -lsmime3 -lnss3 -lnssutil3\\nCflags: -I${includedir}\\n' \"$out/install/usr\" > $out/install/usr/lib/pkgconfig/nss.pc"
   library libNssutil3:
     discard
