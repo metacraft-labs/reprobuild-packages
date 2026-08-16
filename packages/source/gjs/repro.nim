@@ -64,7 +64,8 @@ package gjsSource:
           glib2 & "/usr/lib:" &
           gobjectIntrospection & "/usr/lib:" &
           sourcePackageInstallRoot("libffi") & "/usr/lib:" &
-          sourcePackageInstallRoot("pcre2") & "/usr/lib"),
+          sourcePackageInstallRoot("pcre2") & "/usr/lib:" &
+          sourcePackageInstallRoot("libxml2") & "/usr/lib"),
       ])
       discard pkg.library("libGjs")
       discard pkg.executable("gjs")
