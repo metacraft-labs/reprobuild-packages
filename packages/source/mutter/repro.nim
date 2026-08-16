@@ -134,9 +134,13 @@
 ## variants need different strategies (e.g. an X11-compat variant that
 ## flips ``x11=true`` for legacy bundles).
 
+import std/[sequtils, strutils]
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -413,34 +417,28 @@ package mutterSource:
         "clutter_tests=false",
         "mutter_tests=false",
       ]
+      let cppFlags = @[
+        sourcePackageInstallPath("glib2", "usr", "include", "glib-2.0"),
+        sourcePackageInstallPath("graphene", "usr", "include", "graphene-1.0"),
+        sourcePackageInstallPath("cairo", "usr", "include", "cairo"),
+        sourcePackageInstallPath("wayland", "usr", "include"),
+        sourcePackageInstallPath("libxkbcommon", "usr", "include"),
+        sourcePackageInstallPath("mesa", "usr", "include"),
+        sourcePackageInstallPath("libglvnd", "usr", "include"),
+      ].mapIt("-I" & it).join(" ")
+      let girPath = @[
+        "glib2-introspection", "graphene", "cairo", "pango", "gdk-pixbuf",
+        "harfbuzz", "at-spi2-core", "gsettings-desktop-schemas",
+      ].mapIt(sourcePackageInstallPath(it, "usr", "share", "gir-1.0")).join(":")
+      let dataDirs = @[
+        "glib2-introspection", "graphene", "cairo", "pango", "gdk-pixbuf",
+        "harfbuzz", "at-spi2-core", "gsettings-desktop-schemas",
+      ].mapIt(sourcePackageInstallPath(it, "usr", "share")).join(":")
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
         extraEnv = @[
-          ("CPPFLAGS",
-            "-I/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0 " &
-            "-I/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/include/graphene-1.0 " &
-            "-I/opt/repro/reprobuild/recipes/packages/source/cairo/.repro/output/install/usr/include/cairo " &
-            "-I/opt/repro/reprobuild/recipes/packages/source/wayland/.repro/output/install/usr/include " &
-            "-I/opt/repro/reprobuild/recipes/packages/source/libxkbcommon/.repro/output/install/usr/include " &
-            "-I/opt/repro/reprobuild/recipes/packages/source/mesa/.repro/output/install/usr/include " &
-            "-I/opt/repro/reprobuild/recipes/packages/source/libglvnd/.repro/output/install/usr/include"),
-          ("GI_GIR_PATH",
-            "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/cairo/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/gdk-pixbuf/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/harfbuzz/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/at-spi2-core/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/gsettings-desktop-schemas/.repro/output/install/usr/share/gir-1.0"),
-          ("XDG_DATA_DIRS",
-            "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share:" &
-            "/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/share:" &
-            "/opt/repro/reprobuild/recipes/packages/source/cairo/.repro/output/install/usr/share:" &
-            "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/share:" &
-            "/opt/repro/reprobuild/recipes/packages/source/gdk-pixbuf/.repro/output/install/usr/share:" &
-            "/opt/repro/reprobuild/recipes/packages/source/harfbuzz/.repro/output/install/usr/share:" &
-            "/opt/repro/reprobuild/recipes/packages/source/at-spi2-core/.repro/output/install/usr/share:" &
-            "/opt/repro/reprobuild/recipes/packages/source/gsettings-desktop-schemas/.repro/output/install/usr/share"),
+          ("CPPFLAGS", cppFlags),
+          ("GI_GIR_PATH", girPath),
+          ("XDG_DATA_DIRS", dataDirs),
         ])
       discard pkg.library("libMutter")
       discard pkg.executable("mutterBin")

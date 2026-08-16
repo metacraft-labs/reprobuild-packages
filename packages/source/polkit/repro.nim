@@ -46,11 +46,11 @@
 ##                                   agents (gnome-shell, plasma's
 ##                                   polkit-kde-agent) link against.
 
-import std/os
-
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 package polkitSource:
   ## From-source polkit — closes M9.R.26 Gap 3. Tier-2b c_cpp_meson
@@ -139,13 +139,8 @@ package polkitSource:
   build:
     setCurrentOwningPackageOverride("polkitSource")
     try:
-      let providerRoot = activeProviderProjectRoot()
-      let defaultSourceRoot =
-        if providerRoot.len > 0: parentDir(providerRoot)
-        else: "/opt/repro/reprobuild-packages/packages/source"
-      let sourceRoot = getEnv("REPRO_FROM_SOURCE_ROOT", defaultSourceRoot)
-      let glib2Introspection = packageInstallMirrorRoot(
-        sourceRoot, "glib2-introspection")
+      let glib2Introspection =
+        sourcePackageInstallRoot("glib2-introspection")
       let opts = @[
         # Use duktape as the JS engine (the v1 default per upstream;
         # mozjs is a much heavier dep chain).
