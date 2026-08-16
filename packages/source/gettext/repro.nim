@@ -244,7 +244,12 @@ package gettextSource:
       let pkg = autotools_package(
         srcDir = "./src",
         configureOptions = opts,
-        allowSourceWrites = true)
+        allowSourceWrites = true,
+        extraEnv = @[
+          ("LDFLAGS", "-Wl,-rpath," &
+            sourcePackageInstallPath("glibc", "usr", "lib64") & ":" &
+            sourcePackageInstallPath("gettext", "usr", "lib")),
+        ])
       discard pkg.executable("msgfmt")
       discard pkg.executable("msgmerge")
       discard pkg.executable("xgettext")
