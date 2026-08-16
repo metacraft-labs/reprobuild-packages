@@ -25,6 +25,7 @@ package libsecretSource:
   buildDeps:
     "glib2 >=2.70"
     "libgcrypt >=1.10"
+    "libgpg-error"
 
   config:
     discard
@@ -50,6 +51,8 @@ package libsecretSource:
           glib2 & "/usr/lib/glib-2.0/include:" &
           sourcePackageInstallPath("libgcrypt", "usr", "include") & ":" &
           sourcePackageInstallPath("libgpg-error", "usr", "include")),
+        ("LDFLAGS", "-Wl,-rpath-link," & sourcePackageInstallPath(
+          "libgpg-error", "usr", "lib")),
       ])
       discard pkg.library("libSecret")
     finally:
