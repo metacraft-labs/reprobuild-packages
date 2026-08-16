@@ -21,6 +21,7 @@ package nssSource:
     "python3 >=3.8"
     "pkg-config"
   buildDeps:
+    "glibc"
     "nspr >=4.36"
     "sqlite >=3.40"
     "zlib"
@@ -31,9 +32,12 @@ package nssSource:
       let nspr = sourcePackageInstallPath("nspr", "usr")
       let sqlite = sourcePackageInstallPath("sqlite", "usr")
       let zlib = sourcePackageInstallPath("zlib", "usr")
+      let glibcLib = sourcePackageInstallPath("glibc", "usr", "lib64")
       shell ("NSPR=" & nspr & "; SQLITE=" & sqlite & "; ZLIB=" & zlib &
+        "; GLIBC_LIB=" & glibcLib &
         "; export CPATH=$NSPR/include/nspr:$SQLITE/include:$ZLIB/include" &
         " LIBRARY_PATH=$NSPR/lib:$SQLITE/lib:$ZLIB/lib" &
+        " LDFLAGS=\"-Wl,-rpath-link,$GLIBC_LIB\"" &
         " PKG_CONFIG_PATH=$NSPR/lib/pkgconfig:$SQLITE/lib/pkgconfig:$ZLIB/lib/pkgconfig;" &
         " mkdir -p .repro-build-bin;" &
         " ln -sf \"$(command -v python3)\" .repro-build-bin/python;" &
