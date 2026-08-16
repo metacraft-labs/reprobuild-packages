@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package atSpi2CoreSource:
   versions:
     "2.54.1":
@@ -42,6 +44,8 @@ package atSpi2CoreSource:
   build:
     setCurrentOwningPackageOverride("atSpi2CoreSource")
     try:
+      let glib2Introspection =
+        sourcePackageInstallRoot("glib2-introspection")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "docs=false",
         "introspection=enabled",
@@ -50,9 +54,9 @@ package atSpi2CoreSource:
         "gtk2_atk_adaptor=false",
       ], extraEnv = @[
         ("GI_GIR_PATH",
-          "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0"),
+          glib2Introspection & "/usr/share/gir-1.0"),
         ("XDG_DATA_DIRS",
-          "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share"),
+          glib2Introspection & "/usr/share"),
       ])
       discard pkg.library("libAtspi")
       discard pkg.library("libAtk")

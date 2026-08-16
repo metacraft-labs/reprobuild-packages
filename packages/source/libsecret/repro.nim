@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package libsecretSource:
   versions:
     "0.21.6":
@@ -23,6 +25,7 @@ package libsecretSource:
   buildDeps:
     "glib2 >=2.70"
     "libgcrypt >=1.10"
+    "libgpg-error"
 
   config:
     discard
@@ -33,6 +36,7 @@ package libsecretSource:
   build:
     setCurrentOwningPackageOverride("libsecretSource")
     try:
+      let glib2 = sourcePackageInstallRoot("glib2")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "manpage=false",
         "crypto=libgcrypt",
@@ -43,7 +47,12 @@ package libsecretSource:
         "tpm2=false",
         "pam=false",
       ], extraEnv = @[
-        ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib/glib-2.0/include:/opt/repro/reprobuild/recipes/packages/source/libgcrypt/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/libgpg-error/.repro/output/install/usr/include"),
+        ("CPATH", glib2 & "/usr/include/glib-2.0:" &
+          glib2 & "/usr/lib/glib-2.0/include:" &
+          sourcePackageInstallPath("libgcrypt", "usr", "include") & ":" &
+          sourcePackageInstallPath("libgpg-error", "usr", "include")),
+        ("LDFLAGS", "-Wl,-rpath-link," & sourcePackageInstallPath(
+          "libgpg-error", "usr", "lib")),
       ])
       discard pkg.library("libSecret")
     finally:

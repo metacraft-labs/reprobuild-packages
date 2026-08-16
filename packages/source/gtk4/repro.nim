@@ -92,9 +92,13 @@
 ##   * ``f16c=disabled``         — drop the f16c CPU-feature gated path
 ##                                  (broadens host compatibility).
 
+import std/[sequtils, strutils]
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -251,18 +255,23 @@ package gtk4Source:
         srcDir = "./src",
         configureOptions = opts,
         extraEnv = @[
-          ("GI_GIR_PATH",
-          "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0:" &
-          "/opt/repro/reprobuild/recipes/packages/source/harfbuzz/.repro/output/install/usr/share/gir-1.0:" &
-          "/opt/repro/reprobuild/recipes/packages/source/gdk-pixbuf/.repro/output/install/usr/share/gir-1.0:" &
-          "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/share/gir-1.0:" &
-          "/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/share/gir-1.0"),
-          ("LIBRARY_PATH",
-          "/opt/repro/reprobuild/recipes/packages/source/freetype/.repro/output/install/usr/lib"),
-          ("LD_LIBRARY_PATH",
-          "/opt/repro/reprobuild/recipes/packages/source/freetype/.repro/output/install/usr/lib"),
-          ("CPATH",
-          "/opt/repro/reprobuild/recipes/packages/source/wayland/.repro/output/install/usr/include")])
+          ("GI_GIR_PATH", @[
+            "glib2-introspection", "harfbuzz", "gdk-pixbuf", "pango",
+            "graphene",
+          ].mapIt(sourcePackageInstallPath(
+            it, "usr", "share", "gir-1.0")).join(":")),
+          ("LIBRARY_PATH", sourcePackageInstallPath(
+            "freetype", "usr", "lib")),
+          # GTK's generators execute against the source-built GLib closure
+          # during compilation. Keep source glibc out of this path so host
+          # build tools continue to use their compatible runtime loader.
+          ("LD_LIBRARY_PATH", @[
+            "glib2", "zlib", "libxml2", "freetype", "gettext",
+            "gobject-introspection",
+          ].mapIt(sourcePackageInstallPath(
+            it, "usr", "lib")).join(":")),
+          ("CPATH", sourcePackageInstallPath(
+            "wayland", "usr", "include"))])
       discard pkg.library("libGtk4")
       discard pkg.executable("gtk4Launch")
       discard pkg.executable("gtk4UpdateIconCache")

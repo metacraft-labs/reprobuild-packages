@@ -77,6 +77,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 # ---------------------------------------------------------------------------
 # Package declaration
 # ---------------------------------------------------------------------------
@@ -130,6 +132,8 @@ package grapheneSource:
   build:
     setCurrentOwningPackageOverride("grapheneSource")
     try:
+      let glib2Introspection =
+        sourcePackageInstallRoot("glib2-introspection")
       let opts = @[
         "introspection=enabled",
         "gtk_doc=false",
@@ -138,7 +142,7 @@ package grapheneSource:
       ]
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
         extraEnv = @[("GI_GIR_PATH",
-          "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0")])
+          glib2Introspection & "/usr/share/gir-1.0")])
       discard pkg.library("libGraphene")
     finally:
       clearCurrentOwningPackageOverride()

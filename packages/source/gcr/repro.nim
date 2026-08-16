@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package gcrSource:
   versions:
     "4.3.0":
@@ -33,6 +35,9 @@ package gcrSource:
   build:
     setCurrentOwningPackageOverride("gcrSource")
     try:
+      let glib2 = sourcePackageInstallRoot("glib2")
+      let glib2Introspection =
+        sourcePackageInstallRoot("glib2-introspection")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "introspection=true",
         "vapi=false",
@@ -43,9 +48,15 @@ package gcrSource:
         "ssh_agent=false",
         "systemd=disabled",
       ], extraEnv = @[
-        ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib/glib-2.0/include:/opt/repro/reprobuild/recipes/packages/source/p11-kit/.repro/output/install/usr/include/p11-kit-1:/opt/repro/reprobuild/recipes/packages/source/libgcrypt/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/libgpg-error/.repro/output/install/usr/include"),
-        ("GI_GIR_PATH", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0"),
-        ("XDG_DATA_DIRS", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share"),
+        ("CPATH", glib2 & "/usr/include/glib-2.0:" &
+          glib2 & "/usr/lib/glib-2.0/include:" &
+          sourcePackageInstallRoot("p11-kit") & "/usr/include/p11-kit-1:" &
+          sourcePackageInstallRoot("libgcrypt") & "/usr/include:" &
+          sourcePackageInstallRoot("libgpg-error") & "/usr/include"),
+        ("GI_GIR_PATH", glib2Introspection & "/usr/share/gir-1.0"),
+        ("XDG_DATA_DIRS", glib2Introspection & "/usr/share"),
+        ("LDFLAGS", "-Wl,-rpath-link," & sourcePackageInstallPath(
+          "libgpg-error", "usr", "lib")),
       ])
       discard pkg.library("libGcr4")
       discard pkg.library("libGck2")

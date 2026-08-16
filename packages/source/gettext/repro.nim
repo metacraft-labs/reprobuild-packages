@@ -108,6 +108,9 @@
 ##   * ``--disable-xattr``            — skip extended-attribute copy
 ##                                       support for the same catalog-
 ##                                       compiler-only build profile.
+##   * ``--disable-libasprintf``      — skip the optional C++ formatted-
+##                                       output library. ReproOS consumes
+##                                       gettext's catalog tools only.
 ##   * ``--without-emacs``            — skip the emacs lisp bindings
 ##                                       (the v1 desktop's interactive
 ##                                       editor target is vim, not
@@ -125,6 +128,8 @@
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -238,13 +243,18 @@ package gettextSource:
         "--disable-csharp",
         "--disable-acl",
         "--disable-xattr",
+        "--disable-libasprintf",
         "--without-emacs",
         "--without-included-libintl",
       ]
       let pkg = autotools_package(
         srcDir = "./src",
         configureOptions = opts,
-        allowSourceWrites = true)
+        allowSourceWrites = true,
+        extraEnv = @[
+          ("LDFLAGS", "-Wl,-rpath," &
+            sourcePackageInstallPath("gettext", "usr", "lib")),
+        ])
       discard pkg.executable("msgfmt")
       discard pkg.executable("msgmerge")
       discard pkg.executable("xgettext")

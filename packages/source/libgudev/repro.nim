@@ -32,6 +32,10 @@ package libgudevSource:
         "introspection=disabled",
         "vapi=disabled",
         "gtk_doc=false",
+      ], srcPatches = @[
+        # Upstream passes the libtool spelling directly to the compiler.
+        # GCC accepts it, but Clang requires an explicit linker-driver flag.
+        "sed -i \"s/'-export-dynamic'/'-Wl,--export-dynamic'/\" src/gudev/meson.build",
       ])
       discard pkg.library("libgudev-1.0")
     finally:

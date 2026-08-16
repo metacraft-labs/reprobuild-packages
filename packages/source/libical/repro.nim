@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package libicalSource:
   versions:
     "3.0.19":
@@ -39,6 +41,7 @@ package libicalSource:
   build:
     setCurrentOwningPackageOverride("libicalSource")
     try:
+      let glib2 = sourcePackageInstallRoot("glib2")
       let opts = @[
         "WITH_CXX_BINDINGS=OFF",
         "SHARED_ONLY=ON",
@@ -54,7 +57,10 @@ package libicalSource:
       ]
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
         cacheVars = opts, allowSourceWrites = true, extraEnv = @[
-          ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib/glib-2.0/include:/opt/repro/reprobuild/recipes/packages/source/libxml2/.repro/output/install/usr/include/libxml2"),
+          ("CPATH", glib2 & "/usr/include/glib-2.0:" &
+            glib2 & "/usr/lib/glib-2.0/include:" &
+            sourcePackageInstallPath(
+              "libxml2", "usr", "include", "libxml2")),
         ])
       discard pkg.library("libIcal")
       discard pkg.library("libIcalss")

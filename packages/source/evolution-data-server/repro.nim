@@ -1,6 +1,10 @@
+import std/strutils
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 package evolutionDataServerSource:
   versions:
@@ -46,7 +50,27 @@ package evolutionDataServerSource:
   build:
     setCurrentOwningPackageOverride("evolutionDataServerSource")
     try:
+      let cpath = @[
+        sourcePackageInstallPath("glib2", "usr", "include", "glib-2.0"),
+        sourcePackageInstallPath(
+          "glib2", "usr", "lib", "glib-2.0", "include"),
+        sourcePackageInstallPath("libxml2", "usr", "include", "libxml2"),
+        sourcePackageInstallPath(
+          "json-glib", "usr", "include", "json-glib-1.0"),
+        sourcePackageInstallPath("util-linux", "usr", "include"),
+        sourcePackageInstallPath(
+          "libsecret", "usr", "include", "libsecret-1"),
+        sourcePackageInstallPath("libical", "usr", "include"),
+        sourcePackageInstallPath("nspr", "usr", "include", "nspr"),
+        sourcePackageInstallPath("nss", "usr", "include", "nss"),
+        sourcePackageInstallPath("icu", "usr", "include"),
+      ].join(":")
+      let icuInclude = sourcePackageInstallPath("icu", "usr", "include")
+      let icuLib = sourcePackageInstallPath("icu", "usr", "lib")
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
+        srcPatches = @[
+          "sed -i '/pkg_check_modules(ICU icu-i18n icu-uc)/a\\set(ICU_CFLAGS \"\")\\nset(ICU_INCLUDE_DIRS \"$ENV{ICU_SOURCE_INCLUDE}\")\\nset(ICU_LDFLAGS \"-L$ENV{ICU_SOURCE_LIB};-licui18n;-licuuc\")' src/CMakeLists.txt",
+        ],
         cacheVars = @[
           "ENABLE_GTK=OFF",
           "ENABLE_GTK4=OFF",
@@ -69,7 +93,9 @@ package evolutionDataServerSource:
           "CMAKE_BUILD_TYPE=Release",
           "CMAKE_POLICY_VERSION_MINIMUM=3.5",
         ], allowSourceWrites = true, extraEnv = @[
-          ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib/glib-2.0/include:/opt/repro/reprobuild/recipes/packages/source/libxml2/.repro/output/install/usr/include/libxml2:/opt/repro/reprobuild/recipes/packages/source/json-glib/.repro/output/install/usr/include/json-glib-1.0:/opt/repro/reprobuild/recipes/packages/source/util-linux/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/libsecret/.repro/output/install/usr/include/libsecret-1:/opt/repro/reprobuild/recipes/packages/source/libical/.repro/output/install/usr/include:/opt/repro/reprobuild/recipes/packages/source/nspr/.repro/output/install/usr/include/nspr:/opt/repro/reprobuild/recipes/packages/source/nss/.repro/output/install/usr/include/nss"),
+          ("CPATH", cpath),
+          ("ICU_SOURCE_INCLUDE", icuInclude),
+          ("ICU_SOURCE_LIB", icuLib),
         ])
       discard pkg.library("libEDataServer")
       discard pkg.library("libEBackend")

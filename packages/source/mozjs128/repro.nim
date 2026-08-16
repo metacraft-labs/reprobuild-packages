@@ -61,6 +61,10 @@ package mozjs128Source:
           "--disable-warnings-as-errors",
         ],
         allowSourceWrites = true,
+        # Nix-provisioned Rust tools carry their own runtime closure. Letting
+        # the target package library path leak into those host tools can make
+        # Cargo load ReproOS's libssl instead of the version in its Nix closure.
+        extraEnv = @[("LD_LIBRARY_PATH", "")],
         srcPatches = @[
           "export MOZBUILD_STATE_PATH=\"$PWD/.mozbuild\"",
           "export PYTHON=\"$(command -v python3)\"",

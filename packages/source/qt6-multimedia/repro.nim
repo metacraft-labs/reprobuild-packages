@@ -11,6 +11,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package qt6MultimediaSource:
   versions:
     "6.8.1":
@@ -53,6 +55,10 @@ package qt6MultimediaSource:
   build:
     setCurrentOwningPackageOverride("qt6MultimediaSource")
     try:
+      let libx11 = sourcePackageInstallRoot("libx11")
+      let xorgproto = sourcePackageInstallRoot("xorgproto")
+      let libxext = sourcePackageInstallRoot("libxext")
+      let libxrandr = sourcePackageInstallRoot("libxrandr")
       let opts = @[
         "BUILD_TESTING=OFF",
         "CMAKE_BUILD_TYPE=Release",
@@ -65,8 +71,11 @@ package qt6MultimediaSource:
         "FEATURE_pulseaudio=ON",
         "FEATURE_alsa=OFF",
         "FEATURE_gstreamer=OFF",
-        "CMAKE_CXX_FLAGS=-I/opt/repro/reprobuild/recipes/packages/source/libx11/.repro/output/install/usr/include -I/opt/repro/reprobuild/recipes/packages/source/xorgproto/.repro/output/install/usr/include -I/opt/repro/reprobuild/recipes/packages/source/libxext/.repro/output/install/usr/include -I/opt/repro/reprobuild/recipes/packages/source/libxrandr/.repro/output/install/usr/include",
-        "CMAKE_SHARED_LINKER_FLAGS=-L/opt/repro/reprobuild/recipes/packages/source/libx11/.repro/output/install/usr/lib -L/opt/repro/reprobuild/recipes/packages/source/libxext/.repro/output/install/usr/lib -L/opt/repro/reprobuild/recipes/packages/source/libxrandr/.repro/output/install/usr/lib",
+        "CMAKE_CXX_FLAGS=-I" & libx11 & "/usr/include -I" &
+          xorgproto & "/usr/include -I" & libxext & "/usr/include -I" &
+          libxrandr & "/usr/include",
+        "CMAKE_SHARED_LINKER_FLAGS=-L" & libx11 & "/usr/lib -L" &
+          libxext & "/usr/lib -L" & libxrandr & "/usr/lib",
       ]
       let pkg = cmake_package(srcDir = "./src", generator = "Ninja",
         cacheVars = opts, allowSourceWrites = true)

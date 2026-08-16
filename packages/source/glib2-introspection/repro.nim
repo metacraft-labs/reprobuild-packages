@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package glib2IntrospectionSource:
   versions:
     "2.82.5":
@@ -34,6 +36,9 @@ package glib2IntrospectionSource:
   build:
     setCurrentOwningPackageOverride("glib2IntrospectionSource")
     try:
+      let glib2 = sourcePackageInstallRoot("glib2")
+      let gobjectIntrospection =
+        sourcePackageInstallRoot("gobject-introspection")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "tests=false",
         "documentation=false",
@@ -44,9 +49,14 @@ package glib2IntrospectionSource:
         "xattr=false",
         "libdir=lib",
       ], extraEnv = @[
-        ("PYTHONPATH", "/opt/repro/reprobuild/recipes/packages/source/gobject-introspection/.repro/output/install/usr/lib/gobject-introspection"),
-        ("GI_GIR_PATH", "/opt/repro/reprobuild/recipes/packages/source/gobject-introspection/build/gir"),
-        ("LD_LIBRARY_PATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib:/opt/repro/reprobuild/recipes/packages/source/gobject-introspection/.repro/output/install/usr/lib:/opt/repro/reprobuild/recipes/packages/source/libffi/.repro/output/install/usr/lib:/opt/repro/reprobuild/recipes/packages/source/pcre2/.repro/output/install/usr/lib"),
+        ("PYTHONPATH", gobjectIntrospection &
+          "/usr/lib/gobject-introspection"),
+        ("GI_GIR_PATH", sourcePackagePath(
+          "gobject-introspection", "build", "gir")),
+        ("LD_LIBRARY_PATH", glib2 & "/usr/lib:" &
+          gobjectIntrospection & "/usr/lib:" &
+          sourcePackageInstallRoot("libffi") & "/usr/lib:" &
+          sourcePackageInstallRoot("pcre2") & "/usr/lib"),
       ])
       discard pkg.executable("gio")
       discard pkg.executableAlias("glib2-introspection", sourceName = "gio")

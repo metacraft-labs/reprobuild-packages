@@ -313,7 +313,7 @@ package systemdSource:
         # ``find_program(prog[0], '/usr/sbin/'+prog[0], '/sbin/'+prog[0])``
         # loop walks the ``nix develop`` shell's PATH and prefers the
         # util-linux / kbd / kmod / kexec-tools build-mirrors under
-        # ``/opt/repro/reprobuild/recipes/packages/source/*/build/out/bin/``.
+        # the active source package catalog's ``*/build/out/bin`` trees.
         # Those paths only exist on the BUILD host; on the installed
         # rootfs, systemd-managed API-filesystem mounts (dev-mqueue,
         # tmp, run-lock, sys-kernel-debug, sys-kernel-tracing, /boot,

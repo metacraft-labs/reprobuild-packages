@@ -50,6 +50,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package polkitSource:
   ## From-source polkit — closes M9.R.26 Gap 3. Tier-2b c_cpp_meson
   ## convention consumer.
@@ -137,6 +139,8 @@ package polkitSource:
   build:
     setCurrentOwningPackageOverride("polkitSource")
     try:
+      let glib2Introspection =
+        sourcePackageInstallRoot("glib2-introspection")
       let opts = @[
         # Use duktape as the JS engine (the v1 default per upstream;
         # mozjs is a much heavier dep chain).
@@ -178,8 +182,8 @@ package polkitSource:
       ]
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
         extraEnv = @[
-          ("GI_GIR_PATH", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0"),
-          ("XDG_DATA_DIRS", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share"),
+          ("GI_GIR_PATH", glib2Introspection & "/usr/share/gir-1.0"),
+          ("XDG_DATA_DIRS", glib2Introspection & "/usr/share"),
         ])
       discard pkg.executable("polkitd")
       discard pkg.executable("pkexec")

@@ -137,6 +137,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 # ---------------------------------------------------------------------------
 # Package declaration
 # ---------------------------------------------------------------------------
@@ -508,8 +510,7 @@ package kwinSource:
       # /nix/store/*-*-{wayland-protocols,libdisplay-info}/ (nix stubs),
       # which we glob via a single shell expansion.
       var pkgCfgDirs: seq[string] = @[]
-      let recipeRoot = getEnv("REPROBUILD_RECIPE_ROOT",
-        "/opt/repro/reprobuild/recipes/packages/source")
+      let recipeRoot = sourceRecipeRoot()
       # Sibling from-source pkg-config dirs.
       for sib in walkDir(recipeRoot, relative = false):
         if sib.kind == pcDir:

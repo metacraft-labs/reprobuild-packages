@@ -1,6 +1,10 @@
+import std/[sequtils, strutils]
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 package gjsSource:
   versions:
@@ -33,6 +37,29 @@ package gjsSource:
   build:
     setCurrentOwningPackageOverride("gjsSource")
     try:
+      let glib2 = sourcePackageInstallRoot("glib2")
+      let gobjectIntrospection =
+        sourcePackageInstallRoot("gobject-introspection")
+      let glib2Introspection =
+        sourcePackageInstallRoot("glib2-introspection")
+      let mozjs = sourcePackageInstallRoot("mozjs128")
+      let transitiveLibraryPaths = @[
+        sourcePackageInstallPath("zlib", "usr", "lib"),
+        sourcePackageInstallPath("glibc", "usr", "lib64"),
+        sourcePackageInstallPath("libpng", "usr", "lib"),
+        sourcePackageInstallPath("fontconfig", "usr", "lib"),
+        sourcePackageInstallPath("freetype", "usr", "lib"),
+        sourcePackageInstallPath("pixman", "usr", "lib"),
+        sourcePackageInstallPath("libxml2", "usr", "lib"),
+      ]
+      let runtimeLibraryPaths = @[
+        mozjs & "/usr/lib",
+        transitiveLibraryPaths.filterIt(not it.endsWith("/usr/lib64")).join(":"),
+        glib2 & "/usr/lib",
+        gobjectIntrospection & "/usr/lib",
+        sourcePackageInstallRoot("libffi") & "/usr/lib",
+        sourcePackageInstallRoot("pcre2") & "/usr/lib",
+      ].join(":")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "readline=disabled",
         "profiler=disabled",
@@ -40,11 +67,16 @@ package gjsSource:
         "dtrace=false",
         "systemtap=false",
       ], extraEnv = @[
-        ("CPATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/include/glib-2.0:/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib/glib-2.0/include"),
-        ("PYTHONPATH", "/opt/repro/reprobuild/recipes/packages/source/gobject-introspection/.repro/output/install/usr/lib/gobject-introspection"),
-        ("GI_GIR_PATH", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0"),
-        ("GI_TYPELIB_PATH", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/lib/girepository-1.0"),
-        ("LD_LIBRARY_PATH", "/opt/repro/reprobuild/recipes/packages/source/glib2/.repro/output/install/usr/lib:/opt/repro/reprobuild/recipes/packages/source/gobject-introspection/.repro/output/install/usr/lib:/opt/repro/reprobuild/recipes/packages/source/libffi/.repro/output/install/usr/lib:/opt/repro/reprobuild/recipes/packages/source/pcre2/.repro/output/install/usr/lib"),
+        ("CPATH", glib2 & "/usr/include/glib-2.0:" &
+          glib2 & "/usr/lib/glib-2.0/include"),
+        ("PYTHONPATH", gobjectIntrospection &
+          "/usr/lib/gobject-introspection"),
+        ("GI_GIR_PATH", glib2Introspection & "/usr/share/gir-1.0"),
+        ("GI_TYPELIB_PATH", glib2Introspection &
+          "/usr/lib/girepository-1.0"),
+        ("LDFLAGS", transitiveLibraryPaths.mapIt(
+          "-Wl,-rpath-link," & it).join(" ")),
+        ("LD_LIBRARY_PATH", runtimeLibraryPaths),
       ])
       discard pkg.library("libGjs")
       discard pkg.executable("gjs")
