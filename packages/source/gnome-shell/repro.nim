@@ -155,9 +155,13 @@
 ## variants need different strategies (e.g. a developer variant that
 ## flips ``extensions_app=true`` for extension-development bundles).
 
+import std/[sequtils, strutils]
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+import ../source_recipe_paths
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -310,10 +314,10 @@ package gnomeShellSource:
         "extensions_tool=false",
       ]
       let rpathLinkDirs = [
-        "/opt/repro/reprobuild/recipes/packages/source/polkit/.repro/output/install/usr/lib64",
-        "/opt/repro/reprobuild/recipes/packages/source/gcr/.repro/output/install/usr/lib64",
-        "/opt/repro/reprobuild/recipes/packages/source/gnome-desktop/.repro/output/install/usr/lib",
-        "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/lib64",
+        sourcePackageInstallPath("polkit", "usr", "lib64"),
+        sourcePackageInstallPath("gcr", "usr", "lib64"),
+        sourcePackageInstallPath("gnome-desktop", "usr", "lib"),
+        sourcePackageInstallPath("pango", "usr", "lib64"),
       ]
       var linkFlags = ""
       for dir in rpathLinkDirs:
@@ -323,33 +327,35 @@ package gnomeShellSource:
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
         extraEnv = @[
           ("LDFLAGS", linkFlags),
-          ("GI_GIR_PATH",
-            "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/gtk4/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/gdk-pixbuf/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/share/gir-1.0:" &
-            "/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/share/gir-1.0:" &
-              "/opt/repro/reprobuild/recipes/packages/source/harfbuzz/.repro/output/install/usr/share/gir-1.0:" &
-              "/opt/repro/reprobuild/recipes/packages/source/at-spi2-core/.repro/output/install/usr/share/gir-1.0:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gsettings-desktop-schemas/.repro/output/install/usr/share/gir-1.0:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gcr/.repro/output/install/usr/share/gir-1.0:" &
-              "/opt/repro/reprobuild/recipes/packages/source/polkit/.repro/output/install/usr/share/gir-1.0:" &
-              "/opt/repro/reprobuild/recipes/packages/source/mutter/.repro/output/install/usr/lib64/mutter-15:" &
-              "/opt/repro/reprobuild/recipes/packages/source/mutter/.repro/output/install/usr/share/gir-1.0:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gnome-desktop/.repro/output/install/usr/share/gir-1.0"),
-          ("XDG_DATA_DIRS",
-              "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gtk4/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gdk-pixbuf/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/pango/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/graphene/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/harfbuzz/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/at-spi2-core/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gsettings-desktop-schemas/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gcr/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/polkit/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/mutter/.repro/output/install/usr/share:" &
-              "/opt/repro/reprobuild/recipes/packages/source/gnome-desktop/.repro/output/install/usr/share"),
+          ("GI_GIR_PATH", @[
+            sourcePackageInstallPath(
+              "glib2-introspection", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath("gtk4", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath(
+              "gdk-pixbuf", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath("pango", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath(
+              "graphene", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath(
+              "harfbuzz", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath(
+              "at-spi2-core", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath(
+              "gsettings-desktop-schemas", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath("gcr", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath(
+              "polkit", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath("mutter", "usr", "lib64", "mutter-15"),
+            sourcePackageInstallPath(
+              "mutter", "usr", "share", "gir-1.0"),
+            sourcePackageInstallPath(
+              "gnome-desktop", "usr", "share", "gir-1.0"),
+          ].join(":")),
+          ("XDG_DATA_DIRS", @[
+            "glib2-introspection", "gtk4", "gdk-pixbuf", "pango", "graphene",
+            "harfbuzz", "at-spi2-core", "gsettings-desktop-schemas", "gcr",
+            "polkit", "mutter", "gnome-desktop",
+          ].mapIt(sourcePackageInstallPath(it, "usr", "share")).join(":")),
           ])
       discard pkg.executable("gnomeShell")
       # GNOME Shell installs its private libraries below
