@@ -2,6 +2,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 package gnomeDesktopSource:
   versions:
     "44.5":
@@ -30,6 +32,8 @@ package gnomeDesktopSource:
     "xkeyboard-config"
     "iso-codes"
     "libseccomp"
+    "libpng >=1.6"
+    "libxml2"
 
   config:
     discard
@@ -56,6 +60,11 @@ package gnomeDesktopSource:
           "installed_tests=false",
           "build_gtk4=true",
           "legacy_library=false",
+        ],
+        extraEnv = @[
+          ("LDFLAGS", "-Wl,-rpath-link," & sourcePackageInstallPath(
+            "libpng", "usr", "lib") & " -Wl,-rpath-link," &
+            sourcePackageInstallPath("libxml2", "usr", "lib")),
         ])
       discard pkg.library("libGnomeDesktop4")
     finally:
