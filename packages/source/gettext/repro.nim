@@ -108,6 +108,9 @@
 ##   * ``--disable-xattr``            — skip extended-attribute copy
 ##                                       support for the same catalog-
 ##                                       compiler-only build profile.
+##   * ``--disable-libasprintf``      — skip the optional C++ formatted-
+##                                       output library. ReproOS consumes
+##                                       gettext's catalog tools only.
 ##   * ``--without-emacs``            — skip the emacs lisp bindings
 ##                                       (the v1 desktop's interactive
 ##                                       editor target is vim, not
@@ -240,6 +243,7 @@ package gettextSource:
         "--disable-csharp",
         "--disable-acl",
         "--disable-xattr",
+        "--disable-libasprintf",
         "--without-emacs",
         "--without-included-libintl",
       ]
