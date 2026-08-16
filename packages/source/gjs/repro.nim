@@ -1,3 +1,5 @@
+import std/[sequtils, strutils]
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -41,8 +43,23 @@ package gjsSource:
       let glib2Introspection =
         sourcePackageInstallRoot("glib2-introspection")
       let mozjs = sourcePackageInstallRoot("mozjs128")
-      let zlib = sourcePackageInstallRoot("zlib")
-      let glibc = sourcePackageInstallRoot("glibc")
+      let transitiveLibraryPaths = @[
+        sourcePackageInstallPath("zlib", "usr", "lib"),
+        sourcePackageInstallPath("glibc", "usr", "lib64"),
+        sourcePackageInstallPath("libpng", "usr", "lib"),
+        sourcePackageInstallPath("fontconfig", "usr", "lib"),
+        sourcePackageInstallPath("freetype", "usr", "lib"),
+        sourcePackageInstallPath("pixman", "usr", "lib"),
+        sourcePackageInstallPath("libxml2", "usr", "lib"),
+      ]
+      let runtimeLibraryPaths = @[
+        mozjs & "/usr/lib",
+        transitiveLibraryPaths.filterIt(not it.endsWith("/usr/lib64")).join(":"),
+        glib2 & "/usr/lib",
+        gobjectIntrospection & "/usr/lib",
+        sourcePackageInstallRoot("libffi") & "/usr/lib",
+        sourcePackageInstallRoot("pcre2") & "/usr/lib",
+      ].join(":")
       let pkg = meson_package(srcDir = "./src", configureOptions = @[
         "readline=disabled",
         "profiler=disabled",
@@ -57,15 +74,9 @@ package gjsSource:
         ("GI_GIR_PATH", glib2Introspection & "/usr/share/gir-1.0"),
         ("GI_TYPELIB_PATH", glib2Introspection &
           "/usr/lib/girepository-1.0"),
-        ("LDFLAGS", "-Wl,-rpath-link," & zlib & "/usr/lib " &
-          "-Wl,-rpath-link," & glibc & "/usr/lib64"),
-        ("LD_LIBRARY_PATH", mozjs & "/usr/lib:" &
-          zlib & "/usr/lib:" &
-          glib2 & "/usr/lib:" &
-          gobjectIntrospection & "/usr/lib:" &
-          sourcePackageInstallRoot("libffi") & "/usr/lib:" &
-          sourcePackageInstallRoot("pcre2") & "/usr/lib:" &
-          sourcePackageInstallRoot("libxml2") & "/usr/lib"),
+        ("LDFLAGS", transitiveLibraryPaths.mapIt(
+          "-Wl,-rpath-link," & it).join(" ")),
+        ("LD_LIBRARY_PATH", runtimeLibraryPaths),
       ])
       discard pkg.library("libGjs")
       discard pkg.executable("gjs")
