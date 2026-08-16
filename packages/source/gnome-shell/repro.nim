@@ -314,10 +314,10 @@ package gnomeShellSource:
         "extensions_tool=false",
       ]
       let rpathLinkDirs = [
-        sourcePackageInstallPath("polkit", "usr", "lib64"),
-        sourcePackageInstallPath("gcr", "usr", "lib64"),
+        sourcePackageInstallPath("polkit", "usr", "lib"),
+        sourcePackageInstallPath("gcr", "usr", "lib"),
         sourcePackageInstallPath("gnome-desktop", "usr", "lib"),
-        sourcePackageInstallPath("pango", "usr", "lib64"),
+        sourcePackageInstallPath("pango", "usr", "lib"),
       ]
       var linkFlags = ""
       for dir in rpathLinkDirs:
@@ -326,6 +326,9 @@ package gnomeShellSource:
         linkFlags.add("-Wl,-rpath-link," & dir)
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
         extraEnv = @[
+          ("CC", "gcc"),
+          ("CXX", "g++"),
+          ("LD_LIBRARY_PATH", ""),
           ("LDFLAGS", linkFlags),
           ("GI_GIR_PATH", @[
             sourcePackageInstallPath(
