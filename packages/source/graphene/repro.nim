@@ -73,6 +73,8 @@
 ##   * ``installed_tests=false``  — skip the installed test programs.
 ##   * ``tests=false``            — skip the upstream test suite.
 
+import std/os
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -130,6 +132,13 @@ package grapheneSource:
   build:
     setCurrentOwningPackageOverride("grapheneSource")
     try:
+      let providerRoot = activeProviderProjectRoot()
+      let defaultSourceRoot =
+        if providerRoot.len > 0: parentDir(providerRoot)
+        else: "/opt/repro/reprobuild-packages/packages/source"
+      let sourceRoot = getEnv("REPRO_FROM_SOURCE_ROOT", defaultSourceRoot)
+      let glib2Introspection = packageInstallMirrorRoot(
+        sourceRoot, "glib2-introspection")
       let opts = @[
         "introspection=enabled",
         "gtk_doc=false",
@@ -138,7 +147,7 @@ package grapheneSource:
       ]
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
         extraEnv = @[("GI_GIR_PATH",
-          "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0")])
+          glib2Introspection & "/usr/share/gir-1.0")])
       discard pkg.library("libGraphene")
     finally:
       clearCurrentOwningPackageOverride()
