@@ -266,7 +266,7 @@ package gtk4Source:
           # during compilation. Keep source glibc out of this path so host
           # build tools continue to use their compatible runtime loader.
           ("LD_LIBRARY_PATH", @[
-            "glib2", "zlib", "libxml2", "freetype",
+            "glib2", "zlib", "libxml2", "freetype", "gettext",
           ].mapIt(sourcePackageInstallPath(
             it, "usr", "lib")).join(":")),
           ("CPATH", sourcePackageInstallPath(
