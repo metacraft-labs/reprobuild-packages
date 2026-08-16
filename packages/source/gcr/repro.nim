@@ -55,6 +55,8 @@ package gcrSource:
           sourcePackageInstallRoot("libgpg-error") & "/usr/include"),
         ("GI_GIR_PATH", glib2Introspection & "/usr/share/gir-1.0"),
         ("XDG_DATA_DIRS", glib2Introspection & "/usr/share"),
+        ("LDFLAGS", "-Wl,-rpath-link," & sourcePackageInstallPath(
+          "libgpg-error", "usr", "lib")),
       ])
       discard pkg.library("libGcr4")
       discard pkg.library("libGck2")
