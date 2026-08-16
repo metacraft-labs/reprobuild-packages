@@ -46,6 +46,8 @@
 ##                                   agents (gnome-shell, plasma's
 ##                                   polkit-kde-agent) link against.
 
+import std/os
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -137,6 +139,13 @@ package polkitSource:
   build:
     setCurrentOwningPackageOverride("polkitSource")
     try:
+      let providerRoot = activeProviderProjectRoot()
+      let defaultSourceRoot =
+        if providerRoot.len > 0: parentDir(providerRoot)
+        else: "/opt/repro/reprobuild-packages/packages/source"
+      let sourceRoot = getEnv("REPRO_FROM_SOURCE_ROOT", defaultSourceRoot)
+      let glib2Introspection = packageInstallMirrorRoot(
+        sourceRoot, "glib2-introspection")
       let opts = @[
         # Use duktape as the JS engine (the v1 default per upstream;
         # mozjs is a much heavier dep chain).
@@ -178,8 +187,8 @@ package polkitSource:
       ]
       let pkg = meson_package(srcDir = "./src", configureOptions = opts,
         extraEnv = @[
-          ("GI_GIR_PATH", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share/gir-1.0"),
-          ("XDG_DATA_DIRS", "/opt/repro/reprobuild/recipes/packages/source/glib2-introspection/.repro/output/install/usr/share"),
+          ("GI_GIR_PATH", glib2Introspection & "/usr/share/gir-1.0"),
+          ("XDG_DATA_DIRS", glib2Introspection & "/usr/share"),
         ])
       discard pkg.executable("polkitd")
       discard pkg.executable("pkexec")
