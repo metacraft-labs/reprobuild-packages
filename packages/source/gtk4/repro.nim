@@ -267,6 +267,7 @@ package gtk4Source:
           # build tools continue to use their compatible runtime loader.
           ("LD_LIBRARY_PATH", @[
             "glib2", "zlib", "libxml2", "freetype", "gettext",
+            "gobject-introspection",
           ].mapIt(sourcePackageInstallPath(
             it, "usr", "lib")).join(":")),
           ("CPATH", sourcePackageInstallPath(
