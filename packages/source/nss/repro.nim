@@ -35,6 +35,9 @@ package nssSource:
         "; export CPATH=$NSPR/include/nspr:$SQLITE/include:$ZLIB/include" &
         " LIBRARY_PATH=$NSPR/lib:$SQLITE/lib:$ZLIB/lib" &
         " PKG_CONFIG_PATH=$NSPR/lib/pkgconfig:$SQLITE/lib/pkgconfig:$ZLIB/lib/pkgconfig;" &
+        " mkdir -p .repro-build-bin;" &
+        " ln -sf \"$(command -v python3)\" .repro-build-bin/python;" &
+        " export PATH=\"$PWD/.repro-build-bin:$PATH\";" &
         " mkdir -p dist/Release/lib;" &
         " ln -sf $NSPR/lib/libnspr4.so $NSPR/lib/libplc4.so $NSPR/lib/libplds4.so dist/Release/lib/;" &
         " cd nss; ./build.sh -v --opt --gcc --disable-tests" &
