@@ -24,13 +24,36 @@ package pcre2Source:
   build:
     setCurrentOwningPackageOverride("pcre2Source")
     try:
+      let makeJobs =
+        when defined(windows): 1
+        else: 0
+      let depfiles = [
+        "src/.deps/libpcre2_8_la-*.Plo",
+        "src/.deps/libpcre2_posix_la-*.Plo",
+        "src/.deps/pcre2grep-*.Po",
+        "src/.deps/pcre2test-*.Po",
+        "src/.deps/pcre2posix_test-*.Po",
+      ]
+      let makeDependencyPolicy =
+        when defined(windows):
+          makeDepfilePolicy(depfiles = depfiles)
+        else:
+          automaticMonitorPolicy()
+      var postInstallDepfiles: seq[string] = @[]
+      for depfile in depfiles:
+        postInstallDepfiles.add("build/" & depfile)
+      let postInstallDependencyPolicy =
+        when defined(windows):
+          makeDepfilePolicy(depfiles = postInstallDepfiles)
+        else:
+          automaticMonitorPolicy()
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "--disable-static",
         "--enable-pcre2-8",
         "--disable-pcre2-16",
         "--disable-pcre2-32",
-        "--disable-doc",
-      ])
+      ], makeJobs = makeJobs, makeDependencyPolicy = makeDependencyPolicy,
+        postInstallDependencyPolicy = postInstallDependencyPolicy)
       discard pkg.executable("pcre2grep")
       discard pkg.executableAlias("pcre2", sourceName = "pcre2-config")
     finally:
