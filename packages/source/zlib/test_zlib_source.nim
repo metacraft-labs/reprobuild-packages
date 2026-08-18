@@ -1,106 +1,124 @@
-## Smoke test for the from-source ``zlibSource`` recipe.
-##
-## Pins the M9.H/I/K trio's behaviour on the TWENTY-NINTH real
-## production from-source recipe. zlib's unique coverage angle vs the
-## prior twenty-eight is the ``configureFlags:`` channel feeding a
-## CUSTOM, hand-rolled ``./configure`` script — zlib's ``configure``
-## is NOT autoconf-generated and accepts a much smaller flag set with
-## different naming conventions (``--shared`` not ``--enable-shared``).
-## The convention layer treats the ``configureFlags:`` channel as the
-## abstract "argv passed to ``./configure``" carrier, so a custom-
-## configure recipe reuses the same channel without needing a new
-## flag-channel taxonomy. This pins the per-channel partitioning
-## property from a fourth flavour angle: autotools (expat), autotools-
-## with-tristate (freetype), autotools-with-twin-binaries (gdm), and
-## now custom-configure (zlib).
-##
-## Coverage (10 check assertions across 8 tests):
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the production flag set + channel-isolation
-##     spot-check (meson + cmake channels MUST be empty).
-##   * SINGLE library artifact registration (M3) — ``libZ`` tagged
-##     ``dakLibrary``.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
+import std/unittest
 
-import std/[unittest]
+when defined(reproProviderMode):
+  import std/[os, strutils]
+  import repro_core
 
 import repro_project_dsl
-
-# Side-effect import: triggers the package macro which registers
-# fetch spec + configure flags + library artifact under
-# ``zlibSource`` at module init time.
 import ./repro
 
-const ExpectedUrl =
-  "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz"
-
-const ExpectedHash =
-  "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
-
-const ExpectedConfigureFlags = @[
-  "--shared",
-]
-
-suite "zlibSource — from-source recipe smoke test":
-
-  test "fetch spec carries the vendored URL verbatim":
-    # M9.H registry round-trip — URL is recorded exactly as declared.
+suite "zlib source recipe":
+  test "pins the official release archive":
     let spec = registeredFetchSpec("zlibSource")
     check spec.packageName == "zlibSource"
-    check spec.url == ExpectedUrl
-
-  test "fetch spec hash is a 64-char sha256 hex string":
-    # sha256 over the vendored 1,512,791-byte tarball; length check
-    # guards against a future bump that forgets to widen the hash
-    # alongside the URL.
-    let spec = registeredFetchSpec("zlibSource")
-    check spec.hashHex.len == 64
-    check spec.hashHex == ExpectedHash
-    check spec.hashAlg == dshaSha256
-
-  test "fetch spec is the tarball variant with extractStrip = 1":
-    # Tarball vs git-archive discriminant + the canonical
-    # ``--strip-components=1`` convention upstream GitHub release
-    # tarballs use.
-    let spec = registeredFetchSpec("zlibSource")
     check spec.kind == dfkTarball
+    check spec.url == ZlibSourceUrl
+    check spec.hashAlg == dshaSha256
+    check spec.hashHex == ZlibSourceHash
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "artifacts register a single library":
-    # M3 artifact registry: ``libZ`` is the only artifact and must be
-    # tagged ``dakLibrary``. zlib's build emits one shared object
-    # bundling the deflate + inflate compression primitives, the gzip
-    # stream reader/writer, and the CRC32 helper. A regression that
-    # mis-tagged the artifact kind would mis-route the M9.L install
-    # path (``lib/`` vs ``bin/``).
-    let arts = registeredArtifacts("zlibSource")
-    check arts.len == 1
-    check arts[0].packageName == "zlibSource"
-    check arts[0].artifactName == "libZ"
-    check arts[0].kind == dakLibrary
+  test "records upstream version metadata":
+    let versions = registeredVersions("zlibSource")
+    check versions.len == 1
+    check versions[0].version == ZlibVersion
+    check versions[0].sourceRevision == "v" & ZlibVersion
+    check versions[0].sourceUrl == ZlibSourceUrl
+    check versions[0].sourceRepository == "https://github.com/madler/zlib"
 
-  test "versions block records the upstream tag + URL + repository":
-    # M2 versions registry: the upstream GitHub release tag is
-    # recorded for ``repro update-source`` even though the live
-    # fetch points at the vendored copy. The repository points at
-    # the canonical GitHub project that hosts the zlib source tree
-    # (the historical zlib.net mirror lifecycle is brittle — GitHub
-    # is the stable mirror).
-    let vs = registeredVersions("zlibSource")
-    check vs.len == 1
-    check vs[0].version == "1.3.1"
-    check vs[0].sourceRevision == "v1.3.1"
-    check vs[0].sourceUrl ==
-      "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz"
-    check vs[0].sourceRepository ==
-      "https://github.com/madler/zlib"
+  test "declares the complete build-tool contract":
+    check registeredNativeBuildDeps("zlibSource") ==
+      @ZlibNativeBuildDeps
+
+  test "exports the compression library interface":
+    let artifacts = registeredArtifacts("zlibSource")
+    check artifacts.len == 1
+    check artifacts[0].packageName == "zlibSource"
+    check artifacts[0].artifactName == "libZ"
+    check artifacts[0].kind == dakLibrary
+
+  when defined(reproProviderMode):
+    proc dummyRequest(projectRoot: string): ProviderGraphRequest =
+      ProviderGraphRequest(
+        kind: prkGraphInvocation,
+        providerArtifactId: "test-provider",
+        entryPointId: "zlibSource.root",
+        entryPointBodyHash: "test-body",
+        reason: girExplicitUserRequest,
+        arguments: projectRoot,
+        namespace: "project")
+
+    proc extractActions(fragment: GraphFragment): seq[BuildActionDef] =
+      for node in fragment.nodes:
+        if node.kind == gnkAction:
+          result.add(decodeBuildActionPayload(toBytes(node.payload)))
+
+    proc argValues(action: BuildActionDef; name: string): seq[string] =
+      for arg in action.call.arguments:
+        if arg.name == name:
+          if arg.encodedValue.len == 0:
+            return @[]
+          return arg.encodedValue.split("\x1f")
+      @[]
+
+    proc inlineScriptOf(action: BuildActionDef): string =
+      let argv = action.argValues("argv")
+      if argv.len >= 3: argv[2] else: ""
+
+    test "provider uses the upstream build contract for each platform":
+      let projectRoot = currentSourcePath.parentDir
+      let pkg = PackageDef(
+        packageName: "zlibSource",
+        sourceFile: projectRoot / "repro.nim",
+        hasDevEnv: false,
+        devEnvBodyHash: "",
+        toolUses: @[])
+      let fragment = buildPackageFragment(
+        pkg,
+        dummyRequest(projectRoot),
+        proc() = buildZlibSourcePackage(),
+        includeDefault = false)
+      let actions = extractActions(fragment)
+
+      var configure, compile, install, stageLibrary, installMirror =
+        default(BuildActionDef)
+      for action in actions:
+        if action.commandStatsId == "autotools_package.configure":
+          configure = action
+        elif action.call.packageName == "make" and
+            action.call.executableName == "makeBin":
+          if "install" in action.argValues("targets"):
+            install = action
+          else:
+            compile = action
+        elif action.id == "autotools-stage-library-zlibSource-libZ":
+          stageLibrary = action
+        elif action.id == "install-mirror-zlibSource":
+          installMirror = action
+
+      check configure.id.len > 0
+      check compile.id.len > 0
+      check install.id.len > 0
+      check stageLibrary.id.len > 0
+      check installMirror.id.len > 0
+
+      when defined(windows):
+        let configureScript = configure.inlineScriptOf()
+        check "cp -aL src/. " & ZlibBuildDir & "/" in configureScript
+        for option in ZlibWindowsMakeOptions:
+          check option in compile.argValues("vars")
+          check option in install.argValues("vars")
+        check compile.dependencyPolicy.kind == bdpMakeDepfile
+        check install.dependencyPolicy.kind == bdpMakeDepfile
+        check compile.dependencyPolicy.depfiles == @ZlibWindowsMakeDepfiles
+        check install.dependencyPolicy.depfiles == @ZlibWindowsMakeDepfiles
+        check stageLibrary.dependencyPolicy.kind == bdpAutomaticMonitor
+        check installMirror.dependencyPolicy.kind == bdpAutomaticMonitor
+        let stageScript = stageLibrary.inlineScriptOf()
+        check ZlibBuildDir & "/out/usr/bin/zlib1.dll" in stageScript
+        check ZlibBuildDir & "/out/usr/bin/libZ.dll" notin stageScript
+      else:
+        check compile.dependencyPolicy.kind == bdpAutomaticMonitor
+        check install.dependencyPolicy.kind == bdpAutomaticMonitor
+        check stageLibrary.dependencyPolicy.kind == bdpAutomaticMonitor
+        check installMirror.dependencyPolicy.kind == bdpAutomaticMonitor
+        check "--shared" in configure.inlineScriptOf()
