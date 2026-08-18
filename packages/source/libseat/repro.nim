@@ -177,7 +177,7 @@ package libseatSource:
     ## pkg-config is required by libseat's meson probe for libsystemd
     ## (activated by M9.R.57.5's libseat-logind=systemd flip). Matches
     ## the same fix M9.R.57.2b landed on wlroots.
-    "pkgconf >=1.8"
+    "pkg-config >=1.8"
     ## Seat management compiles directly against evdev, hidraw, DRM,
     ## ioctl, and errno definitions from the Linux UAPI.
     "linux-headers >=4.19"

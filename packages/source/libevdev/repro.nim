@@ -82,7 +82,7 @@ package libevdevSource:
     "ninja >=1.10"
     "gcc >=11"
     ## Meson uses pkg-config for dependency and feature detection.
-    "pkgconf >=1.8"
+    "pkg-config >=1.8"
     ## libevdev compiles directly against the Linux input UAPI.
     "linux-headers >=4.19"
     ## libevdev's autogen step runs Python to parse the kernel's

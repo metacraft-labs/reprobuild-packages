@@ -188,7 +188,7 @@ package libinputSource:
     ## modern compiler-flag surface.
     "gcc >=7"
     ## Meson uses pkg-config to locate libudev, mtdev, and libevdev.
-    "pkgconf >=1.8"
+    "pkg-config >=1.8"
     ## Syscall probes and the evdev backend consume Linux UAPI headers.
     "linux-headers >=4.19"
 

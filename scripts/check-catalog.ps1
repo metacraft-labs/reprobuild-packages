@@ -13,6 +13,11 @@ foreach ($recipe in $recipes) {
     }
 
     $source = Get-Content -LiteralPath $definition -Raw
+    if ([regex]::IsMatch($source, '(?m)^\s*"pkgconf(?:\s|\")')) {
+        $failures.Add(
+            "$($recipe.Name): declare the pkg-config capability, not its pkgconf provider"
+        )
+    }
     $packageMatch = [regex]::Match(
         $source,
         '(?m)^package\s+([A-Za-z0-9_`-]+):'

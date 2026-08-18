@@ -163,9 +163,9 @@ package waylandSource:
     ## ninja is meson's default backend — the compile action invokes
     ## ``ninja`` against the meson build directory.
     "ninja >=1.10"
-    ## pkgconf exposes the pkg-config interface Meson uses to locate
-    ## the source-built libffi dependency.
-    "pkgconf >=1.8"
+    ## Meson consumes the pkg-config interface; provisioning may satisfy it
+    ## with pkgconf, but the recipe names the public capability it invokes.
+    "pkg-config >=1.8"
     ## glibc's public limits.h delegates Linux ABI constants to
     ## linux/limits.h, so compiler feature probes need kernel headers.
     "linux-headers >=4.19"
