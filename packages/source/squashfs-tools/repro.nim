@@ -34,6 +34,13 @@ package squashfsToolsSource:
   build:
     setCurrentOwningPackageOverride("squashfsToolsSource")
     try:
+      let patches = @[
+        "printf '\n.PHONY: repro_install\n" &
+          "repro_install:\n" &
+          "\tmkdir -p $(DESTDIR)/usr/bin\n" &
+          "\tcp -a mksquashfs unsquashfs sqfstar sqfscat " &
+            "$(DESTDIR)/usr/bin/\n' >> ./src/squashfs-tools/Makefile",
+      ]
       let pkg = autotools_package(
         srcDir = "./src/squashfs-tools",
         configureOptions = @[
@@ -45,9 +52,10 @@ package squashfsToolsSource:
           "ZSTD_SUPPORT=0",
           "XATTR_SUPPORT=0",
           "COMP_DEFAULT=xz",
-          "INSTALL_PREFIX=/usr",
         ],
         skipConfigure = true,
+        installTarget = "repro_install",
+        srcPatches = patches,
       )
       discard pkg.executable("mksquashfs")
     finally:
