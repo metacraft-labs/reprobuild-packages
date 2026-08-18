@@ -27,6 +27,7 @@ suite "grubSource from-source recipe":
       "https://git.savannah.gnu.org/git/grub.git"
 
   test "builds the two boot platforms published by the package":
+    check "sh" in registeredBuildDeps("grubSource")
     check "--target=i386" in GrubBiosConfigureOptions
     check "--with-platform=pc" in GrubBiosConfigureOptions
     check "--target=x86_64" in GrubEfiConfigureOptions
