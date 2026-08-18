@@ -270,6 +270,10 @@ package glibcSource:
       # otherwise injects _FORTIFY_SOURCE into every compiler invocation,
       # which conflicts with glibc's fortified inline declarations.
       let glibcBuildEnv = @[
+        # The linux-headers dependency makes CFLAGS nonempty, so glibc's
+        # configure script does not add its usual -O2 default. glibc rejects
+        # unoptimized builds; CPPFLAGS retains the injected header path.
+        ("CFLAGS", "-O2 -g"),
         ("NIX_HARDENING_ENABLE",
          "bindnow format libcxxhardeningfast pic relro " &
          "stackclashprotection strictflexarrays1 strictoverflow " &
