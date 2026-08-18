@@ -25,3 +25,11 @@ suite "grubSource from-source recipe":
     check versions[0].sourceUrl == ExpectedUrl
     check versions[0].sourceRepository ==
       "https://git.savannah.gnu.org/git/grub.git"
+
+  test "builds the two boot platforms published by the package":
+    check "--target=i386" in GrubBiosConfigureOptions
+    check "--with-platform=pc" in GrubBiosConfigureOptions
+    check "--target=x86_64" in GrubEfiConfigureOptions
+    check "--with-platform=efi" in GrubEfiConfigureOptions
+    check "TARGET_LDFLAGS=-Wl,--no-dynamic-linker" in
+      GrubCommonConfigureOptions
