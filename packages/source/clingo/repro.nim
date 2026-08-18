@@ -25,6 +25,8 @@ package clingoSource:
     "ninja >=1.10"
     "gcc >=11"
     "bison >=3.0"
+    # Clingo 5.8.0's vendored grammars require re2c's pre-4.3 behavior.
+    "re2c >=3.0"
 
   config:
     discard
@@ -52,7 +54,7 @@ package clingoSource:
         opts.add("RE2C_EXECUTABLE=" & re2cWrapper)
         patches.add(
           "printf '%s\\n' '#!/bin/sh' 'unset LD_LIBRARY_PATH' " &
-          "'exec /usr/bin/re2c \"$@\"' > src/repro-re2c && " &
+          "'exec re2c \"$@\"' > src/repro-re2c && " &
           "chmod +x src/repro-re2c")
       let pkg = cmake_package(
         srcDir = "./src",
@@ -61,7 +63,7 @@ package clingoSource:
         # Clingo generates libclingo/clingo.h below its source tree.
         allowSourceWrites = true,
         # Tool provisioning also exposes the source GCC runtime through
-        # LD_LIBRARY_PATH. Host re2c must retain its host glibc/libstdc++ pair.
+        # LD_LIBRARY_PATH. re2c must retain its own glibc/libstdc++ pair.
         extraEnv = @[("LD_LIBRARY_PATH", "")],
         srcPatches = patches)
       discard pkg.library("libclingo")
