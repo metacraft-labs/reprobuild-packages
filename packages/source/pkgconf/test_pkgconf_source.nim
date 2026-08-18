@@ -1,127 +1,175 @@
-## Smoke test for the from-source ``pkgconfSource`` recipe.
-##
-## Pins the M9.H/I/K trio's behaviour on the M9.N Batch D build-tool
-## slice. pkgconf's unique coverage angles vs the prior 80 from-
-## source recipes:
-##
-##   * THIRD from-source-autotools consumer with a MIXED-KIND
-##     artifact set (one executable + one library, matching the xz
-##     precedent). Pins the per-artifact stage-copy fan-out at the
-##     (1, 1) mixed cardinality from a THREE-flag configure
-##     channel.
-##   * FIRST recipe in the corpus to declare configure flags whose
-##     values carry colon-separated path lists
-##     (``--with-system-libdir=/lib:/usr/lib``) — pins the per-channel
-##     handling of colon-separated path values (a regression that
-##     split the value on colons would surface as a flag-count
-##     mismatch).
-##   * Real sha256 on the fetch channel — the test asserts the exact
-##     64-char hex hash recorded in the recipe + the algorithm tag.
-##
-## Coverage (>=8 tests with multiple assertions each):
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the three-flag set (one bare flag + two
-##     value-bearing flags with embedded colons) + channel-isolation
-##     spot-check.
-##   * MIXED-KIND artifact registration (M3) — pkgconf tagged
-##     ``dakExecutable``, libpkgconf tagged ``dakLibrary``.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
+import std/unittest
 
-import std/[unittest]
+when defined(reproProviderMode):
+  import std/[os, strutils]
+  import repro_core
 
 import repro_project_dsl
-
-# Side-effect import: triggers the package macro which registers
-# fetch spec + configure flags + one executable + one library
-# artifacts under ``pkgconfSource`` at module init time.
 import ./repro
 
-const ExpectedUrl =
-  "https://distfiles.ariadne.space/pkgconf/pkgconf-2.3.0.tar.xz"
-
-# Real sha256 over the upstream pkgconf-2.3.0.tar.xz tarball; see
-# ``repro.nim``'s sha256 strategy section.
-const ExpectedHash =
-  "3a9080ac51d03615e7c1910a0a2a8df08424892b5f13b0628a204d3fcce0ea8b"
-
-const ExpectedConfigureFlags = @[
-  "--disable-static",
-  "--with-system-libdir=/lib:/usr/lib",
-  "--with-system-includedir=/usr/include",
-]
-
-suite "pkgconfSource — from-source recipe smoke test":
-
-  test "fetch spec carries the upstream URL verbatim":
-    # M9.H registry round-trip — URL is recorded exactly as declared.
+suite "pkgconf source recipe":
+  test "pins the upstream release archive":
     let spec = registeredFetchSpec("pkgconfSource")
     check spec.packageName == "pkgconfSource"
-    check spec.url == ExpectedUrl
-
-  test "fetch spec hash is the real sha256 over the upstream tarball":
-    # Real sha256 over the upstream distfiles.ariadne.space tarball;
-    # computed locally + asserted exactly.
-    let spec = registeredFetchSpec("pkgconfSource")
-    check spec.hashHex.len == 64
-    check spec.hashHex == ExpectedHash
-    check spec.hashAlg == dshaSha256
-
-  test "fetch spec is the tarball variant with extractStrip = 1":
-    # Tarball vs git-archive discriminant + the canonical
-    # ``--strip-components=1`` convention.
-    let spec = registeredFetchSpec("pkgconfSource")
     check spec.kind == dfkTarball
+    check spec.url == PkgconfSourceUrl
+    check spec.hashAlg == dshaSha256
+    check spec.hashHex == PkgconfSourceHash
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "artifacts register commands and the shared library":
-    # M3 artifact registry: pkgconf tagged ``dakExecutable``;
-    # libpkgconf tagged ``dakLibrary``. The unique coverage of THIS
-    # recipe vs the xz precedent is the THREE-flag configure channel
-    # paired with the (1, 1) mixed cardinality.
-    let arts = registeredArtifacts("pkgconfSource")
-    check arts.len == 3
-    var seenPkgconf = false
-    var seenPkgConfig = false
-    var seenLibpkgconf = false
-    for art in arts:
-      check art.packageName == "pkgconfSource"
-      case art.artifactName
-      of "pkgconf":
-        seenPkgconf = true
-        check art.kind == dakExecutable
-      of "pkgConfig":
-        seenPkgConfig = true
-        check art.kind == dakExecutable
-      of "libpkgconf":
-        seenLibpkgconf = true
-        check art.kind == dakLibrary
-      else:
-        discard
-    check seenPkgconf
-    check seenPkgConfig
-    check seenLibpkgconf
+  test "records the upstream version identity":
+    let versions = registeredVersions("pkgconfSource")
+    check versions.len == 1
+    check versions[0].version == PkgconfVersion
+    check versions[0].sourceRevision == "pkgconf-" & PkgconfVersion
+    check versions[0].sourceUrl == PkgconfSourceUrl
+    check versions[0].sourceRepository == "https://github.com/pkgconf/pkgconf"
 
-  test "versions block records the upstream tag + URL + repository":
-    # M2 versions registry: the upstream distfiles.ariadne.space
-    # release tag is recorded for ``repro update-source``. The
-    # repository points at the canonical github.com project.
-    let vs = registeredVersions("pkgconfSource")
-    check vs.len == 1
-    check vs[0].version == "2.3.0"
-    check vs[0].sourceRevision == "pkgconf-2.3.0"
-    check vs[0].sourceUrl ==
-      "https://distfiles.ariadne.space/pkgconf/pkgconf-2.3.0.tar.xz"
-    check vs[0].sourceRepository ==
-      "https://github.com/pkgconf/pkgconf"
+  test "uses only tools required by the release archive":
+    check registeredNativeBuildDeps("pkgconfSource") ==
+      @PkgconfNativeBuildDeps
+
+  test "exports the implementation, compatibility command, and library":
+    let artifacts = registeredArtifacts("pkgconfSource")
+    check artifacts.len == 3
+    check artifacts[0].artifactName == "pkgconf"
+    check artifacts[0].kind == dakExecutable
+    check artifacts[1].artifactName == "pkgConfig"
+    check artifacts[1].kind == dakExecutable
+    check artifacts[2].artifactName == "libpkgconf"
+    check artifacts[2].kind == dakLibrary
+    for artifact in artifacts:
+      check artifact.packageName == "pkgconfSource"
+
+  when defined(reproProviderMode):
+    proc dummyRequest(projectRoot: string): ProviderGraphRequest =
+      ProviderGraphRequest(
+        kind: prkGraphInvocation,
+        providerArtifactId: "test-provider",
+        entryPointId: "pkgconfSource.root",
+        entryPointBodyHash: "test-body",
+        reason: girExplicitUserRequest,
+        arguments: projectRoot,
+        namespace: "project")
+
+    proc extractActions(fragment: GraphFragment): seq[BuildActionDef] =
+      for node in fragment.nodes:
+        if node.kind == gnkAction:
+          result.add(decodeBuildActionPayload(toBytes(node.payload)))
+
+    proc findById(actions: seq[BuildActionDef]; id: string): BuildActionDef =
+      for action in actions:
+        if action.id == id:
+          return action
+      raise newException(ValueError, "action not found: " & id)
+
+    proc argValues(action: BuildActionDef; name: string): seq[string] =
+      for arg in action.call.arguments:
+        if arg.name == name:
+          if arg.encodedValue.len == 0:
+            return @[]
+          return arg.encodedValue.split("\x1f")
+      @[]
+
+    proc inlineScriptOf(action: BuildActionDef): string =
+      let argv = action.argValues("argv")
+      if argv.len >= 3: argv[2] else: ""
+
+    test "provider builds the release without regenerating Autotools files":
+      let projectRoot = currentSourcePath.parentDir
+      let packageDef = PackageDef(
+        packageName: "pkgconfSource",
+        sourceFile: projectRoot / "repro.nim",
+        hasDevEnv: false,
+        devEnvBodyHash: "",
+        toolUses: @[])
+      let fragment = buildPackageFragment(
+        packageDef,
+        dummyRequest(projectRoot),
+        proc() = buildPkgconfSourcePackage(),
+        includeDefault = false)
+      let actions = extractActions(fragment)
+
+      var configure, compile, install = default(BuildActionDef)
+      for action in actions:
+        if action.commandStatsId == "autotools_package.configure":
+          configure = action
+        elif action.call.packageName == "make" and
+            action.call.executableName == "makeBin":
+          if "install" in action.argValues("targets"):
+            install = action
+          else:
+            compile = action
+
+      check configure.id.len > 0
+      check compile.id.len > 0
+      check install.id.len > 0
+      check configure.inlineScriptOf().contains("./src/configure")
+      check not configure.inlineScriptOf().contains("autoreconf")
+      for option in PkgconfBaseConfigureOptions:
+        check option in configure.inlineScriptOf()
+      check configure.declaredOutputs == @[projectRoot / PkgconfBuildDir]
+      check configure.readOnlyRoots == @[projectRoot / "src"]
+
+      when defined(windows):
+        for option in PkgconfWindowsConfigureOptions:
+          check option in configure.inlineScriptOf()
+        for option in PkgconfSharedConfigureOptions:
+          check option notin configure.inlineScriptOf()
+        let conversionExclusion =
+          ("MSYS2_ARG_CONV_EXCL", PkgconfWindowsArgConversionExclusions)
+        let staticCppFlags = ("CPPFLAGS", PkgconfWindowsCppFlags)
+        check conversionExclusion in configure.env
+        check conversionExclusion in compile.env
+        check conversionExclusion in install.env
+        check staticCppFlags in configure.env
+        check staticCppFlags in compile.env
+        check staticCppFlags in install.env
+        check compile.dependencyPolicy.kind == bdpMakeDepfile
+        check install.dependencyPolicy.kind == bdpMakeDepfile
+        check compile.dependencyPolicy.depfiles == @PkgconfMakeDepfiles
+        check install.dependencyPolicy.depfiles == @PkgconfMakeDepfiles
+      else:
+        for option in PkgconfSharedConfigureOptions:
+          check option in configure.inlineScriptOf()
+        for option in PkgconfWindowsConfigureOptions:
+          check option notin configure.inlineScriptOf()
+        check compile.dependencyPolicy.kind == bdpAutomaticMonitor
+        check install.dependencyPolicy.kind == bdpAutomaticMonitor
+
+      let implementation = actions.findById(
+        "autotools-stage-executable-pkgconfSource-pkgconf")
+      let compatibility = actions.findById(
+        "autotools-stage-alias-pkgconfSource-pkgConfig")
+      let library = actions.findById(
+        "autotools-stage-library-pkgconfSource-libpkgconf")
+      let mirror = actions.findById("install-mirror-pkgconfSource")
+
+      when defined(windows):
+        var postInstallDepfiles: seq[string] = @[]
+        for depfile in PkgconfMakeDepfiles:
+          postInstallDepfiles.add(PkgconfBuildDir & "/" & depfile)
+        for action in [implementation, compatibility, library, mirror]:
+          check action.dependencyPolicy.kind == bdpMakeDepfile
+          check action.dependencyPolicy.depfiles == postInstallDepfiles
+      else:
+        for action in [implementation, compatibility, library, mirror]:
+          check action.dependencyPolicy.kind == bdpAutomaticMonitor
+      check "/usr/bin/pkgconf" in compatibility.inlineScriptOf()
+      check "/usr/bin/pkg-config" notin compatibility.inlineScriptOf()
+      when defined(windows):
+        let compatibilityOutputDir =
+          projectRoot / ".repro" / "output" / "pkgConfig"
+        check compatibility.outputs == @[
+          compatibilityOutputDir / "pkgConfig.exe",
+          compatibilityOutputDir / "pkgconf.exe",
+        ]
+        check "#!/bin/sh" notin compatibility.inlineScriptOf()
+      else:
+        let compatibilityOutputDir =
+          projectRoot / ".repro" / "output" / "pkgConfig"
+        check compatibility.outputs == @[
+          compatibilityOutputDir / "pkgConfig",
+          compatibilityOutputDir / "pkgconf",
+        ]
+        check "#!/bin/sh" in compatibility.inlineScriptOf()
