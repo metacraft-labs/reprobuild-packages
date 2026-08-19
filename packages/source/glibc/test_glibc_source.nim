@@ -26,7 +26,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -145,3 +145,7 @@ suite "glibcSource — from-source recipe smoke test":
       "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz"
     check vs[0].sourceRepository ==
       "https://sourceware.org/git/glibc.git"
+
+  test "ldconfig uses glibc's observable dynamic program link":
+    const recipeSource = staticRead("./repro.nim")
+    check recipeSource.contains("makeVars = @[\"others-static=sln\"]")

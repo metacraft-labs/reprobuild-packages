@@ -282,6 +282,11 @@ package glibcSource:
       let pkg = autotools_package(
         srcDir = "./src",
         configureOptions = opts,
+        # Upstream lists ldconfig in both `others` and `others-static`.
+        # Keeping only `sln` in the static set selects glibc's own dynamic
+        # program link rule for ldconfig. Rootfs composition can then observe
+        # every file it reads while producing ld.so.cache.
+        makeVars = @["others-static=sln"],
         extraEnv = glibcBuildEnv)
       discard pkg.library("libC")
       discard pkg.library("libM")
