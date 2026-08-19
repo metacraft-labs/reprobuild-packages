@@ -279,18 +279,22 @@ package glibcSource:
          "stackclashprotection strictflexarrays1 strictoverflow " &
          "zerocallusedregs"),
       ]
+      let glibcSourcePatches = @[
+        # Upstream registers ldconfig as both a static and dynamic program.
+        # Keep the dynamic registration so io-mon can observe its runtime
+        # closure when ReproOS generates ld.so.cache. Patch only elf's static
+        # registration: a command-line others-static override would leak into
+        # every recursive sub-make and break support/test-run-command.
+        "sed -i '/^[[:space:]]*others-static[[:space:]]*+=[[:space:]]*ldconfig[[:space:]]*$/d' ./src/elf/Makefile",
+      ]
       let pkg = autotools_package(
         srcDir = "./src",
         configureOptions = opts,
-        # Upstream lists ldconfig in both `others` and `others-static`.
-        # Keeping only `sln` in the static set selects glibc's own dynamic
-        # program link rule for ldconfig. Rootfs composition can then observe
-        # every file it reads while producing ld.so.cache.
-        makeVars = @["others-static=sln"],
         # The elf makefile generates included test descriptions while make is
         # still loading it. Ensure the redirect destination exists before a
         # clean parallel build enters the elf subdirectory.
         postConfigureCommands = @["mkdir -p elf"],
+        srcPatches = glibcSourcePatches,
         extraEnv = glibcBuildEnv)
       discard pkg.library("libC")
       discard pkg.library("libM")
