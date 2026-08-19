@@ -3,5 +3,6 @@ build/
 result
 result-*
 packages/source/*/src/
+packages/source/grub/build-grub-*/
 /tools/package_interface_fingerprints
 /tools/package_interface_fingerprints.exe
