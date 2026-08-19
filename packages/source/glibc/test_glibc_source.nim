@@ -146,11 +146,17 @@ suite "glibcSource — from-source recipe smoke test":
     check vs[0].sourceRepository ==
       "https://sourceware.org/git/glibc.git"
 
-  test "ldconfig uses glibc's observable dynamic program link":
+  test "ldconfig uses the guarded observable dynamic link patch":
     const recipeSource = staticRead("./repro.nim")
+    const patchSource = staticRead("./patches/enable-dynamic-ldconfig.py")
+    const comparatorSource = staticRead("./patches/ldconfig-cache-libcmp.c")
     check recipeSource.contains(
-      "others-static[[:space:]]*+=[[:space:]]*ldconfig")
+      "python3 ./patches/enable-dynamic-ldconfig.py ./src")
     check recipeSource.contains("srcPatches = glibcSourcePatches")
     check not recipeSource.contains("makeVars = @[\"others-static=sln\"]")
+    check patchSource.contains("others-static\\t+= ldconfig")
+    check patchSource.contains("CFLAGS-ldconfig.c += -DNO_HIDDEN")
+    check patchSource.contains("ldconfig-cache-libcmp")
+    check comparatorSource.contains("_dl_cache_libcmp")
     check recipeSource.contains(
       "postConfigureCommands = @[\"mkdir -p elf\"]")

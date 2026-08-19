@@ -280,12 +280,11 @@ package glibcSource:
          "zerocallusedregs"),
       ]
       let glibcSourcePatches = @[
-        # Upstream registers ldconfig as both a static and dynamic program.
-        # Keep the dynamic registration so io-mon can observe its runtime
-        # closure when ReproOS generates ld.so.cache. Patch only elf's static
-        # registration: a command-line others-static override would leak into
-        # every recursive sub-make and break support/test-run-command.
-        "sed -i '/^[[:space:]]*others-static[[:space:]]*+=[[:space:]]*ldconfig[[:space:]]*$/d' ./src/elf/Makefile",
+        # Upstream intentionally builds ldconfig as a static utility. ReproOS
+        # runs it while composing the image, where a dynamic main executable
+        # lets io-mon observe the complete cache-generation closure. Keep the
+        # version-specific source transformation guarded and reviewable.
+        "python3 ./patches/enable-dynamic-ldconfig.py ./src",
       ]
       let pkg = autotools_package(
         srcDir = "./src",
