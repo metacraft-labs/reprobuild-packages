@@ -1,4 +1,4 @@
-import std/unittest
+import std/[sequtils, unittest]
 
 import repro_project_dsl
 import ./repro
@@ -12,11 +12,11 @@ suite "busyboxSource recipe":
     check spec.hashAlg == dshaSha256
     check spec.extractStrip == 1
 
-  test "exposes one BusyBox executable":
+  test "exposes BusyBox and its required hostname applet":
     let artifacts = registeredArtifacts("busyboxSource")
-    check artifacts.len == 1
-    check artifacts[0].artifactName == "busybox"
-    check artifacts[0].kind == dakExecutable
+    check artifacts.len == 2
+    check artifacts.mapIt(it.artifactName) == @["busybox", "hostname"]
+    check artifacts.allIt(it.kind == dakExecutable)
 
   test "records the upstream version metadata":
     let versions = registeredVersions("busyboxSource")

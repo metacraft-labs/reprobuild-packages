@@ -27,6 +27,9 @@ package busyboxSource:
   executable busybox:
     discard
 
+  executable hostname:
+    discard
+
   build:
     setCurrentOwningPackageOverride("busyboxSource")
     try:
@@ -38,7 +41,7 @@ package busyboxSource:
         "make -C ./src defconfig",
         "sed -i 's/# CONFIG_STATIC is not set/CONFIG_STATIC=y/; s/CONFIG_TC=y/# CONFIG_TC is not set/; s/CONFIG_FEATURE_TC_INGRESS=y/# CONFIG_FEATURE_TC_INGRESS is not set/; s/CONFIG_SELINUX=y/# CONFIG_SELINUX is not set/' ./src/.config",
         "make -C ./src oldconfig </dev/null",
-        "printf '\n.PHONY: repro_install\nrepro_install:\n\tmkdir -p $(DESTDIR)/usr/bin\n\tcp busybox $(DESTDIR)/usr/bin/busybox\n' >> ./src/Makefile",
+        "printf '\n.PHONY: repro_install\nrepro_install:\n\tmkdir -p $(DESTDIR)/usr/bin\n\tcp busybox $(DESTDIR)/usr/bin/busybox\n\tln -sfn busybox $(DESTDIR)/usr/bin/hostname\n' >> ./src/Makefile",
       ]
       let pkg = autotools_package(
         srcDir = "./src",
@@ -48,6 +51,7 @@ package busyboxSource:
         srcPatches = patches,
       )
       discard pkg.executable("busybox")
+      discard pkg.executable("hostname")
       pkg.installTreeMirror()
     finally:
       clearCurrentOwningPackageOverride()
