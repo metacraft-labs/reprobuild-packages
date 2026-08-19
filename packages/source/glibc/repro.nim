@@ -287,6 +287,10 @@ package glibcSource:
         # program link rule for ldconfig. Rootfs composition can then observe
         # every file it reads while producing ld.so.cache.
         makeVars = @["others-static=sln"],
+        # The elf makefile generates included test descriptions while make is
+        # still loading it. Ensure the redirect destination exists before a
+        # clean parallel build enters the elf subdirectory.
+        postConfigureCommands = @["mkdir -p elf"],
         extraEnv = glibcBuildEnv)
       discard pkg.library("libC")
       discard pkg.library("libM")

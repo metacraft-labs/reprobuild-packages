@@ -149,3 +149,5 @@ suite "glibcSource — from-source recipe smoke test":
   test "ldconfig uses glibc's observable dynamic program link":
     const recipeSource = staticRead("./repro.nim")
     check recipeSource.contains("makeVars = @[\"others-static=sln\"]")
+    check recipeSource.contains(
+      "postConfigureCommands = @[\"mkdir -p elf\"]")
