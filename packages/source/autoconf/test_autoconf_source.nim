@@ -29,7 +29,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -124,6 +124,19 @@ suite "autoconfSource — from-source recipe smoke test":
     check seenAutoscan
     check seenAutoupdate
     check seenIfnames
+
+  test "post-install relocation removes host data and tool paths":
+    var cleanupCommand = ""
+    for action in registeredBuildActions():
+      if action.id.startsWith("autotools-la-cleanup-autoconfSource-"):
+        for arg in action.call.arguments:
+          if arg.name == "argv":
+            cleanupCommand = arg.encodedValue
+    check cleanupCommand.contains("REPRO_AUTOTOOLS_INSTALL_ROOT")
+    check cleanupCommand.contains("FindBin")
+    check cleanupCommand.contains("/usr/bin/env perl")
+    check cleanupCommand.contains("autoconf autoheader autom4te autoreconf")
+    check registeredRuntimeDeps("autoconfSource") == @["perl >=5.32", "m4"]
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry: the upstream ftp.gnu.org release tag is

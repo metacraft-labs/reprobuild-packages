@@ -79,9 +79,24 @@
 ## defaulted ``configureFlags`` to empty on this recipe would surface
 ## as a flag-count mismatch.
 
+import std/strutils
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+const AutoconfTools = [
+  "autoconf",
+  "autoheader",
+  "autom4te",
+  "autoreconf",
+  "autoscan",
+  "autoupdate",
+  "ifnames",
+]
+
+proc shellSingleQuoted(value: string): string =
+  "'" & value.replace("'", "'\"'\"'") & "'"
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -176,7 +191,39 @@ package autoconfSource:
       let opts = @[
         "--disable-static",
       ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      let relocationProgram = """
+use strict;
+use warnings;
+my ($bin, @tools) = @ARGV;
+for my $tool (@tools) {
+  my $path = "$bin/$tool";
+  open my $input, '<', $path or die "open $path: $!";
+  local $/;
+  my $text = <$input>;
+  close $input or die "close $path: $!";
+  $text =~ s{\A\#![^\n]*}{#!/usr/bin/env perl};
+  $text =~ s{use warnings FATAL => 'all';}{use warnings FATAL => 'all';\nuse FindBin;};
+  $text =~ s{'/usr/share/autoconf/autoconf/trailer\.m4'}{"\$FindBin::Bin/../share/autoconf/autoconf/trailer.m4"}g;
+  $text =~ s{'/usr/share/autoconf'}{"\$FindBin::Bin/../share/autoconf"}g;
+  $text =~ s{'/usr/bin/autoconf'}{"\$FindBin::Bin/autoconf"}g;
+  $text =~ s{'/usr/bin/autoheader'}{"\$FindBin::Bin/autoheader"}g;
+  $text =~ s{'/usr/bin/autom4te'}{"\$FindBin::Bin/autom4te"}g;
+  $text =~ s{my \$m4 = \$ENV\{"M4"\} \|\| '[^']+/bin/m4';}{my \$m4 = \$ENV{"M4"} || 'm4';};
+  $text =~ s{my \@words = shellwords \(\$_\);}{my \@words = shellwords (\$_);\n      \@words = map { \$_ eq '/usr/share/autoconf' ? "\$FindBin::Bin/../share/autoconf" : \$_ } \@words;};
+  open my $output, '>', $path or die "write $path: $!";
+  print {$output} $text or die "write $path: $!";
+  close $output or die "close $path: $!";
+  chmod 0755, $path or die "chmod $path: $!";
+}
+"""
+      let relocationCommand =
+        "perl -e " & shellSingleQuoted(relocationProgram) &
+        " \"$REPRO_AUTOTOOLS_INSTALL_ROOT/usr/bin\" " &
+        AutoconfTools.join(" ")
+      let pkg = autotools_package(
+        srcDir = "./src",
+        configureOptions = opts,
+        postInstallCommands = @[relocationCommand])
       discard pkg.executable("autoconf")
       discard pkg.executable("autoheader")
       discard pkg.executable("autom4te")
@@ -188,8 +235,8 @@ package autoconfSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
-    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
-    ## DT_NEEDED inspection of the linked artifacts. Empty until
-    ## the M9.R.5b per-recipe pass populates per-output ELF
-    ## interrogation.
-    discard
+    ## Autoconf's command suite is implemented in Perl and invokes m4 while
+    ## expanding macros. The installed scripts discover their shared data
+    ## relative to their own executable path.
+    "perl >=5.32"
+    "m4"

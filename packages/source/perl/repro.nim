@@ -37,6 +37,8 @@ package perlSource:
       shell "rm -rf $out/stage && make DESTDIR=$out/stage install"
       shell "cp -a $out/stage/usr/. $out/ && rm -rf $out/stage"
       shell "ln -sf perl5/5.40.0/x86_64-linux/CORE/libperl.so $out/lib/libperl.so"
+      shell "mv $out/bin/perl $out/bin/perl.real && printf '%s\\n' '#!/bin/sh' 'prefix=$(CDPATH= cd -- \"$(dirname -- \"$0\")/..\" && pwd)' 'export LD_LIBRARY_PATH=\"$prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"' 'export PERL5LIB=\"$prefix/lib/perl5/5.40.0:$prefix/lib/perl5/5.40.0/x86_64-linux${PERL5LIB:+:$PERL5LIB}\"' 'exec \"$prefix/bin/perl.real\" \"$@\"' > $out/bin/perl && chmod 0755 $out/bin/perl"
+      shell "$out/bin/perl -Mstrict -e 'print qq(source-perl-ok\\n)'"
 
   runtimeDeps:
     discard
