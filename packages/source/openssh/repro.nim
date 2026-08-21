@@ -21,6 +21,7 @@ package opensshSource:
     "make >=4"
 
   buildDeps:
+    "libxcrypt"
     "openssl"
     "zlib"
 
@@ -61,5 +62,6 @@ package opensshSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
+    "libxcrypt"
     "openssl"
     "zlib"
