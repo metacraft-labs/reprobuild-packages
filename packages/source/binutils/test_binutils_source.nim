@@ -51,7 +51,14 @@ const ExpectedConfigureFlags = @[
   "--enable-shared",
   "--disable-werror",
   "--disable-gprofng",
-  "MAKEINFO=true",
+]
+
+const ExpectedGeneratedToolOverrides = @[
+  "MAKEINFO",
+  "BISON",
+  "YACC",
+  "FLEX",
+  "LEX",
 ]
 
 suite "binutilsSource — from-source recipe smoke test":
@@ -86,6 +93,21 @@ suite "binutilsSource — from-source recipe smoke test":
     check configureCommand.len > 0
     for flag in ExpectedConfigureFlags:
       check configureCommand.contains(flag)
+
+  test "generated tools are disabled in the environment and recursive make":
+    var configuredOverrides: seq[string] = @[]
+    var makeVarsEncoding = ""
+    for action in registeredBuildActions():
+      for (name, value) in action.env:
+        if name in ExpectedGeneratedToolOverrides and value == "true":
+          configuredOverrides.add(name)
+      for arg in action.call.arguments:
+        if arg.name == "vars" and arg.encodedValue.contains("MAKEINFO=true"):
+          makeVarsEncoding = arg.encodedValue
+    check makeVarsEncoding.len > 0
+    for name in ExpectedGeneratedToolOverrides:
+      check name in configuredOverrides
+      check makeVarsEncoding.contains(name & "=true")
 
   test "uses only tools required by the release archive":
     let native = registeredNativeBuildDeps("binutilsSource")

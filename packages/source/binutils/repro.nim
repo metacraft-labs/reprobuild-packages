@@ -151,9 +151,10 @@
 ##   * ``--disable-gprofng``   — omit the optional profiler, whose
 ##                                generated sources add bison and flex
 ##                                to the build-time closure.
-##   * ``MAKEINFO=true``       — suppress Info manual generation so
-##                                the boot image does not require
-##                                texinfo to build binutils.
+##   * generated-tool overrides — suppress Info manual generation
+##                                  and parser regeneration so the
+##                                  release archive does not require
+##                                  texinfo, bison, or flex.
 
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
@@ -288,9 +289,27 @@ package binutilsSource:
         "--enable-shared",
         "--disable-werror",
         "--disable-gprofng",
-        "MAKEINFO=true",
       ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      let generatedToolOverrides = @[
+        "MAKEINFO=true",
+        "BISON=true",
+        "YACC=true",
+        "FLEX=true",
+        "LEX=true",
+      ]
+      let generatedToolEnv = @[
+        ("MAKEINFO", "true"),
+        ("BISON", "true"),
+        ("YACC", "true"),
+        ("FLEX", "true"),
+        ("LEX", "true"),
+      ]
+      let pkg = autotools_package(
+        srcDir = "./src",
+        configureOptions = opts,
+        makeVars = generatedToolOverrides,
+        extraEnv = generatedToolEnv,
+      )
       discard pkg.executable("ld")
       discard pkg.executable("as")
       discard pkg.executable("ar")
