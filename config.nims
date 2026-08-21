@@ -16,12 +16,16 @@ proc addDependencyPath(envName, siblingName: string) =
     let configured = getEnv(envName)
     if configured.len > 0: configured
     else: ".." / siblingName
-  if dirExists(root / "src"):
-    switch("path", root / "src")
+  let sourcePath =
+    if dirExists(root / "src"): root / "src"
+    else: root
+  if dirExists(sourcePath):
+    switch("path", sourcePath)
 
 addDependencyPath("SHM_QUEUE_SRC", "nim-shm-queue")
 addDependencyPath("SHM_GSET_SRC", "nim-shm-gset")
 addDependencyPath("STACKABLE_HOOKS_SRC", "nim-stackable-hooks")
+addDependencyPath("REPRO_TEST_ADAPTERS_SRC", "reprobuild-test-adapters")
 
 let nimcryptoRoot = libsRoot / "nimcrypto"
 if fileExists(nimcryptoRoot / "nimcrypto" / "hash.nim"):

@@ -8,13 +8,9 @@
 ##     artifacts sharing a single ``./configure`` + ``make`` install-
 ##     tree. Pins the from-source-autotools convention's per-artifact
 ##     stage-copy fan-out at the eleven-binary cardinality.
-##   * FIRST from-source-autotools consumer with a FIVE-flag
-##     ``configureFlags:`` block — the prior precedents covered
-##     1-flag (autoconf / automake / libtool) + 3-flag (pkgconf) +
-##     4-flag (expat) cardinalities, binutils closes the 5-flag gap
-##     with the canonical ``--enable-gold`` + ``--enable-ld=default``
-##     + ``--enable-plugins`` + ``--enable-shared`` +
-##     ``--disable-werror`` set.
+##   * The lowered configure action records all required linker options
+##     plus the explicit exclusions that keep optional build tools out
+##     of the source closure.
 ##   * Real sha256 on the fetch channel — the test asserts the exact
 ##     64-char hex hash recorded in the recipe + the algorithm tag.
 ##
@@ -22,16 +18,16 @@
 ##
 ##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
 ##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the five-flag set + channel-isolation
-##     spot-check (meson + cmake + make channels MUST be empty).
+##   * Lowered configure action inspection — required options and
+##     optional-tool exclusions must reach the executed command.
+##   * Exact native and build dependency closure.
 ##   * ELEVEN ``executable`` artifact registration (M3) — ld + as +
 ##     ar + nm + objcopy + objdump + ranlib + strip + readelf + size
 ##     + strings all tagged ``dakExecutable``.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -54,6 +50,8 @@ const ExpectedConfigureFlags = @[
   "--enable-plugins",
   "--enable-shared",
   "--disable-werror",
+  "--disable-gprofng",
+  "MAKEINFO=true",
 ]
 
 suite "binutilsSource — from-source recipe smoke test":
@@ -79,14 +77,24 @@ suite "binutilsSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "lowered configure action carries the production options":
+    var configureCommand = ""
+    for action in registeredBuildActions():
+      for arg in action.call.arguments:
+        if arg.name == "argv" and arg.encodedValue.contains("../src/configure"):
+          configureCommand = arg.encodedValue
+    check configureCommand.len > 0
+    for flag in ExpectedConfigureFlags:
+      check configureCommand.contains(flag)
+
+  test "uses only tools required by the release archive":
+    let native = registeredNativeBuildDeps("binutilsSource")
+    check native == @["gcc >=11", "make >=4.3", "perl >=5.32"]
+    check "bison >=3.6" notin native
+    check "flex >=2.6" notin native
+
+  test "documentation suppression removes the texinfo dependency":
+    check registeredBuildDeps("binutilsSource").len == 0
   test "artifacts register eleven executables all tagged dakExecutable":
     # M3 artifact registry: ld + as + ar + nm + objcopy + objdump +
     # ranlib + strip + readelf + size + strings are all tagged

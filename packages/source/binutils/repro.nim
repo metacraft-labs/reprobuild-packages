@@ -24,13 +24,9 @@
 ## (M9.L.2) claims the recipe via the populated ``configureFlags:``
 ## channel.
 ##
-## binutils is the ONLY ``from-source-autotools`` consumer in the
-## corpus that declares FIVE configure flags. The prior precedents
-## (expat = 4, pkgconf = 3, autoconf / automake / libtool = 1) cover
-## the 1 / 3 / 4-flag cardinalities; binutils closes the 5-flag gap
-## with the canonical ``--enable-gold`` + ``--enable-ld=default`` +
-## ``--enable-plugins`` + ``--enable-shared`` + ``--disable-werror``
-## set the modern desktop story requires.
+## The release archive already contains generated parsers. The recipe
+## therefore omits maintainer-only parser generators and suppresses
+## optional manuals and gprofng to keep the bootstrap closure minimal.
 ##
 ## ## Why binutils matters for the v1 desktop story
 ##
@@ -117,7 +113,8 @@
 ##
 ## ## Configurables
 ##
-## v1 ships FIVE configure flags per the task brief:
+## The configure invocation selects the linker features needed by the
+## desktop package set while omitting optional tools and documentation:
 ##
 ##   * ``--enable-gold``      — enable the gold linker as a sidecar
 ##                               binary. gold is a faster, more-
@@ -151,6 +148,12 @@
 ##                                in-depth flag to keep the build
 ##                                resilient to host-compiler version
 ##                                drift.
+##   * ``--disable-gprofng``   — omit the optional profiler, whose
+##                                generated sources add bison and flex
+##                                to the build-time closure.
+##   * ``MAKEINFO=true``       — suppress Info manual generation so
+##                                the boot image does not require
+##                                texinfo to build binutils.
 
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
@@ -204,17 +207,12 @@ package binutilsSource:
     ## handful of code-generation passes under ``binutils/`` and
     ## ``ld/``.
     "perl >=5.32"
-    ## bison + flex are consumed by binutils's parser-generation
-    ## passes (the assembler's expression parser + the linker
-    ## script parser).
-    "bison >=3.6"
-    "flex >=2.6"
+    ## Release tarballs carry generated parsers, so bison and flex are
+    ## maintainer-only dependencies. Info manuals are intentionally omitted
+    ## below and do not add texinfo to the boot-image source closure.
 
   buildDeps:
-    ## texinfo is consumed by the documentation build pass; even
-    ## with ``--disable-doc`` not declared, the configure probes
-    ## for it.
-    "texinfo >=6.7"
+    discard
 
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
@@ -289,6 +287,8 @@ package binutilsSource:
         "--enable-plugins",
         "--enable-shared",
         "--disable-werror",
+        "--disable-gprofng",
+        "MAKEINFO=true",
       ]
       let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
       discard pkg.executable("ld")
