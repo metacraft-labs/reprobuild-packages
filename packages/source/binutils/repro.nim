@@ -292,17 +292,18 @@ package binutilsSource:
       ]
       let generatedToolOverrides = @[
         "MAKEINFO=true",
-        "BISON=true",
-        "YACC=true",
-        "FLEX=true",
-        "LEX=true",
+        # Autoconf treats `:` as an explicitly unavailable lexer/parser tool.
+        "BISON=:",
+        "YACC=:",
+        "FLEX=:",
+        "LEX=:",
       ]
       let generatedToolEnv = @[
         ("MAKEINFO", "true"),
-        ("BISON", "true"),
-        ("YACC", "true"),
-        ("FLEX", "true"),
-        ("LEX", "true"),
+        ("BISON", ":"),
+        ("YACC", ":"),
+        ("FLEX", ":"),
+        ("LEX", ":"),
       ]
       let pkg = autotools_package(
         srcDir = "./src",

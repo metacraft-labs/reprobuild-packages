@@ -54,11 +54,11 @@ const ExpectedConfigureFlags = @[
 ]
 
 const ExpectedGeneratedToolOverrides = @[
-  "MAKEINFO",
-  "BISON",
-  "YACC",
-  "FLEX",
-  "LEX",
+  ("MAKEINFO", "true"),
+  ("BISON", ":"),
+  ("YACC", ":"),
+  ("FLEX", ":"),
+  ("LEX", ":"),
 ]
 
 suite "binutilsSource — from-source recipe smoke test":
@@ -99,15 +99,15 @@ suite "binutilsSource — from-source recipe smoke test":
     var makeVarsEncoding = ""
     for action in registeredBuildActions():
       for (name, value) in action.env:
-        if name in ExpectedGeneratedToolOverrides and value == "true":
+        if (name, value) in ExpectedGeneratedToolOverrides:
           configuredOverrides.add(name)
       for arg in action.call.arguments:
         if arg.name == "vars" and arg.encodedValue.contains("MAKEINFO=true"):
           makeVarsEncoding = arg.encodedValue
     check makeVarsEncoding.len > 0
-    for name in ExpectedGeneratedToolOverrides:
+    for (name, value) in ExpectedGeneratedToolOverrides:
       check name in configuredOverrides
-      check makeVarsEncoding.contains(name & "=true")
+      check makeVarsEncoding.contains(name & "=" & value)
 
   test "uses only tools required by the release archive":
     let native = registeredNativeBuildDeps("binutilsSource")
