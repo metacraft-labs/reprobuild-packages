@@ -70,12 +70,15 @@ suite "libxml2Source — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "autotools constructor receives the exact production options":
+    check libxml2ConfigureOptions() == ExpectedConfigureFlags
+
+  test "Windows links the BCryptGenRandom system library":
+    when defined(windows):
+      check libxml2BuildEnvironment() == @[("LIBS", "-lbcrypt")]
+    else:
+      check libxml2BuildEnvironment().len == 0
+
   test "artifacts register a single library":
     # M3 artifact registry: ``libXml2`` is the only artifact and
     # must be tagged ``dakLibrary``. libxml2's autotools build emits

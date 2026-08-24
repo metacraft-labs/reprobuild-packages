@@ -109,6 +109,21 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+proc libxml2ConfigureOptions*(): seq[string] = @[
+  "--disable-static",
+  "--without-python",
+  "--without-history",
+  "--without-html",
+  "--without-debug",
+  "--without-mem-debug",
+]
+
+proc libxml2BuildEnvironment*(): seq[(string, string)] =
+  when defined(windows):
+    @[("LIBS", "-lbcrypt")]
+  else:
+    @[]
+
 # ---------------------------------------------------------------------------
 # Package declaration
 # ---------------------------------------------------------------------------
@@ -198,15 +213,10 @@ package libxml2Source:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
     setCurrentOwningPackageOverride("libxml2Source")
     try:
-      let opts = @[
-        "--disable-static",
-        "--without-python",
-        "--without-history",
-        "--without-html",
-        "--without-debug",
-        "--without-mem-debug",
-      ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      let pkg = autotools_package(
+        srcDir = "./src",
+        configureOptions = libxml2ConfigureOptions(),
+        extraEnv = libxml2BuildEnvironment())
       discard pkg.library("libXml2")
     finally:
       clearCurrentOwningPackageOverride()
