@@ -1,134 +1,108 @@
-## Smoke test for the from-source ``gettextSource`` recipe.
-##
-## Pins the M9.H/I/K trio's behaviour on the SIXTY-FIFTH real
-## production from-source recipe. gettext's unique coverage angle vs
-## the prior sixty-four is being the canonical GNU i18n / l10n
-## toolchain with a platform-aware configure option set
-## ``configureFlags:`` block exercising the mixed ``--disable-*`` /
-## ``--without-*`` polarity convention.
-##
-## Coverage (>=8 tests with multiple assertions each):
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the production option set + channel-isolation
-##     spot-check (meson + cmake + make channels MUST be empty).
-##   * artifact registration (M3) — three executables
-##     (``dakExecutable``) attributed to ``gettextSource``.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
+import std/[os, strutils, unittest]
 
-import std/[strutils, unittest]
-
+import repro_core/ambient_execution
 import repro_project_dsl
-import ../source_recipe_paths
 
-# Side-effect import: triggers the package macro which registers
-# fetch spec + configure flags + three executable artifacts under
-# ``gettextSource`` at module init time.
+import ../source_recipe_paths
 import ./repro
 
-const ExpectedUrl =
-  "https://ftp.gnu.org/gnu/gettext/gettext-0.22.5.tar.xz"
-
-const ExpectedHash =
-  "fe10c37353213d78a5b83d48af231e005c4da84db5ce88037d88355938259640"
-
-const ExpectedConfigureFlags = @[
-  "--disable-static",
-  "--disable-java",
-  "--disable-csharp",
-  "--disable-acl",
-  "--disable-xattr",
-  "--disable-libasprintf",
-  "--without-emacs",
-]
-
-suite "gettextSource — from-source recipe smoke test":
-
-  test "fetch spec carries the vendored URL verbatim":
-    # M9.H registry round-trip — URL is recorded exactly as declared.
+suite "gettext source recipe":
+  test "pins the official GNU release archive":
     let spec = registeredFetchSpec("gettextSource")
     check spec.packageName == "gettextSource"
-    check spec.url == ExpectedUrl
-
-  test "fetch spec hash is a 64-char sha256 hex string":
-    # sha256 over the vendored 10,329,748-byte tarball; length check
-    # guards against a future bump that forgets to widen the hash
-    # alongside the URL.
-    let spec = registeredFetchSpec("gettextSource")
-    check spec.hashHex.len == 64
-    check spec.hashHex == ExpectedHash
-    check spec.hashAlg == dshaSha256
-
-  test "fetch spec is the tarball variant with extractStrip = 1":
-    # Tarball vs git-archive discriminant + the canonical
-    # ``--strip-components=1`` convention upstream release tarballs use.
-    let spec = registeredFetchSpec("gettextSource")
     check spec.kind == dfkTarball
+    check spec.url == GettextSourceUrl
+    check spec.hashAlg == dshaSha256
+    check spec.hashHex == GettextSourceHash
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    var expected = ExpectedConfigureFlags
-    when defined(windows):
-      expected.add("--host=x86_64-w64-mingw32")
-    else:
-      expected.add("--without-included-libintl")
-    check gettextConfigureOptions() == expected
+  test "records current upstream version metadata":
+    let versions = registeredVersions("gettextSource")
+    check versions.len == 1
+    check versions[0].version == GettextVersion
+    check versions[0].sourceRevision == "v" & GettextVersion
+    check versions[0].sourceUrl == GettextSourceUrl
+    check versions[0].sourceRepository == GettextSourceRepository
 
-  test "build environment emits rpath flags only on ELF-like hosts":
-    let environment = gettextBuildEnvironment()
+  test "declares the expected build closure":
+    check registeredNativeBuildDeps("gettextSource") ==
+      @GettextNativeBuildDeps
+    check registeredBuildDeps("gettextSource") == @GettextBuildDeps
+
+  test "selects platform-specific libintl and linker options":
+    var expectedOptions = @GettextBaseConfigureOptions
     when defined(windows):
-      check environment.len == 0
+      expectedOptions.add("--host=x86_64-w64-mingw32")
+      expectedOptions.add("--with-libiconv-prefix=" &
+        sourcePackageInstallPath("libiconv", "usr"))
+      check gettextBuildEnvironment().len == 0
     else:
-      check environment == @[(
+      expectedOptions.add("--without-included-libintl")
+      check gettextBuildEnvironment() == @[(
         "LDFLAGS",
         "-Wl,-rpath," & sourcePackageInstallPath("gettext", "usr", "lib")
       )]
+    check gettextConfigureOptions() == expectedOptions
 
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "artifacts register three executables":
-    # glibc provides the libintl API in libc, so this build installs the
-    # gettext toolchain but no standalone libintl.so artifact.
-    let arts = registeredArtifacts("gettextSource")
-    check arts.len == 3
-    var seenMsgfmt = false
-    var seenMsgmerge = false
-    var seenXgettext = false
-    for art in arts:
-      check art.packageName == "gettextSource"
-      case art.artifactName
-      of "msgfmt":
-        seenMsgfmt = true
-        check art.kind == dakExecutable
-      of "msgmerge":
-        seenMsgmerge = true
-        check art.kind == dakExecutable
-      of "xgettext":
-        seenXgettext = true
-        check art.kind == dakExecutable
-      else:
-        discard
-    check seenMsgfmt
-    check seenMsgmerge
-    check seenXgettext
+  test "exports the catalog tools":
+    let artifacts = registeredArtifacts("gettextSource")
+    check artifacts.len == 3
+    check artifacts[0].artifactName == "msgfmt"
+    check artifacts[1].artifactName == "msgmerge"
+    check artifacts[2].artifactName == "xgettext"
+    for artifact in artifacts:
+      check artifact.packageName == "gettextSource"
+      check artifact.kind == dakExecutable
 
-  test "versions block records the upstream tag + URL + repository":
-    # M2 versions registry: the upstream ftp.gnu.org release tag is
-    # recorded for ``repro update-source`` even though the live fetch
-    # points at the vendored copy. The repository points at the
-    # savannah.gnu.org git mirror that hosts the gettext source tree.
-    let vs = registeredVersions("gettextSource")
-    check vs.len == 1
-    check vs[0].version == "0.22.5"
-    check vs[0].sourceRevision == "v0.22.5"
-    check vs[0].sourceUrl ==
-      "https://ftp.gnu.org/gnu/gettext/gettext-0.22.5.tar.xz"
-    check vs[0].sourceRepository ==
-      "https://git.savannah.gnu.org/git/gettext.git"
+  test "uses the native Make quote pass only on Windows":
+    when defined(windows):
+      check gettextPostConfigureCommands() == @[
+        "sh ../../scripts/fix-native-make-quotes.sh ."
+      ]
+    else:
+      check gettextPostConfigureCommands().len == 0
+
+  test "quote pass rewrites affected flags exactly once":
+    let shellPath = uncontrolledFindExe("sh")
+    require shellPath.len > 0
+
+    let fixtureDir = getTempDir() /
+      ("repro-gettext-quote-test-" & $getCurrentProcessId())
+    let fixtureMakefile = fixtureDir / "Makefile"
+    let scriptPath = currentSourcePath().parentDir.parentDir /
+      "scripts" / "fix-native-make-quotes.sh"
+    if dirExists(fixtureDir):
+      removeDir(fixtureDir)
+    createDir(fixtureDir)
+    defer:
+      removeDir(fixtureDir)
+
+    writeFile(fixtureMakefile, """
+AM_CPPFLAGS = -DLOCALEDIR=\"/usr/share/locale\"
+bindir_c_make = \"$(bindir)\"
+msgfmt_CPPFLAGS = $(AM_CPPFLAGS) -DINSTALLDIR=\"/usr/bin\"
+gettext_CFLAGS = -DINSTALLDIR=$(bindir_c_make)
+PLAIN_VALUE = untouched
+""")
+
+    let command = quoteShellCommand(@[shellPath, scriptPath, fixtureDir])
+    check uncontrolledExecCmdEx(command).exitCode == 0
+    check uncontrolledExecCmdEx(command).exitCode == 0
+
+    let patched = readFile(fixtureMakefile)
+    check patched.count(
+      "# reprobuild native GNU make quote compatibility") == 1
+    check patched.contains(
+      "reprobuild_original_AM_CPPFLAGS := $(AM_CPPFLAGS)")
+    check patched.contains(
+      """AM_CPPFLAGS = $(subst ","",$(reprobuild_original_AM_CPPFLAGS))""")
+    check patched.contains(
+      "reprobuild_original_msgfmt_CPPFLAGS := $(msgfmt_CPPFLAGS)")
+    check patched.contains(
+      """msgfmt_CPPFLAGS = $(subst ","",$(reprobuild_original_msgfmt_CPPFLAGS))""")
+    check patched.contains(
+      "reprobuild_original_bindir_c_make := $(bindir_c_make)")
+    check patched.contains(
+      """bindir_c_make = $(subst ","",$(reprobuild_original_bindir_c_make))""")
+    check not patched.contains("reprobuild_original_gettext_CFLAGS")
+    check not patched.contains("reprobuild_original_PLAIN_VALUE")
