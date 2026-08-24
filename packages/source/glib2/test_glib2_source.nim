@@ -167,6 +167,7 @@ suite "glib2Source — from-source recipe smoke test":
     check "pkg-config" in native
     check "pcre2 >=10.34" notin native
     check "pcre2 >=10.34" in deps
+    check "gettext >=0.21" in deps
 
   test "artifacts register four libraries":
     # M3 artifact registry: FOUR libraries are registered, each

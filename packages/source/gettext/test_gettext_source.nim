@@ -3,7 +3,7 @@
 ## Pins the M9.H/I/K trio's behaviour on the SIXTY-FIFTH real
 ## production from-source recipe. gettext's unique coverage angle vs
 ## the prior sixty-four is being the canonical GNU i18n / l10n
-## toolchain with a SEVEN-flag
+## toolchain with a platform-aware configure option set
 ## ``configureFlags:`` block exercising the mixed ``--disable-*`` /
 ## ``--without-*`` polarity convention.
 ##
@@ -12,7 +12,7 @@
 ##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
 ##     algorithm + kind discriminant + extractStrip.
 ##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the five-flag set + channel-isolation
+##     sequence equality on the production option set + channel-isolation
 ##     spot-check (meson + cmake + make channels MUST be empty).
 ##   * artifact registration (M3) — three executables
 ##     (``dakExecutable``) attributed to ``gettextSource``.
@@ -40,8 +40,8 @@ const ExpectedConfigureFlags = @[
   "--disable-csharp",
   "--disable-acl",
   "--disable-xattr",
+  "--disable-libasprintf",
   "--without-emacs",
-  "--without-included-libintl",
 ]
 
 suite "gettextSource — from-source recipe smoke test":
@@ -69,10 +69,10 @@ suite "gettextSource — from-source recipe smoke test":
     check spec.extractStrip == 1
 
   test "configureFlags registers the exact production flag sequence":
-    const recipe = staticRead("repro.nim")
-    for flag in ExpectedConfigureFlags:
-      check recipe.contains(flag)
-    check not recipe.contains("\"libacl\"")
+    var expected = ExpectedConfigureFlags
+    when not defined(windows):
+      expected.add("--without-included-libintl")
+    check gettextConfigureOptions() == expected
   test "configureFlags does not leak into the meson channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "configureFlags does not leak into the cmake channel":

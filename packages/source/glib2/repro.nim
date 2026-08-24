@@ -108,10 +108,9 @@
 ##                                    the g-ir-scanner toolchain dep
 ##                                    the v1 desktop story doesn't
 ##                                    exercise).
-##   * ``nls=disabled``           — skip the native-language-support
-##                                    translation build (gettext
-##                                    plumbing not needed for the v1
-##                                    desktop story).
+##   * ``nls=disabled``           — skip translation-catalog generation.
+##                                    GLib's runtime gettext API remains a
+##                                    required dependency.
 ##   * ``xattr=false``            — skip extended-attribute support
 ##                                    (libattr dependency not needed
 ##                                    for the v1 desktop story).
@@ -205,6 +204,9 @@ package glib2Source:
     ## zlib is required by GIO for the gzip / deflate stream encoders
     ## and by GResource's optional compression layer.
     "zlib"
+    ## GLib always exposes gettext-compatible runtime APIs. Disabling nls
+    ## skips catalog generation but does not remove the libintl dependency.
+    "gettext >=0.21"
 
   config:
     ## No prefix lifted from `mesonOptions:`; flags inlined in the `build:` block.

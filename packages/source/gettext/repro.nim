@@ -115,21 +115,28 @@
 ##                                       (the v1 desktop's interactive
 ##                                       editor target is vim, not
 ##                                       emacs).
-##   * ``--without-included-libintl`` — use the system glibc-provided
-##                                       libintl stub on hosts where
-##                                       glibc ships one (vs the
-##                                       upstream's bundled fallback
-##                                       libintl). On modern glibc
-##                                       2.39+ the NLS machinery is
-##                                       in-tree but the full feature
-##                                       set still ships via this
-##                                       system libc.
+##   * ``--without-included-libintl`` — use the system-provided libintl on
+##                                       non-Windows hosts. Windows builds
+##                                       retain gettext's bundled libintl.
 
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
 import ../source_recipe_paths
+
+proc gettextConfigureOptions*(): seq[string] =
+  result = @[
+    "--disable-static",
+    "--disable-java",
+    "--disable-csharp",
+    "--disable-acl",
+    "--disable-xattr",
+    "--disable-libasprintf",
+    "--without-emacs",
+  ]
+  when not defined(windows):
+    result.add("--without-included-libintl")
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -237,16 +244,7 @@ package gettextSource:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
     setCurrentOwningPackageOverride("gettextSource")
     try:
-      let opts = @[
-        "--disable-static",
-        "--disable-java",
-        "--disable-csharp",
-        "--disable-acl",
-        "--disable-xattr",
-        "--disable-libasprintf",
-        "--without-emacs",
-        "--without-included-libintl",
-      ]
+      let opts = gettextConfigureOptions()
       let pkg = autotools_package(
         srcDir = "./src",
         configureOptions = opts,
