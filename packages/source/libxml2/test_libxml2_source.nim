@@ -71,7 +71,10 @@ suite "libxml2Source — from-source recipe smoke test":
     check spec.extractStrip == 1
 
   test "autotools constructor receives the exact production options":
-    check libxml2ConfigureOptions() == ExpectedConfigureFlags
+    var expected = ExpectedConfigureFlags
+    when defined(windows):
+      expected.add("--host=x86_64-w64-mingw32")
+    check libxml2ConfigureOptions() == expected
 
   test "Windows links the BCryptGenRandom system library":
     when defined(windows):

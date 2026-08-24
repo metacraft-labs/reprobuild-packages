@@ -109,14 +109,19 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
-proc libxml2ConfigureOptions*(): seq[string] = @[
-  "--disable-static",
-  "--without-python",
-  "--without-history",
-  "--without-html",
-  "--without-debug",
-  "--without-mem-debug",
-]
+proc libxml2ConfigureOptions*(): seq[string] =
+  result = @[
+    "--disable-static",
+    "--without-python",
+    "--without-history",
+    "--without-html",
+    "--without-debug",
+    "--without-mem-debug",
+  ]
+  when defined(windows):
+    # The shell reports an MSYS host, while GCC targets native Windows.
+    # Keep Libtool on its MinGW shared-library path.
+    result.add("--host=x86_64-w64-mingw32")
 
 proc libxml2BuildEnvironment*(): seq[(string, string)] =
   when defined(windows):
