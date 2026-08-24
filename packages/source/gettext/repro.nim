@@ -138,6 +138,18 @@ proc gettextConfigureOptions*(): seq[string] =
   when not defined(windows):
     result.add("--without-included-libintl")
 
+proc gettextBuildEnvironment*(): seq[(string, string)] =
+  when defined(windows):
+    # GNU libtool re-evaluates LDFLAGS as shell text. A native Windows path in
+    # an rpath flag contains backslashes that corrupt its argument quoting, and
+    # PE/COFF binaries do not use ELF runtime search paths in any case.
+    @[]
+  else:
+    @[(
+      "LDFLAGS",
+      "-Wl,-rpath," & sourcePackageInstallPath("gettext", "usr", "lib")
+    )]
+
 # ---------------------------------------------------------------------------
 # Package declaration
 # ---------------------------------------------------------------------------
@@ -249,10 +261,7 @@ package gettextSource:
         srcDir = "./src",
         configureOptions = opts,
         allowSourceWrites = true,
-        extraEnv = @[
-          ("LDFLAGS", "-Wl,-rpath," &
-            sourcePackageInstallPath("gettext", "usr", "lib")),
-        ])
+        extraEnv = gettextBuildEnvironment())
       discard pkg.executable("msgfmt")
       discard pkg.executable("msgmerge")
       discard pkg.executable("xgettext")

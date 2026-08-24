@@ -22,6 +22,7 @@
 import std/[strutils, unittest]
 
 import repro_project_dsl
+import ../source_recipe_paths
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + three executable artifacts under
@@ -73,6 +74,17 @@ suite "gettextSource — from-source recipe smoke test":
     when not defined(windows):
       expected.add("--without-included-libintl")
     check gettextConfigureOptions() == expected
+
+  test "build environment emits rpath flags only on ELF-like hosts":
+    let environment = gettextBuildEnvironment()
+    when defined(windows):
+      check environment.len == 0
+    else:
+      check environment == @[(
+        "LDFLAGS",
+        "-Wl,-rpath," & sourcePackageInstallPath("gettext", "usr", "lib")
+      )]
+
   test "configureFlags does not leak into the meson channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "configureFlags does not leak into the cmake channel":
