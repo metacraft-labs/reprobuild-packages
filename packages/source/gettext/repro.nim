@@ -135,7 +135,11 @@ proc gettextConfigureOptions*(): seq[string] =
     "--disable-libasprintf",
     "--without-emacs",
   ]
-  when not defined(windows):
+  when defined(windows):
+    # The shell reports MSYS while the provisioned GCC targets native Windows.
+    # Select MinGW explicitly so libtool preserves quoted preprocessor defines.
+    result.add("--host=x86_64-w64-mingw32")
+  else:
     result.add("--without-included-libintl")
 
 proc gettextBuildEnvironment*(): seq[(string, string)] =

@@ -71,7 +71,9 @@ suite "gettextSource — from-source recipe smoke test":
 
   test "configureFlags registers the exact production flag sequence":
     var expected = ExpectedConfigureFlags
-    when not defined(windows):
+    when defined(windows):
+      expected.add("--host=x86_64-w64-mingw32")
+    else:
       expected.add("--without-included-libintl")
     check gettextConfigureOptions() == expected
 
