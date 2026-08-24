@@ -35,7 +35,13 @@ suite "gettext source recipe":
       expectedOptions.add("--host=x86_64-w64-mingw32")
       expectedOptions.add("--with-libiconv-prefix=" &
         sourcePackageInstallPath("libiconv", "usr"))
-      check gettextBuildEnvironment().len == 0
+      let libiconvLib =
+        sourcePackageInstallPath("libiconv", "usr", "lib").replace('\\', '/')
+      let libxml2Lib =
+        sourcePackageInstallPath("libxml2", "usr", "lib").replace('\\', '/')
+      check gettextBuildEnvironment() == @[(
+        "LDFLAGS", "-L" & libiconvLib & " -L" & libxml2Lib
+      )]
     else:
       expectedOptions.add("--without-included-libintl")
       check gettextBuildEnvironment() == @[(
@@ -54,15 +60,15 @@ suite "gettext source recipe":
       check artifact.packageName == "gettextSource"
       check artifact.kind == dakExecutable
 
-  test "uses the native Make quote pass only on Windows":
+  test "uses the native Makefile pass only on Windows":
     when defined(windows):
       check gettextPostConfigureCommands() == @[
-        "sh ../../scripts/fix-native-make-quotes.sh ."
+        "sh ../../scripts/fix-windows-native-makefiles.sh ."
       ]
     else:
       check gettextPostConfigureCommands().len == 0
 
-  test "quote pass rewrites affected flags exactly once":
+  test "native Makefile pass is complete and idempotent":
     let shellPath = uncontrolledFindExe("sh")
     require shellPath.len > 0
 
@@ -70,7 +76,7 @@ suite "gettext source recipe":
       ("repro-gettext-quote-test-" & $getCurrentProcessId())
     let fixtureMakefile = fixtureDir / "Makefile"
     let scriptPath = currentSourcePath().parentDir.parentDir /
-      "scripts" / "fix-native-make-quotes.sh"
+      "scripts" / "fix-windows-native-makefiles.sh"
     if dirExists(fixtureDir):
       removeDir(fixtureDir)
     createDir(fixtureDir)
@@ -82,6 +88,8 @@ AM_CPPFLAGS = -DLOCALEDIR=\"/usr/share/locale\"
 bindir_c_make = \"$(bindir)\"
 msgfmt_CPPFLAGS = $(AM_CPPFLAGS) -DINSTALLDIR=\"/usr/bin\"
 gettext_CFLAGS = -DINSTALLDIR=$(bindir_c_make)
+WINDRES = windres
+RC = windres
 PLAIN_VALUE = untouched
 """)
 
@@ -106,3 +114,11 @@ PLAIN_VALUE = untouched
       """bindir_c_make = $(subst ","",$(reprobuild_original_bindir_c_make))""")
     check not patched.contains("reprobuild_original_gettext_CFLAGS")
     check not patched.contains("reprobuild_original_PLAIN_VALUE")
+    let windresBinding =
+      "windres --use-temp-file --preprocessor=\"$(CC)\" " &
+      "--preprocessor-arg=-E --preprocessor-arg=-xc-header " &
+      "--preprocessor-arg=-DRC_INVOKED"
+    check patched.count("WINDRES = " & windresBinding) == 1
+    check patched.count("RC = " & windresBinding) == 1
+    check not patched.contains("WINDRES = windres\n")
+    check not patched.contains("RC = windres\n")

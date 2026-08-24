@@ -3,6 +3,7 @@
 ## Windows uses GNU libiconv explicitly and retains gettext's bundled
 ## libintl. Other hosts use the platform libintl implementation.
 
+import std/strutils
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -50,9 +51,11 @@ proc gettextConfigureOptions*(): seq[string] =
 
 proc gettextBuildEnvironment*(): seq[(string, string)] =
   when defined(windows):
-    # PE/COFF binaries do not use ELF runtime search paths. Backslashes in a
-    # native path would also be re-evaluated as shell escapes by libtool.
-    @[]
+    let libiconvLib =
+      sourcePackageInstallPath("libiconv", "usr", "lib").replace('\\', '/')
+    let libxml2Lib =
+      sourcePackageInstallPath("libxml2", "usr", "lib").replace('\\', '/')
+    @[("LDFLAGS", "-L" & libiconvLib & " -L" & libxml2Lib)]
   else:
     @[(
       "LDFLAGS",
@@ -61,8 +64,7 @@ proc gettextBuildEnvironment*(): seq[(string, string)] =
 
 proc gettextPostConfigureCommands*(): seq[string] =
   when defined(windows):
-    # Native GNU Make strips escaped quotes when it delegates recipes to MSYS.
-    @["sh ../../scripts/fix-native-make-quotes.sh ."]
+    @["sh ../../scripts/fix-windows-native-makefiles.sh ."]
   else:
     @[]
 

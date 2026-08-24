@@ -38,10 +38,10 @@ suite "libiconv source recipe":
     for artifact in artifacts:
       check artifact.packageName == "libiconvSource"
 
-  test "uses the native Make quote pass only on Windows":
+  test "uses the native Makefile pass only on Windows":
     when defined(windows):
       check libiconvPostConfigureCommands() == @[
-        "sh ../../../../scripts/fix-native-make-quotes.sh ."
+        "sh ../../../../scripts/fix-windows-native-makefiles.sh ."
       ]
     else:
       check libiconvPostConfigureCommands().len == 0

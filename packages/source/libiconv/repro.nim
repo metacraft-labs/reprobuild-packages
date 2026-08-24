@@ -23,7 +23,7 @@ const
 
 proc libiconvPostConfigureCommands*(): seq[string] =
   when defined(windows):
-    @["sh ../../../../scripts/fix-native-make-quotes.sh ."]
+    @["sh ../../../../scripts/fix-windows-native-makefiles.sh ."]
   else:
     @[]
 

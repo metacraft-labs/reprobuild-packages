@@ -6,10 +6,28 @@ build_dir=${1:-.}
 marker='# reprobuild native GNU make quote compatibility'
 vars_file="${TMPDIR:-/tmp}/repro-make-quote-vars.$$"
 missing_vars_file="${vars_file}.missing"
-trap 'rm -f "$vars_file" "$missing_vars_file"' EXIT HUP INT TERM
+tools_file="${vars_file}.tools"
+trap 'rm -f "$vars_file" "$missing_vars_file" "$tools_file"' \
+  EXIT HUP INT TERM
 
 find "$build_dir" -type f \( -name Makefile -o -name makefile \) -print |
 while IFS= read -r makefile; do
+  # Native windres cannot resolve its implicit `gcc` preprocessor through the
+  # POSIX-form PATH inherited from MSYS. Bind the configured compiler and use
+  # a temporary file so windres does not route the command through popen.
+  awk '
+    /^(WINDRES|RC)[ \t]*=[ \t]*windres[ \t]*$/ {
+      sub(/windres[ \t]*$/,
+        "windres --use-temp-file --preprocessor=\"$(CC)\" " \
+        "--preprocessor-arg=-E --preprocessor-arg=-xc-header " \
+        "--preprocessor-arg=-DRC_INVOKED")
+    }
+    { print }
+  ' "$makefile" > "$tools_file"
+  if ! cmp -s "$makefile" "$tools_file"; then
+    mv "$tools_file" "$makefile"
+  fi
+
   awk '
     function emit() {
       if (name != "" && has_quote &&
