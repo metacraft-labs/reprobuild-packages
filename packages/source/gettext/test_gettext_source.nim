@@ -35,13 +35,23 @@ suite "gettext source recipe":
       expectedOptions.add("--host=x86_64-w64-mingw32")
       expectedOptions.add("--with-libiconv-prefix=" &
         sourcePackageInstallPath("libiconv", "usr"))
+      let libiconvInclude =
+        sourcePackageInstallPath(
+          "libiconv", "usr", "include").replace('\\', '/')
+      let libxml2Include =
+        sourcePackageInstallPath(
+          "libxml2", "usr", "include", "libxml2").replace('\\', '/')
       let libiconvLib =
         sourcePackageInstallPath("libiconv", "usr", "lib").replace('\\', '/')
       let libxml2Lib =
         sourcePackageInstallPath("libxml2", "usr", "lib").replace('\\', '/')
-      check gettextBuildEnvironment() == @[(
-        "LDFLAGS", "-L" & libiconvLib & " -L" & libxml2Lib
-      )]
+      check gettextBuildEnvironment() == @[
+        (
+          "CPPFLAGS",
+          "-I" & libiconvInclude & " -I" & libxml2Include
+        ),
+        ("LDFLAGS", "-L" & libiconvLib & " -L" & libxml2Lib),
+      ]
     else:
       expectedOptions.add("--without-included-libintl")
       check gettextBuildEnvironment() == @[(
@@ -90,6 +100,8 @@ msgfmt_CPPFLAGS = $(AM_CPPFLAGS) -DINSTALLDIR=\"/usr/bin\"
 gettext_CFLAGS = -DINSTALLDIR=$(bindir_c_make)
 WINDRES = windres
 RC = windres
+  "-DPACKAGE_VERSION_STRING=\\\"$(VERSION)\\\"" \
+RESOURCE_OPTIONS = `$(SHELL) windres-options --escape $(VERSION)`
 PLAIN_VALUE = untouched
 """)
 
@@ -122,3 +134,8 @@ PLAIN_VALUE = untouched
     check patched.count("RC = " & windresBinding) == 1
     check not patched.contains("WINDRES = windres\n")
     check not patched.contains("RC = windres\n")
+    check patched.contains(
+      "  '-DPACKAGE_VERSION_STRING=\"$(VERSION)\"' \\")
+    check patched.contains(
+      "RESOURCE_OPTIONS = `$(SHELL) windres-options $(VERSION)`")
+    check not patched.contains("windres-options --escape")

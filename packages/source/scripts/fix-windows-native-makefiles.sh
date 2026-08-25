@@ -16,11 +16,21 @@ while IFS= read -r makefile; do
   # POSIX-form PATH inherited from MSYS. Bind the configured compiler and use
   # a temporary file so windres does not route the command through popen.
   awk '
+    /^[ \t]*"-DPACKAGE_VERSION_STRING=.*VERSION.*"[ \t]*\\$/ {
+      match($0, /^[ \t]*/)
+      indent = substr($0, RSTART, RLENGTH)
+      printf "%s%c-DPACKAGE_VERSION_STRING=\"$(VERSION)\"%c %c\n", \
+        indent, 39, 39, 92
+      next
+    }
     /^(WINDRES|RC)[ \t]*=[ \t]*windres[ \t]*$/ {
       sub(/windres[ \t]*$/,
         "windres --use-temp-file --preprocessor=\"$(CC)\" " \
         "--preprocessor-arg=-E --preprocessor-arg=-xc-header " \
         "--preprocessor-arg=-DRC_INVOKED")
+    }
+    {
+      gsub(/windres-options --escape/, "windres-options")
     }
     { print }
   ' "$makefile" > "$tools_file"

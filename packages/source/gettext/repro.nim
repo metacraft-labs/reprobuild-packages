@@ -51,11 +51,19 @@ proc gettextConfigureOptions*(): seq[string] =
 
 proc gettextBuildEnvironment*(): seq[(string, string)] =
   when defined(windows):
+    let libiconvInclude =
+      sourcePackageInstallPath("libiconv", "usr", "include").replace('\\', '/')
+    let libxml2Include =
+      sourcePackageInstallPath(
+        "libxml2", "usr", "include", "libxml2").replace('\\', '/')
     let libiconvLib =
       sourcePackageInstallPath("libiconv", "usr", "lib").replace('\\', '/')
     let libxml2Lib =
       sourcePackageInstallPath("libxml2", "usr", "lib").replace('\\', '/')
-    @[("LDFLAGS", "-L" & libiconvLib & " -L" & libxml2Lib)]
+    @[
+      ("CPPFLAGS", "-I" & libiconvInclude & " -I" & libxml2Include),
+      ("LDFLAGS", "-L" & libiconvLib & " -L" & libxml2Lib),
+    ]
   else:
     @[(
       "LDFLAGS",
