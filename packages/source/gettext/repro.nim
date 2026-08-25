@@ -45,7 +45,7 @@ proc gettextConfigureOptions*(): seq[string] =
   when defined(windows):
     result.add("--host=x86_64-w64-mingw32")
     result.add("--with-libiconv-prefix=" &
-      sourcePackageInstallPath("libiconv", "usr"))
+      sourcePackageInstallPath("libiconv", "usr").replace('\\', '/'))
   else:
     result.add("--without-included-libintl")
 
@@ -73,6 +73,15 @@ proc gettextBuildEnvironment*(): seq[(string, string)] =
 proc gettextPostConfigureCommands*(): seq[string] =
   when defined(windows):
     @["sh ../../scripts/fix-windows-native-makefiles.sh ."]
+  else:
+    @[]
+
+proc gettextInstallMakeVars*(): seq[string] =
+  when defined(windows):
+    # GNU make propagates command-line variables through recursive makes.
+    # The upstream examples list otherwise expands beyond Windows' command
+    # line limit; those sample source trees are not package artifacts.
+    @["EXAMPLESFILES=", "EXAMPLESDIRS="]
   else:
     @[]
 
@@ -119,6 +128,7 @@ package gettextSource:
         srcDir = "./src",
         configureOptions = gettextConfigureOptions(),
         allowSourceWrites = true,
+        installMakeVars = gettextInstallMakeVars(),
         postConfigureCommands = gettextPostConfigureCommands(),
         extraEnv = gettextBuildEnvironment())
       discard pkg.executable("msgfmt")

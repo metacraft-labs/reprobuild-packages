@@ -6,6 +6,20 @@ import repro_project_dsl
 import ../source_recipe_paths
 import ./repro
 
+proc actionById(id: string): BuildActionDef =
+  for action in registeredBuildActions():
+    if action.id == id:
+      return action
+  raise newException(ValueError, "action not found: " & id)
+
+proc argValues(action: BuildActionDef; name: string): seq[string] =
+  for arg in action.call.arguments:
+    if arg.name == name:
+      if arg.encodedValue.len > 0:
+        return arg.encodedValue.split('\x1f')
+      return @[]
+  @[]
+
 suite "gettext source recipe":
   test "pins the official GNU release archive":
     let spec = registeredFetchSpec("gettextSource")
@@ -34,7 +48,7 @@ suite "gettext source recipe":
     when defined(windows):
       expectedOptions.add("--host=x86_64-w64-mingw32")
       expectedOptions.add("--with-libiconv-prefix=" &
-        sourcePackageInstallPath("libiconv", "usr"))
+        sourcePackageInstallPath("libiconv", "usr").replace('\\', '/'))
       let libiconvInclude =
         sourcePackageInstallPath(
           "libiconv", "usr", "include").replace('\\', '/')
@@ -77,6 +91,24 @@ suite "gettext source recipe":
       ]
     else:
       check gettextPostConfigureCommands().len == 0
+
+  test "skips bundled examples only during native Windows installation":
+    resetBuildActionRegistry()
+    buildGettextSourcePackage()
+    let compileVars = actionById(
+      "autotools-make-build-gettextSource-build").argValues("vars")
+    let installVars = actionById(
+      "autotools-make-install-gettextSource-build").argValues("vars")
+    when defined(windows):
+      check gettextInstallMakeVars() == @["EXAMPLESFILES=", "EXAMPLESDIRS="]
+      check "EXAMPLESFILES=" notin compileVars
+      check "EXAMPLESDIRS=" notin compileVars
+      check "EXAMPLESFILES=" in installVars
+      check "EXAMPLESDIRS=" in installVars
+    else:
+      check gettextInstallMakeVars().len == 0
+      check "EXAMPLESFILES=" notin installVars
+      check "EXAMPLESDIRS=" notin installVars
 
   test "native Makefile pass is complete and idempotent":
     let shellPath = uncontrolledFindExe("sh")
