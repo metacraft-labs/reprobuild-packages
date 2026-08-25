@@ -80,6 +80,9 @@ suite "coreutilsSource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "root builds opt in through the upstream safety gate":
     check "FORCE_UNSAFE_CONFIGURE" in RecipeSource
+  test "ACL support is explicit in the build and runtime closures":
+    check registeredBuildDeps("coreutilsSource") == @["libacl"]
+    check registeredRuntimeDeps("coreutilsSource") == @["libacl"]
   test "artifacts register six executables all tagged dakExecutable":
     # M3 artifact registry: ls + cp + mv + rm + cat + echo are all
     # tagged ``dakExecutable``. coreutils's autotools build emits ~100

@@ -171,6 +171,12 @@ package coreutilsSource:
     ## generates the per-binary manpages.
     "perl >=5.32"
 
+  buildDeps:
+    # The file-manipulation tools enable POSIX ACL support when libacl is
+    # available. Declare it so the linked runtime does not depend on an
+    # ambient build environment.
+    "libacl"
+
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
     discard
@@ -237,8 +243,7 @@ package coreutilsSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
-    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
-    ## DT_NEEDED inspection of the linked artifacts. Empty until
-    ## the M9.R.5b per-recipe pass populates per-output ELF
-    ## interrogation.
-    discard
+    # cp, install, ls, and mv link libacl when ACL support is enabled.
+    # libacl propagates libattr, completing the runtime closure for these
+    # tools when another source recipe uses them during its build.
+    "libacl"
