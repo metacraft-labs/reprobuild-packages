@@ -71,7 +71,7 @@
 ##
 ## v1 ships NO configurables. The bootstrap pipeline is hardcoded to
 ## ``./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF
-## -DBUILD_TESTING=OFF -DUSE_LIBIDN2=OFF``:
+## -DBUILD_TESTING=OFF -DCMAKE_DISABLE_FIND_PACKAGE_Libidn2=ON``:
 ##
 ##   * ``--prefix=$out``               — installs under the per-package
 ##                                        output dir the from-source-
@@ -88,10 +88,14 @@
 ##   * ``-DBUILD_TESTING=OFF``         — omit upstream self-tests from
 ##                                        the package build; ReproOS consumes
 ##                                        the installed command-line tools.
-##   * ``-DUSE_LIBIDN2=OFF``           — keep bundled curl from probing an
+##   * ``-DCMAKE_DISABLE_FIND_PACKAGE_Libidn2=ON``
+##                                      — keep bundled curl from probing an
 ##                                        ambient libidn2 whose transitive
 ##                                        libunistring dependency may not be
-##                                        present in the build profile.
+##                                        present in the build profile. The
+##                                        vendored curl overrides its own
+##                                        ``USE_LIBIDN2`` option, so disabling
+##                                        discovery is the effective control.
 
 import repro_project_dsl
 # DSL-port M9.R.2c — pulls ``Library`` / ``Executable`` into scope for
@@ -166,7 +170,7 @@ package cmakeSource:
       # bundled C++ sources and lays out the generated ``Makefile``s
       # at the source root. Disable optional host integrations and
       # upstream tests so the bootstrap stays hermetic and focused.
-      shell "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF -DBUILD_TESTING=OFF -DUSE_LIBIDN2=OFF"
+      shell "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF -DBUILD_TESTING=OFF -DCMAKE_DISABLE_FIND_PACKAGE_Libidn2=ON"
       # Build step — drives the generated ``Makefile``s.
       shell "make"
       # Install step — copies the three CLI binaries + the cmake

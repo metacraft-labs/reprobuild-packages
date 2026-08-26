@@ -135,7 +135,7 @@ suite "cmakeSource — from-source recipe smoke test":
       check r.artifactName == "cmake"
     check rows[0].command ==
       "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF " &
-      "-DBUILD_TESTING=OFF -DUSE_LIBIDN2=OFF"
+      "-DBUILD_TESTING=OFF -DCMAKE_DISABLE_FIND_PACKAGE_Libidn2=ON"
     check rows[1].command == "make"
     check rows[2].command == "make install"
 
