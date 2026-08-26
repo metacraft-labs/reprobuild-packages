@@ -123,8 +123,8 @@ suite "cmakeSource — from-source recipe smoke test":
 
   test "shell() action registry records the cmake bootstrap pipeline":
     # M9.N Batch C.1 — the recipe's ``build:`` block records three
-    # shell actions: ``./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF``
-    # followed by ``make`` followed by ``make install``. The from-
+    # shell actions: a bootstrap configured without upstream tests or
+    # ambient libidn2, followed by ``make`` and ``make install``. The from-
     # source-custom convention consumes the sequence verbatim;
     # ``$out`` is resolved to the per-package output dir at emit
     # time.
@@ -133,7 +133,9 @@ suite "cmakeSource — from-source recipe smoke test":
     for r in rows:
       check r.packageName == "cmakeSource"
       check r.artifactName == "cmake"
-    check rows[0].command == "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF"
+    check rows[0].command ==
+      "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF " &
+      "-DBUILD_TESTING=OFF -DUSE_LIBIDN2=OFF"
     check rows[1].command == "make"
     check rows[2].command == "make install"
 

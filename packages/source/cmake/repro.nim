@@ -70,7 +70,8 @@
 ## ## Configurables
 ##
 ## v1 ships NO configurables. The bootstrap pipeline is hardcoded to
-## ``./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF``:
+## ``./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF
+## -DBUILD_TESTING=OFF -DUSE_LIBIDN2=OFF``:
 ##
 ##   * ``--prefix=$out``               — installs under the per-package
 ##                                        output dir the from-source-
@@ -84,6 +85,13 @@
 ##                                        skipping the OpenSSL channel
 ##                                        cuts the build-time dependency
 ##                                        surface on the bootstrap host).
+##   * ``-DBUILD_TESTING=OFF``         — omit upstream self-tests from
+##                                        the package build; ReproOS consumes
+##                                        the installed command-line tools.
+##   * ``-DUSE_LIBIDN2=OFF``           — keep bundled curl from probing an
+##                                        ambient libidn2 whose transitive
+##                                        libunistring dependency may not be
+##                                        present in the build profile.
 
 import repro_project_dsl
 # DSL-port M9.R.2c — pulls ``Library`` / ``Executable`` into scope for
@@ -156,9 +164,9 @@ package cmakeSource:
     build:
       # Bootstrap step — compiles the minimal cmake binary from the
       # bundled C++ sources and lays out the generated ``Makefile``s
-      # at the source root. ``-DCMAKE_USE_OPENSSL=OFF`` skips the
-      # OpenSSL channel to cut the bootstrap-host dependency surface.
-      shell "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF"
+      # at the source root. Disable optional host integrations and
+      # upstream tests so the bootstrap stays hermetic and focused.
+      shell "./bootstrap --prefix=$out -- -DCMAKE_USE_OPENSSL=OFF -DBUILD_TESTING=OFF -DUSE_LIBIDN2=OFF"
       # Build step — drives the generated ``Makefile``s.
       shell "make"
       # Install step — copies the three CLI binaries + the cmake
