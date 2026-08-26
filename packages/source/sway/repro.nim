@@ -275,6 +275,10 @@ package swaySource:
     ## swaynag; also used directly for drawing block backgrounds /
     ## separators.
     "cairo"
+    ## pixman is Sway's direct pixel-format and region-manipulation
+    ## dependency. Meson probes pixman-1 independently of Cairo and wlroots,
+    ## so its pkg-config interface must be present in Sway's build profile.
+    "pixman >=0.42"
     ## gdk-pixbuf is the image loader swaybar uses for icon tray
     ## entries (when tray=enabled — disabled here, but the
     ## dependency declaration stays explicit for forward compat) and

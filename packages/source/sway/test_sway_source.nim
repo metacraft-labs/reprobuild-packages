@@ -77,6 +77,9 @@ suite "swaySource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "mesonOptions does not leak into the cmake channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
+  test "build dependencies include the direct pixman interface":
+    check "pixman >=0.42" in registeredBuildDeps("swaySource")
+
   test "artifacts register all four sway binaries as executables":
     # M3 artifact registry: ALL FOUR of ``sway`` / ``swaybar`` /
     # ``swaynag`` / ``swaymsg`` must be present and tagged
