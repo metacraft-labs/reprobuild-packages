@@ -144,13 +144,18 @@ package cmakeSource:
     extractStrip: 1
 
   nativeBuildDeps:
-    ## gcc is the host C++ toolchain — cmake is C++17 with no external
-    ## runtime dependencies beyond the system libstdc++.
+    ## gcc is the host C++ toolchain used to compile cmake's C++17 sources.
     "gcc >=11"
     ## make is the build-system driver the ``./bootstrap`` step
     ## generates ``Makefile``s for; the bootstrap chain runs
     ## ``./bootstrap && make && make install``.
     "make"
+
+  runtimeDeps:
+    ## The installed cmake, ctest, and cpack binaries dynamically link the
+    ## C++ runtime produced by the declared GCC package. Keeping this explicit
+    ## lets the install mirror embed a standalone runtime search path.
+    "gcc >=11"
 
   executable cmake:
     ## ``$PREFIX/bin/cmake`` — the meta-build driver consumed by every
@@ -189,11 +194,4 @@ package cmakeSource:
     ## same install-tree as ``cmake``. No per-artifact build body: the
     ## cmake ``build:`` block above already installs ``cpack`` under
     ## ``$out/bin/`` via the ``make install`` step.
-    discard
-
-  runtimeDeps:
-    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
-    ## DT_NEEDED inspection of the linked artifacts. Empty until
-    ## the M9.R.5b per-recipe pass populates per-output ELF
-    ## interrogation.
     discard

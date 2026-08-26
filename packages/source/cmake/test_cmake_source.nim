@@ -79,6 +79,9 @@ suite "cmakeSource — from-source recipe smoke test":
     check true  # M9.R.6.1: registry retired — assertion gutted
   test "no flags registered on the make channel":
     check true  # M9.R.6.1: registry retired — assertion gutted
+  test "runtime dependency records the source-built C++ runtime":
+    check registeredRuntimeDeps("cmakeSource") == @["gcc >=11"]
+
   test "artifacts register three executables all tagged dakExecutable":
     # M3 artifact registry: cmake + ctest + cpack are all tagged
     # ``dakExecutable``. cmake's bootstrap-build-install pipeline
