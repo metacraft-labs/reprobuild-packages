@@ -159,8 +159,13 @@ package ninjaSource:
     extractStrip: 1
 
   nativeBuildDeps:
-    ## gcc is the host C++ toolchain — ninja is C++14 with no external
-    ## runtime dependencies beyond the system libstdc++.
+    ## gcc is the host C++ toolchain used to compile ninja's C++14 sources.
+    "gcc >=11"
+
+  runtimeDeps:
+    ## The installed ninja binary dynamically links the C++ runtime produced
+    ## by the declared GCC package. The install mirror embeds this dependency
+    ## so build systems can probe ninja in a clean action environment.
     "gcc >=11"
 
   buildDeps:
@@ -191,10 +196,3 @@ package ninjaSource:
       # Install the resulting binary into the output bin dir where the
       # stage-copy step expects it.
       shell "mkdir -p $out/bin && install -Dm755 ninja $out/bin/ninja"
-
-  runtimeDeps:
-    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
-    ## DT_NEEDED inspection of the linked artifacts. Empty until
-    ## the M9.R.5b per-recipe pass populates per-output ELF
-    ## interrogation.
-    discard
