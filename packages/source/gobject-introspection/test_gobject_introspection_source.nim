@@ -35,6 +35,13 @@ suite "gobjectIntrospectionSource — from-source recipe smoke test":
     check "pkg-config" in
       registeredNativeBuildDeps("gobjectIntrospectionSource")
 
+  test "runtime closure includes libraries required by libgirepository":
+    check registeredRuntimeDeps("gobjectIntrospectionSource") == @[
+      "glib2 >=2.62",
+      "libffi",
+      "glibc >=2.29",
+    ]
+
   test "one library + two executable artifacts registered":
     let arts = registeredArtifacts("gobjectIntrospectionSource")
     check arts.len == 4

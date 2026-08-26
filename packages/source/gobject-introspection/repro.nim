@@ -88,6 +88,8 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+import ../source_recipe_paths
+
 # ---------------------------------------------------------------------------
 # Package declaration
 # ---------------------------------------------------------------------------
@@ -191,7 +193,15 @@ package gobjectIntrospectionSource:
       let pkg = meson_package(
         srcDir = "./src",
         configureOptions = opts,
-        extraEnv = @[("PYTHONNOUSERSITE", "1")],
+        extraEnv = @[
+          ("PYTHONNOUSERSITE", "1"),
+          # libgirepository directly uses libm. On Nix hosts the final helper
+          # links do not inherit a global FHS library search path, so let ld
+          # resolve libm from the source-built glibc mirror without exposing
+          # that runtime through LD_LIBRARY_PATH to build tools.
+          ("LDFLAGS", "-Wl,-rpath-link," & sourcePackageInstallPath(
+            "glibc", "usr", "lib64")),
+        ],
         srcPatches = @[
           "sed -i '1s|.*|#!/usr/bin/env python3-with-modules|' src/tools/g-ir-tool-template.in",
           "sed -i \"s/if not os.path.isfile(os.path.join(pylibdir, 'giscanner', '_giscanner' + py_mod_suffix)):/if not os.path.isdir(os.path.join(pylibdir, 'giscanner')):/\" src/tools/g-ir-tool-template.in",
@@ -213,4 +223,6 @@ package gobjectIntrospectionSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
-    discard
+    "glib2 >=2.62"
+    "libffi"
+    "glibc >=2.29"
