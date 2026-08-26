@@ -4,6 +4,12 @@ import repro_dsl_stdlib/types/package_result
 
 import ../source_recipe_paths
 
+proc glib2IntrospectionLddPatch*(glibcLoader: string): string =
+  "sed -i \"/^gir_args = \\[$/a\\  " &
+    "'--use-ldd-wrapper=" & glibcLoader & "',\\n  " &
+    "'--ldd-wrapper-args-begin',\\n  '--list',\\n  " &
+    "'--ldd-wrapper-args-end',\" src/meson.build"
+
 package glib2IntrospectionSource:
   versions:
     "2.82.5":
@@ -25,6 +31,7 @@ package glib2IntrospectionSource:
     "glib2 >=2.82"
     "pcre2 >=10.34"
     "libffi"
+    "libiconv >=1.19"
     "zlib"
   config:
     discard
@@ -37,27 +44,42 @@ package glib2IntrospectionSource:
     setCurrentOwningPackageOverride("glib2IntrospectionSource")
     try:
       let glib2 = sourcePackageInstallRoot("glib2")
+      let glibc = sourcePackageInstallRoot("glibc")
+      let gcc = sourcePackageInstallRoot("gcc")
+      let libiconv = sourcePackageInstallRoot("libiconv")
+      let glibcLoader = glibc &
+        "/usr/lib64/ld-linux-x86-64.so.2"
       let gobjectIntrospection =
         sourcePackageInstallRoot("gobject-introspection")
-      let pkg = meson_package(srcDir = "./src", configureOptions = @[
-        "tests=false",
-        "documentation=false",
-        "man-pages=disabled",
-        "introspection=enabled",
-        "sysprof=disabled",
-        "nls=disabled",
-        "xattr=false",
-        "libdir=lib",
-      ], extraEnv = @[
-        ("PYTHONPATH", gobjectIntrospection &
-          "/usr/lib/gobject-introspection"),
-        ("GI_GIR_PATH", sourcePackagePath(
-          "gobject-introspection", "build", "gir")),
-        ("LD_LIBRARY_PATH", glib2 & "/usr/lib:" &
-          gobjectIntrospection & "/usr/lib:" &
-          sourcePackageInstallRoot("libffi") & "/usr/lib:" &
-          sourcePackageInstallRoot("pcre2") & "/usr/lib"),
-      ])
+      let pkg = meson_package(
+        srcDir = "./src",
+        configureOptions = @[
+          "tests=false",
+          "documentation=false",
+          "man-pages=disabled",
+          "introspection=enabled",
+          "sysprof=disabled",
+          "nls=disabled",
+          "xattr=false",
+          "libdir=lib",
+        ],
+        extraEnv = @[
+          ("PYTHONPATH", gobjectIntrospection &
+            "/usr/lib/gobject-introspection"),
+          ("GI_GIR_PATH", sourcePackagePath(
+            "gobject-introspection", "build", "gir")),
+          ("LDFLAGS", "-Wl,-rpath," & glibc & "/usr/lib64 " &
+            "-Wl,-rpath-link," & libiconv & "/usr/lib"),
+          ("LD_LIBRARY_PATH", glib2 & "/usr/lib:" &
+            gobjectIntrospection & "/usr/lib:" &
+            gcc & "/usr/lib:" &
+            libiconv & "/usr/lib:" &
+            sourcePackageInstallRoot("libffi") & "/usr/lib:" &
+            sourcePackageInstallRoot("pcre2") & "/usr/lib"),
+        ],
+        srcPatches = @[
+          glib2IntrospectionLddPatch(glibcLoader),
+        ])
       discard pkg.executable("gio")
       discard pkg.executableAlias("glib2-introspection", sourceName = "gio")
     finally:
@@ -65,3 +87,5 @@ package glib2IntrospectionSource:
   runtimeDeps:
     "glib2 >=2.82"
     "gobject-introspection >=1.66"
+    "glibc >=2.42"
+    "libiconv >=1.19"
