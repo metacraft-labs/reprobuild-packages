@@ -1,7 +1,7 @@
 ## Smoke test for the from-source ``gobjectIntrospectionSource`` recipe
 ## (M9.R.15b).
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -34,6 +34,18 @@ suite "gobjectIntrospectionSource — from-source recipe smoke test":
   test "native build dependencies include pkg-config":
     check "pkg-config" in
       registeredNativeBuildDeps("gobjectIntrospectionSource")
+
+  test "GIR generation uses the source-built ELF loader":
+    check "glibc >=2.42" in
+      registeredBuildDeps("gobjectIntrospectionSource")
+    let patch = gobjectIntrospectionLddPatch(
+      "/source/glibc/usr/lib64/ld-linux-x86-64.so.2")
+    check patch.startsWith("sed -i")
+    check "--use-ldd-wrapper=" in patch
+    check "/source/glibc/usr/lib64/ld-linux-x86-64.so.2" in patch
+    check "--ldd-wrapper-args-begin" in patch
+    check "--list" in patch
+    check patch.endsWith("src/gir/meson.build")
 
   test "runtime closure includes libraries required by libgirepository":
     check registeredRuntimeDeps("gobjectIntrospectionSource") == @[

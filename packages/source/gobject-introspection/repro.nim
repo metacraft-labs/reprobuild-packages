@@ -90,6 +90,12 @@ import repro_dsl_stdlib/types/package_result
 
 import ../source_recipe_paths
 
+proc gobjectIntrospectionLddPatch*(glibcLoader: string): string =
+  "sed -i \"/^scanner_command = \\\\[$/a\\  " &
+    "'--use-ldd-wrapper=" & glibcLoader & "',\\n  " &
+    "'--ldd-wrapper-args-begin',\\n  '--list',\\n  " &
+    "'--ldd-wrapper-args-end',\" src/gir/meson.build"
+
 # ---------------------------------------------------------------------------
 # Package declaration
 # ---------------------------------------------------------------------------
@@ -136,6 +142,9 @@ package gobjectIntrospectionSource:
     ## (every introspected callback / signal handler is dispatched
     ## through a libffi-built closure).
     "libffi"
+    ## GIR generation inspects linked libraries through the source-built ELF
+    ## loader rather than relying on an ambient ldd executable.
+    "glibc >=2.42"
 
   config:
     discard
@@ -190,6 +199,8 @@ package gobjectIntrospectionSource:
         # (``package_result.nim:1020-1021``).
         "libdir=lib",
       ]
+      let glibcLoader = sourcePackageInstallPath(
+        "glibc", "usr", "lib64", "ld-linux-x86-64.so.2")
       let pkg = meson_package(
         srcDir = "./src",
         configureOptions = opts,
@@ -203,6 +214,7 @@ package gobjectIntrospectionSource:
             "glibc", "usr", "lib64")),
         ],
         srcPatches = @[
+          gobjectIntrospectionLddPatch(glibcLoader),
           "sed -i '1s|.*|#!/usr/bin/env python3-with-modules|' src/tools/g-ir-tool-template.in",
           "sed -i \"s/if not os.path.isfile(os.path.join(pylibdir, 'giscanner', '_giscanner' + py_mod_suffix)):/if not os.path.isdir(os.path.join(pylibdir, 'giscanner')):/\" src/tools/g-ir-tool-template.in",
           # Nix's Meson carries support for private GIR install directories
