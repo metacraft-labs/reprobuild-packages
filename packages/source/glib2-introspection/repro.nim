@@ -33,6 +33,7 @@ package glib2IntrospectionSource:
     "libffi"
     "libiconv >=1.19"
     "zlib"
+    "glibc >=2.42"
   config:
     discard
   executable gio:

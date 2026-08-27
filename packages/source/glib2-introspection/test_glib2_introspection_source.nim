@@ -67,6 +67,8 @@ suite "glib2IntrospectionSource from-source recipe":
   test "runtime closure includes every linked source library":
     check "libiconv >=1.19" in
       registeredBuildDeps("glib2IntrospectionSource")
+    check "glibc >=2.42" in
+      registeredBuildDeps("glib2IntrospectionSource")
     check registeredRuntimeDeps("glib2IntrospectionSource") == @[
       "glib2 >=2.82",
       "gobject-introspection >=1.66",
