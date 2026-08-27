@@ -91,7 +91,7 @@ import repro_dsl_stdlib/types/package_result
 import ../source_recipe_paths
 
 proc gobjectIntrospectionLddPatch*(glibcLoader: string): string =
-  "sed -i \"/^scanner_command = \\\\[$/a\\  " &
+  "sed -i \"/find_program('g-ir-scanner', native: true),$/a\\  " &
     "'--use-ldd-wrapper=" & glibcLoader & "',\\n  " &
     "'--ldd-wrapper-args-begin',\\n  '--list',\\n  " &
     "'--ldd-wrapper-args-end',\" src/gir/meson.build"

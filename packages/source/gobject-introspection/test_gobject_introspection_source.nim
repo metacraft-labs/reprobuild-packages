@@ -41,6 +41,7 @@ suite "gobjectIntrospectionSource — from-source recipe smoke test":
     let patch = gobjectIntrospectionLddPatch(
       "/source/glibc/usr/lib64/ld-linux-x86-64.so.2")
     check patch.startsWith("sed -i")
+    check "find_program('g-ir-scanner', native: true),$" in patch
     check "--use-ldd-wrapper=" in patch
     check "/source/glibc/usr/lib64/ld-linux-x86-64.so.2" in patch
     check "--ldd-wrapper-args-begin" in patch
