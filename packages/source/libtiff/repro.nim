@@ -17,6 +17,12 @@ package libtiffSource:
     "ninja >=1.10"
     "gcc >=11"
     "pkg-config"
+    "sh"
+    "rm"
+    "find"
+    "sed"
+    "grep"
+    "patchelf"
   buildDeps:
     "glibc >=2.42"
     "libjpeg"
