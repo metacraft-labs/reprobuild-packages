@@ -21,6 +21,7 @@ package utilMacrosSource:
     "automake"
     "m4"
     "make"
+    "sh"
 
   buildDeps:
     discard

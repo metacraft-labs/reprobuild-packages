@@ -5,6 +5,9 @@ import repro_project_dsl
 import ./repro
 
 suite "utilMacrosSource from-source recipe":
+  test "autotools actions provision their shell":
+    check "sh" in registeredNativeBuildDeps("utilMacrosSource")
+
   test "pins the official freedesktop.org tag":
     let spec = registeredFetchSpec("utilMacrosSource")
     check spec.hashHex ==
