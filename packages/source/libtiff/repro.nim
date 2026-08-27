@@ -24,6 +24,7 @@ package libtiffSource:
     "mv"
     "sha256sum"
     "tar"
+    "gzip"
     "find"
     "sed"
     "grep"

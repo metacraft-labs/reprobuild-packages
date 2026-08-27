@@ -43,6 +43,7 @@ package curlSource:
     "mv"
     "sha256sum"
     "tar"
+    "xz"
     "find"
     "sed"
     "grep"
