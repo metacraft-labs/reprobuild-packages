@@ -195,8 +195,8 @@ package tarSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
-    ## TODO(M9.R.5b): derive runtime closure from pkg-config /
-    ## DT_NEEDED inspection of the linked artifacts. Empty until
-    ## the M9.R.5b per-recipe pass populates per-output ELF
-    ## interrogation.
-    discard
+    ## GNU tar launches these helpers for compressed archive formats.
+    "xz"
+    "gzip"
+    "bzip2"
+    "zstd"

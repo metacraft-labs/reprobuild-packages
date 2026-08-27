@@ -86,6 +86,8 @@ suite "tarSource — from-source recipe smoke test":
     check arts[0].packageName == "tarSource"
     check arts[0].artifactName == "tar"
     check arts[0].kind == dakExecutable
+    check registeredRuntimeDeps("tarSource") ==
+      @["xz", "gzip", "bzip2", "zstd"]
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry: the upstream ftp.gnu.org release tag is
