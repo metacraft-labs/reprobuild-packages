@@ -27,8 +27,13 @@ suite "mesonSource recipe":
     check versions[0].sourceRepository ==
       "https://github.com/mesonbuild/meson"
 
-  test "Python is available while building and running Meson":
-    check registeredNativeBuildDeps("mesonSource") == @["python3 >=3.8"]
+  test "Python and shell helpers are available while building Meson":
+    let nativeDeps = registeredNativeBuildDeps("mesonSource")
+    for tool in [
+      "python3 >=3.8", "sh", "rm", "mkdir", "curl", "mv", "sha256sum",
+      "tar", "gzip", "cp", "chmod", "patchelf",
+    ]:
+      check tool in nativeDeps
     check registeredRuntimeDeps("mesonSource") == @["python3 >=3.8"]
 
   test "the package exports one Meson executable":

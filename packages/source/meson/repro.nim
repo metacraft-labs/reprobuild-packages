@@ -22,6 +22,17 @@ package mesonSource:
 
   nativeBuildDeps:
     "python3 >=3.8"
+    "sh"
+    "rm"
+    "mkdir"
+    "curl"
+    "mv"
+    "sha256sum"
+    "tar"
+    "gzip"
+    "cp"
+    "chmod"
+    "patchelf"
 
   executable meson:
     build:
