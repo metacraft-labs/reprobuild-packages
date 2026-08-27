@@ -27,6 +27,27 @@ package clingoSource:
     "bison >=3.0"
     # Clingo 5.8.0's vendored grammars require re2c's pre-4.3 behavior.
     "re2c >=3.0"
+    "sh"
+    "rm"
+    "mkdir"
+    "curl"
+    "mv"
+    "sha256sum"
+    "tar"
+    "gzip"
+    "find"
+    "sed"
+    "grep"
+    "cmp"
+    "diff"
+    "awk"
+    "cp"
+    "chmod"
+    "ls"
+    "sort"
+    "head"
+    "ln"
+    "patchelf"
 
   config:
     discard
