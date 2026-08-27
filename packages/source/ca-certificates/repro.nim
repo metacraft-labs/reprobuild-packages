@@ -22,6 +22,18 @@ package caCertificatesSource:
 
   nativeBuildDeps:
     "make"
+    "sh"
+    "rm"
+    "mkdir"
+    "curl"
+    "mv"
+    "sha256sum"
+    "cp"
+    "chmod"
+    "find"
+    "sed"
+    "grep"
+    "patchelf"
 
   buildDeps:
     discard

@@ -22,7 +22,10 @@ suite "caCertificatesSource source recipe":
     check spec.extractStrip == 0
 
   test "declares the data-only build closure":
-    check registeredNativeBuildDeps("caCertificatesSource") == @["make"]
+    let nativeDeps = registeredNativeBuildDeps("caCertificatesSource")
+    for tool in ["make", "sh", "rm", "mkdir", "curl", "mv", "sha256sum",
+                 "cp", "chmod", "find", "sed", "grep", "patchelf"]:
+      check tool in nativeDeps
     check registeredBuildDeps("caCertificatesSource").len == 0
     check registeredRuntimeDeps("caCertificatesSource").len == 0
 
