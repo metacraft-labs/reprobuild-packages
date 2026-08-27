@@ -58,7 +58,10 @@ suite "glib2IntrospectionSource from-source recipe":
         check "libiconv/.repro/output/install/usr/lib" in libraryPath[0][1]
         check "pcre2/.repro/output/install/usr/lib" in libraryPath[0][1]
       if linkerFlags.len == 1:
-        check linkerFlags[0][1].startsWith("-Wl,-rpath,")
+        check linkerFlags[0][1].startsWith("-Wl,--dynamic-linker=")
+        check "glibc/.repro/output/install/usr/lib64/" &
+          "ld-linux-x86-64.so.2" in linkerFlags[0][1]
+        check "-Wl,-rpath," in linkerFlags[0][1]
         check "glibc/.repro/output/install/usr/lib64" in linkerFlags[0][1]
         check "-Wl,-rpath-link," in linkerFlags[0][1]
         check "libiconv/.repro/output/install/usr/lib" in linkerFlags[0][1]

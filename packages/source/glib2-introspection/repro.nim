@@ -69,7 +69,8 @@ package glib2IntrospectionSource:
             "/usr/lib/gobject-introspection"),
           ("GI_GIR_PATH", sourcePackagePath(
             "gobject-introspection", "build", "gir")),
-          ("LDFLAGS", "-Wl,-rpath," & glibc & "/usr/lib64 " &
+          ("LDFLAGS", "-Wl,--dynamic-linker=" & glibcLoader & " " &
+            "-Wl,-rpath," & glibc & "/usr/lib64 " &
             "-Wl,-rpath-link," & libiconv & "/usr/lib"),
           ("LD_LIBRARY_PATH", glib2 & "/usr/lib:" &
             gobjectIntrospection & "/usr/lib:" &
