@@ -27,7 +27,7 @@ package mesonSource:
     build:
       shell "mkdir -p $out/share/meson $out/bin"
       shell "cp -r $extracted/mesonbuild $out/share/meson/"
-      shell "printf '#!/bin/sh\\nMESON_ROOT=$(CDPATH= cd -- \"$(dirname -- \"$0\")/../share/meson\" && pwd)\\nPYTHONPATH=\"$MESON_ROOT${PYTHONPATH:+:$PYTHONPATH}\" exec python3 -m mesonbuild.mesonmain \"$@\"\\n' > $out/bin/meson"
+      shell "printf '#!/bin/sh\\nMESON_BIN_DIR=${0%/*}\\n[ \"$MESON_BIN_DIR\" = \"$0\" ] && MESON_BIN_DIR=.\\nMESON_ROOT=$(CDPATH= cd -- \"$MESON_BIN_DIR/../share/meson\" && pwd)\\nPYTHONPATH=\"$MESON_ROOT${PYTHONPATH:+:$PYTHONPATH}\" exec python3 -m mesonbuild.mesonmain \"$@\"\\n' > $out/bin/meson"
       shell "chmod +x $out/bin/meson"
 
   runtimeDeps:
