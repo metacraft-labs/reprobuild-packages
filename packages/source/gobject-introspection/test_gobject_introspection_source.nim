@@ -53,6 +53,7 @@ suite "gobjectIntrospectionSource — from-source recipe smoke test":
       "glib2 >=2.62",
       "libffi",
       "glibc >=2.29",
+      "ldd >=2.42",
     ]
 
   test "one library + two executable artifacts registered":

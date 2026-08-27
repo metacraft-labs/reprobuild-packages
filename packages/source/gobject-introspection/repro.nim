@@ -238,3 +238,7 @@ package gobjectIntrospectionSource:
     "glib2 >=2.62"
     "libffi"
     "glibc >=2.29"
+    ## g-ir-scanner invokes ldd while resolving the shared libraries of each
+    ## temporary introspection binary. Keep that tool in the scanner's runtime
+    ## interface so every GIR-generating consumer receives it transitively.
+    "ldd >=2.42"
