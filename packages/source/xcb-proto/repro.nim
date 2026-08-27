@@ -17,6 +17,7 @@ package xcbProtoSource:
     "gcc >=11"
     "pkg-config"
     "python3"
+    "sh"
   config:
     discard
   build:

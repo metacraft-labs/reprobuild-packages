@@ -25,6 +25,13 @@ package python3WithModulesSource:
     "python-packaging"
     "python-setuptools"
     "python-markdown"
+    "sh"
+    "mkdir"
+    "find"
+    "rm"
+    "cp"
+    "chmod"
+    "ln"
 
   executable `python3-with-modules`:
     build:
