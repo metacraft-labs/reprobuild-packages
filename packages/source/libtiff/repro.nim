@@ -18,6 +18,7 @@ package libtiffSource:
     "gcc >=11"
     "pkg-config"
   buildDeps:
+    "glibc >=2.42"
     "libjpeg"
     "xz"
     "zlib"
@@ -43,6 +44,7 @@ package libtiffSource:
     finally:
       clearCurrentOwningPackageOverride()
   runtimeDeps:
+    "glibc >=2.42"
     "libjpeg"
     "xz"
     "zlib"
