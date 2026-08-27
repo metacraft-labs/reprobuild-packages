@@ -72,8 +72,13 @@ suite "gdkPixbufSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "native build dependencies include pkg-config":
-    check "pkg-config" in registeredNativeBuildDeps("gdkPixbufSource")
+  test "native build dependencies prioritize relocatable ldd":
+    let deps = registeredNativeBuildDeps("gdkPixbufSource")
+    check deps[0 .. 2] == @[
+      "ldd >=2.42",
+      "gobject-introspection",
+      "pkg-config",
+    ]
 
   test "mesonOptions registers the exact production flag sequence":
     check true  # M9.R.6.1: registry retired — assertion gutted

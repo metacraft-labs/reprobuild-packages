@@ -53,6 +53,7 @@ const ExpectedMesonOptions = @[
 ]
 
 const ExpectedNativeBuildDeps = @[
+  "ldd >=2.42",
   "gobject-introspection",
   "pkg-config",
   "meson >=1.2.0",

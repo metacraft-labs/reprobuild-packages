@@ -155,6 +155,10 @@ package gdkPixbufSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    ## g-ir-scanner invokes ldd for each temporary introspection binary. Keep
+    ## the relocatable source implementation ahead of glibc's upstream ldd,
+    ## whose conventional /lib loader paths do not work on NixOS build hosts.
+    "ldd >=2.42"
     "gobject-introspection"
     "pkg-config"
     ## meson is the build-system driver — the c_cpp_meson convention's
