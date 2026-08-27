@@ -54,7 +54,9 @@ suite "mesonSource recipe":
     check rows[0].command == "mkdir -p $out/share/meson $out/bin"
     check rows[1].command ==
       "cp -r $extracted/mesonbuild $out/share/meson/"
-    check rows[2].command.contains("MESON_BIN_DIR=${0%/*}")
+    # The shell action passes the launcher body as printf's format string.
+    # Double the percent there so the installed script receives `${0%/*}`.
+    check rows[2].command.contains("MESON_BIN_DIR=${0%%/*}")
     check not rows[2].command.contains("dirname")
     check rows[2].command.contains("PYTHONPATH=")
     check rows[2].command.contains("python3 -m mesonbuild.mesonmain")
