@@ -47,6 +47,9 @@ package curlSource:
     "find"
     "sed"
     "grep"
+    "cmp"
+    "diff"
+    "awk"
     "patchelf"
   buildDeps:
     "openssl"
