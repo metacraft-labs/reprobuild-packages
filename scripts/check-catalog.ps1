@@ -2,7 +2,10 @@ $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
 $recipesRoot = Join-Path $root 'packages/source'
-$recipes = Get-ChildItem -LiteralPath $recipesRoot -Directory | Sort-Object Name
+$supportDirectories = @('scripts')
+$recipes = Get-ChildItem -LiteralPath $recipesRoot -Directory |
+    Where-Object { $_.Name -notin $supportDirectories } |
+    Sort-Object Name
 $failures = [System.Collections.Generic.List[string]]::new()
 
 foreach ($recipe in $recipes) {
