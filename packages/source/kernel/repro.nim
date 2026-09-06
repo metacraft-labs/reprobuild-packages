@@ -131,9 +131,186 @@
 ## bootable / loadable); the other three are M3 ``dakFiles``
 ## artifacts (data files consumed by downstream actions).
 
+import std/strutils
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+# ---------------------------------------------------------------------------
+# Kernel configuration — the single source of truth
+# ---------------------------------------------------------------------------
+#
+# The three sequences below are the ONLY place the image kernel's
+# configuration is written down. ``kernelConfigCommand`` renders them into
+# the ``scripts/config`` invocation the ``build:`` block runs between
+# ``defconfig`` and ``olddefconfig``, and the recipe's tests read the same
+# constants, so a symbol cannot be gated in one place and configured in
+# another. There is no second kernel recipe in this repository to drift
+# against: ``packages/source/kernel`` is the only one, and the Hyper-V
+# bootstrap kernel fragments that used to sit beside it live in the legacy
+# pre-extraction tree, which this repository supersedes.
+
+const KernelConfigDisabled*: seq[string] = @[
+  # Symbols forced off. Debug info and BTF are dropped because they
+  # dominate build time and image size for a boot kernel; module signing
+  # and the trusted/revocation keyrings are dropped because the recipe
+  # has no signing key; ORC unwinding is traded for frame pointers so the
+  # build does not need objtool's stack validation.
+  "DEBUG_INFO",
+  "DEBUG_INFO_BTF",
+  "DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT",
+  "MODULE_SIG",
+  "SYSTEM_TRUSTED_KEYS",
+  "SYSTEM_REVOCATION_KEYS",
+  "STACK_VALIDATION",
+  "UNWINDER_ORC",
+]
+
+const KernelConfigEnabled*: seq[string] = @[
+  # Symbols forced on, on top of ``x86_64 defconfig``.
+  #
+  # Boot and console.
+  "UNWINDER_FRAME_POINTER",
+  "BLK_DEV_INITRD",
+  "DEVTMPFS",
+  "DEVTMPFS_MOUNT",
+  # virtio transports and devices (QEMU/KVM).
+  "VIRTIO",
+  "VIRTIO_PCI",
+  "VIRTIO_BLK",
+  "VIRTIO_NET",
+  "VIRTIO_CONSOLE",
+  # Hyper-V enlightenments (Windows hosts).
+  "HYPERV",
+  "HYPERV_STORAGE",
+  "HYPERV_NET",
+  "HYPERV_KEYBOARD",
+  "HID_HYPERV_MOUSE",
+  "HYPERV_BALLOON",
+  # Display.
+  "DRM",
+  "DRM_VIRTIO_GPU",
+  "DRM_HYPERV",
+  "DRM_SIMPLEDRM",
+  # Filesystems and block.
+  "EXT4_FS",
+  "VFAT_FS",
+  "TMPFS",
+  "OVERLAY_FS",
+  "SQUASHFS",
+  "SQUASHFS_XZ",
+  "BLK_DEV_LOOP",
+  # Firmware.
+  "EFI",
+  "EFI_STUB",
+  #
+  # --- Attestation substrate -------------------------------------------
+  #
+  # Device mapper. ``BLK_DEV_DM`` is already ``y`` in x86_64 defconfig,
+  # but it is named here so the two targets below cannot silently become
+  # modules if a future defconfig demotes it: ``scripts/config --enable``
+  # writes ``=y``, and ``olddefconfig`` rewrites a ``=y`` tristate back
+  # down to ``=m`` when its dependency is modular.
+  "BLK_DEV_DM",
+  # Read-only integrity-checked root. The dm-verity target is what the
+  # attested image's root filesystem is activated through, and it must be
+  # available before any root filesystem is mounted, hence built-in.
+  "DM_VERITY",
+  # Encrypted volumes (LUKS state partitions).
+  "DM_CRYPT",
+  # TPM. ``TCG_TPM`` is the core chip driver; ``TCG_TIS`` the
+  # memory-mapped TIS/PTP-FIFO interface every x86 vTPM (QEMU's
+  # ``tpm-tis``, Hyper-V's vTPM) presents; ``TCG_CRB`` the ACPI
+  # command-response-buffer interface that AMD fTPMs and several
+  # cloud vTPMs present INSTEAD of TIS, so that one kernel really
+  # does serve every host rather than only the ones this repository
+  # happens to test on; and ``HW_RANDOM_TPM`` feeds the TPM's RNG
+  # into ``/dev/hwrng``. ``TCG_TIS_CORE`` and ``CRYPTO_HASH_INFO``
+  # come along as Kconfig ``select``s.
+  "TCG_TPM",
+  "TCG_TIS",
+  "TCG_CRB",
+  "HW_RANDOM_TPM",
+  # Pseudo-filesystems the attestation plane reads and writes:
+  # ``configfs`` is where the TSM report interface is driven from on
+  # kernels that carry it, ``securityfs`` is where the TPM's binary
+  # measurement log (``/sys/kernel/security/tpm0/binary_bios_measurements``)
+  # appears.
+  "CONFIGFS_FS",
+  "SECURITYFS",
+  # Guest-side confidential compute, so ONE kernel serves all tiers.
+  #
+  # ``AMD_MEM_ENCRYPT`` brings up SME/SEV/SEV-ES/SEV-SNP guest support;
+  # ``SEV_GUEST`` is the driver that talks to the PSP for an SNP
+  # attestation report. ``INTEL_TDX_GUEST`` brings up TDX guest support
+  # and ``TDX_GUEST_DRIVER`` exposes the TDX report ioctl.
+  #
+  # Two entries here are pure ENABLERS and exist because
+  # ``olddefconfig`` silently drops a requested symbol whose dependency
+  # is unmet, rather than failing:
+  #
+  #   * ``VIRT_DRIVERS`` is the ``menuconfig`` bool that guards the whole
+  #     of ``drivers/virt``. It is OFF in x86_64 defconfig, and without
+  #     it both ``SEV_GUEST`` and ``TDX_GUEST_DRIVER`` vanish from the
+  #     resolved config even though they were requested.
+  #   * ``X86_X2APIC`` is a hard dependency of ``INTEL_TDX_GUEST`` and is
+  #     likewise off in defconfig; without it ``INTEL_TDX_GUEST`` and,
+  #     transitively, ``TDX_GUEST_DRIVER`` vanish too.
+  #
+  # ``TSM_REPORTS`` — the unified ``configfs`` attestation-report ABI —
+  # is deliberately NOT listed: it does not exist in Linux 6.6, having
+  # been introduced in 6.7. Requesting it here would write a line
+  # ``olddefconfig`` deletes without a word. On 6.6 the per-tier drivers
+  # above carry their own report ioctls, which is what the attestation
+  # agent uses. A version bump to >= 6.7 must add it.
+  "AMD_MEM_ENCRYPT",
+  "VIRT_DRIVERS",
+  "SEV_GUEST",
+  "X86_X2APIC",
+  "INTEL_TDX_GUEST",
+  "TDX_GUEST_DRIVER",
+]
+
+const KernelAttestationSymbols*: seq[string] = @[
+  # The subset of the resolved configuration the attestation campaign
+  # depends on, as it must appear in the BUILT kernel's ``.config``
+  # after ``olddefconfig`` — not as requested.
+  #
+  # ``TCG_TIS_CORE`` and ``DM_BUFIO`` are not in ``KernelConfigEnabled``:
+  # Kconfig ``select``s them. They are listed because they are what
+  # actually carries the TIS transport and dm-verity's block cache, and
+  # because a check that finds them can only have read a config that was
+  # resolved rather than one that was requested.
+  "BLK_DEV_DM",
+  "DM_BUFIO",
+  "DM_VERITY",
+  "DM_CRYPT",
+  "TCG_TPM",
+  "TCG_TIS",
+  "TCG_TIS_CORE",
+  "TCG_CRB",
+  "HW_RANDOM_TPM",
+  "CONFIGFS_FS",
+  "SECURITYFS",
+  "AMD_MEM_ENCRYPT",
+  "SEV_GUEST",
+  "INTEL_TDX_GUEST",
+  "TDX_GUEST_DRIVER",
+]
+
+func kernelConfigCommand*(configScript, configFile: string): string =
+  ## Render the ``scripts/config`` invocation that turns a fresh
+  ## ``defconfig`` into the ReproOS kernel configuration. Rendered rather
+  ## than written out so the build and the tests cannot disagree.
+  var parts = @[configScript, "--file", configFile]
+  for symbol in KernelConfigDisabled:
+    parts.add("--disable")
+    parts.add(symbol)
+  for symbol in KernelConfigEnabled:
+    parts.add("--enable")
+    parts.add(symbol)
+  parts.join(" ")
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -297,7 +474,7 @@ package kernelSource:
         ## helper for a version. Return a stable zero without launching pahole.
         "printf '#!/bin/sh\\necho 0\\n' > ./src/scripts/pahole-version.sh",
         "make -C ./src ARCH=x86_64 defconfig",
-        "./src/scripts/config --file ./src/.config --disable DEBUG_INFO --disable DEBUG_INFO_BTF --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT --disable MODULE_SIG --disable SYSTEM_TRUSTED_KEYS --disable SYSTEM_REVOCATION_KEYS --disable STACK_VALIDATION --disable UNWINDER_ORC --enable UNWINDER_FRAME_POINTER --enable BLK_DEV_INITRD --enable DEVTMPFS --enable DEVTMPFS_MOUNT --enable VIRTIO --enable VIRTIO_PCI --enable VIRTIO_BLK --enable VIRTIO_NET --enable VIRTIO_CONSOLE --enable HYPERV --enable HYPERV_STORAGE --enable HYPERV_NET --enable HYPERV_KEYBOARD --enable HID_HYPERV_MOUSE --enable HYPERV_BALLOON --enable DRM --enable DRM_VIRTIO_GPU --enable DRM_HYPERV --enable DRM_SIMPLEDRM --enable EXT4_FS --enable VFAT_FS --enable TMPFS --enable OVERLAY_FS --enable SQUASHFS --enable SQUASHFS_XZ --enable BLK_DEV_LOOP --enable EFI --enable EFI_STUB",
+        kernelConfigCommand("./src/scripts/config", "./src/.config"),
         "make -C ./src ARCH=x86_64 olddefconfig",
         "printf '\\n.PHONY: repro_install\\nrepro_install:\\n\t$(MAKE) ARCH=x86_64 INSTALL_MOD_PATH=$(DESTDIR) DEPMOD=true modules_install\\n\tmkdir -p $(DESTDIR)/usr/lib/reproos-kernel\\n\tcp arch/x86/boot/bzImage $(DESTDIR)/usr/lib/reproos-kernel/vmlinuz\\n\tcp System.map $(DESTDIR)/usr/lib/reproos-kernel/System.map\\n\tcp .config $(DESTDIR)/usr/lib/reproos-kernel/config\\n\t$(MAKE) -s ARCH=x86_64 kernelrelease > $(DESTDIR)/usr/lib/reproos-kernel/kernel.release\\n' >> ./src/Makefile",
       ]
