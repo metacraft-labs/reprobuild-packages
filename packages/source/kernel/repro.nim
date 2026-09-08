@@ -375,6 +375,8 @@ package kernelSource:
     "find"
     "bc"
     "cmp"
+    ## The x86 defconfig compresses the boot image with CONFIG_KERNEL_GZIP.
+    "gzip"
     ## make is the kbuild driver — the c_cpp_make convention's
     ## compile action invokes ``make`` against the extracted source
     ## tree. ``make >=4.3`` is needed for kbuild's grouped-targets

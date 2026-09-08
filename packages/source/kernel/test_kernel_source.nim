@@ -1,40 +1,6 @@
-## Smoke test for the from-source ``kernelSource`` recipe.
-##
-## Pins the M9.H/I/K trio's behaviour on the SIXTH real production
-## from-source recipe (predecessors: ``dbusBrokerSource`` /
-## ``libdrmSource`` / ``waylandSource`` / ``wlrootsSource`` /
-## ``swaySource``). The kernel's specific coverage angle is that it
-## is the FIRST consumer of the M9.I ``makeFlags:`` channel — the
-## five prior from-source recipes all build under meson + ninja and
-## consume ``mesonOptions:``. The kernel by contrast drives ``make``
-## /kbuild, so this recipe's M9.I round-trip exercises the
-## ``"make"`` channel of ``registeredBuildFlags``, complementing the
-## five prior recipes' ``"meson"`` coverage.
-##
-## The recipe also exercises a MIXED artifact set: ONE
-## ``executable`` (bzImage — the bootable kernel image) plus THREE
-## ``files`` artifacts (vmlinux + System.map + KERNELRELEASE). The
-## prior recipes covered: dbus-broker = 2 executables, libdrm = 3
-## libraries, Wayland = 3 libs + 1 exec, wlroots = 1 library,
-## Sway = 4 executables. The kernel is the first to combine 1
-## ``dakExecutable`` with 3 ``dakFiles`` in a single recipe, so the
-## M3 artifact registry's exec-vs-files discriminator gets a fresh
-## angle of coverage.
-##
-## Coverage:
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * ``makeFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the production flag set + channel-
-##     isolation spot-check (the ``meson`` channel must NOT see
-##     the make flags).
-##   * MIXED artifact registration (M3) — ``bzImage`` registered as
-##     ``dakExecutable``; ``vmlinux`` / ``systemMap`` /
-##     ``kernelRelease`` registered as ``dakFiles``. All four
-##     attributed to ``kernelSource``.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
+## Metadata regression checks for the source-built Linux kernel.
+## Covers native build tools, the pinned upstream fetch, artifact kinds,
+## and version metadata without compiling or booting the kernel.
 
 import std/[sequtils, unittest]
 
@@ -51,15 +17,6 @@ const ExpectedUrl =
 const ExpectedHash =
   "b2f6607a75cd27b2e368cf2d25e1637e1e0da9dfed4cda536658879eee6f2b70"
 
-const ExpectedMakeFlags = @[
-  "ARCH=x86_64",
-  "LOCALVERSION=",
-  "KBUILD_BUILD_USER=reprobuild",
-  "KBUILD_BUILD_HOST=reprobuild",
-  "KBUILD_BUILD_TIMESTAMP=@1577836800",
-  "-j1",
-]
-
 suite "kernelSource — from-source recipe smoke test":
 
   test "kbuild tools are explicit build-platform requirements":
@@ -67,14 +24,14 @@ suite "kernelSource — from-source recipe smoke test":
     check packages.len == 1
     if packages.len == 1:
       let pkg = packages[0]
-      for name in ["binutils", "sed", "awk", "grep", "find", "bc", "cmp"]:
+      for name in ["binutils", "sed", "awk", "grep", "find", "bc", "cmp", "gzip"]:
         let uses = pkg.nativeBuildDeps.filterIt(it.packageSelector == name)
         check uses.len == 1
         if uses.len == 1:
           check uses[0].depKind == DepKindNative
       check pkg.toolUses.filterIt(it.packageSelector == "bc").len == 0
 
-  test "fetch spec carries the vendored URL verbatim":
+  test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
     let spec = registeredFetchSpec("kernelSource")
     check spec.packageName == "kernelSource"
@@ -98,10 +55,6 @@ suite "kernelSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "makeFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "makeFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
   test "artifacts register the bzImage as dakExecutable":
     # M3 artifact registry: bzImage must be tagged
     # ``dakExecutable`` because it is the BOOTABLE kernel image.
