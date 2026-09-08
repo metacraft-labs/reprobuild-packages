@@ -26,3 +26,15 @@ Set `REPROBUILD_SRC` when the sibling `reprobuild` checkout is not available at
 
 Run `nim c -r tools/package_interface_fingerprints.nim` to print the canonical
 interface pins used by external provisioning catalogs.
+
+## Contributor Checks
+
+Run `repro lint` to validate the source catalog layout and package identity
+policy. Run `repro test` for the catalog checker's regression tests. These
+are build graph collections, also addressable as `repro build check-catalog`
+and `repro build test-catalog`, without importing every package recipe.
+Both commands require Python 3.10 or newer through the declared tool dependency.
+The checks deliberately rerun, including when recipes are added or removed.
+
+The pre-commit and pre-push hooks run `repro lint`. In an already provisioned
+developer environment, `--tool-provisioning=path` uses its installed tools.

@@ -36,7 +36,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[sequtils, unittest]
 
 import repro_project_dsl
 
@@ -61,6 +61,18 @@ const ExpectedMakeFlags = @[
 ]
 
 suite "kernelSource — from-source recipe smoke test":
+
+  test "kbuild tools are explicit build-platform requirements":
+    let packages = registeredPackages().filterIt(it.packageName == "kernelSource")
+    check packages.len == 1
+    if packages.len == 1:
+      let pkg = packages[0]
+      for name in ["binutils", "sed", "awk", "grep", "find", "bc", "cmp"]:
+        let uses = pkg.nativeBuildDeps.filterIt(it.packageSelector == name)
+        check uses.len == 1
+        if uses.len == 1:
+          check uses[0].depKind == DepKindNative
+      check pkg.toolUses.filterIt(it.packageSelector == "bc").len == 0
 
   test "fetch spec carries the vendored URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.

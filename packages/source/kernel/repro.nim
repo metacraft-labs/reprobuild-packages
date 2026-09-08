@@ -364,13 +364,17 @@ package kernelSource:
     ## gcc is the host C toolchain — kbuild assumes a C11-capable gcc
     ## for kernel 6.x. R8 Tier-2 reference uses jammy gcc 11.4.
     ##
-    ## binutils (``ld`` / ``as`` / ``objcopy`` / ``nm``, which kbuild
-    ## invokes to link the kernel ELF and strip the bootable bzImage) is
-    ## NOT declared separately: it travels with the C toolchain, which is
-    ## the convention every other from-source recipe in this tree follows
-    ## — only ``gcc`` and ``glibc`` (which bootstrap the toolchain) name
-    ## binutils explicitly.
     "gcc >=12"
+    ## Kbuild invokes these directly; a compiler driver's own dependencies
+    ## are not a declaration of the kernel's assembler/linker requirements.
+    "binutils >=2.39"
+    ## scripts/config, compiler probes, and generated-header/install rules.
+    "sed"
+    "awk"
+    "grep"
+    "find"
+    "bc"
+    "cmp"
     ## make is the kbuild driver — the c_cpp_make convention's
     ## compile action invokes ``make`` against the extracted source
     ## tree. ``make >=4.3`` is needed for kbuild's grouped-targets
@@ -392,10 +396,6 @@ package kernelSource:
     ## kbuild's own configure probe wants it present even though the
     ## ``build:`` block disables ``STACK_VALIDATION``.
     "libelf >=0.187"
-    ## bc is the arbitrary-precision calculator kbuild's
-    ## ``kernel/timeconst.bc`` script invokes to compute jiffies
-    ## constants at build time. Required from 4.x onwards.
-    "bc"
     ## The host-side extract-cert helper is compiled even when module signing
     ## and trusted key embedding are disabled.
     "openssl >=3.0"
