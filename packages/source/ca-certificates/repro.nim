@@ -1,11 +1,25 @@
-## Pinned Mozilla trust bundle packaged from curl's immutable dated PEM.
-## The payload is source data rather than an archive or compiled program,
-## so the fetch registry uses ``dataFile: true`` and the build only installs
-## the verified bytes into the standard Linux trust-store locations.
+## Pinned Mozilla trust data, installed without a downloader bootstrap cycle.
+
+import std/[options, os, strutils]
+import nimcrypto/sha2
 
 import repro_project_dsl
-import repro_dsl_stdlib/constructors
-import repro_dsl_stdlib/types/package_result
+import repro_project_dsl/source_cache_identity
+import repro_dsl_stdlib/fs as buildFs
+
+const
+  VendoredBundle* = "vendor/cacert-2026-07-16.pem"
+  BundleSha256* = "3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
+  InstallRoot* = ".repro/output/install"
+  InstalledBundle* = InstallRoot & "/etc/ssl/certs/ca-certificates.crt"
+  InstalledAlias* = InstallRoot & "/etc/pki/tls/cert.pem"
+
+func bundleMatchesPin*(data: string): bool =
+  ($sha256.digest(data)).toLowerAscii() == BundleSha256
+
+static:
+  doAssert bundleMatchesPin(staticRead(VendoredBundle)),
+    "vendored Mozilla trust bundle does not match the pinned SHA-256"
 
 package caCertificatesSource:
   versions:
@@ -14,26 +28,8 @@ package caCertificatesSource:
       sourceUrl = "https://curl.se/ca/cacert-2026-07-16.pem"
       sourceRepository = "https://hg.mozilla.org/projects/nss"
 
-  fetch:
-    url: "https://curl.se/ca/cacert-2026-07-16.pem"
-    sha256: "3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
-    dataFile: true
-    extractStrip: 0
-
   nativeBuildDeps:
-    "make"
-    "sh"
-    "rm"
-    "mkdir"
-    "curl"
-    "mv"
-    "sha256sum"
-    "cp"
-    "chmod"
-    "find"
-    "sed"
-    "grep"
-    "patchelf"
+    discard
 
   buildDeps:
     discard
@@ -42,28 +38,20 @@ package caCertificatesSource:
     discard
 
   files caBundle:
-    ## Installs the canonical bundle and a Fedora-compatible alias.
+    ## Both paths contain the same upstream PEM bytes.
     discard
 
   build:
-    setCurrentOwningPackageOverride("caCertificatesSource")
-    try:
-      let patches = @[
-        "printf '%b\\n' 'all:' '\\t@:' 'install:' " &
-          "'\\tmkdir -p $(DESTDIR)/etc/ssl/certs $(DESTDIR)/etc/pki/tls' " &
-          "'\\tcp source $(DESTDIR)/etc/ssl/certs/ca-certificates.crt' " &
-          "'\\tchmod 0644 $(DESTDIR)/etc/ssl/certs/ca-certificates.crt' " &
-          "'\\tln -sf ../../ssl/certs/ca-certificates.crt $(DESTDIR)/etc/pki/tls/cert.pem' " &
-          "> src/Makefile",
-      ]
-      let pkg = autotools_package(
-        srcDir = "./src",
-        configureOptions = @[],
-        skipConfigure = true,
-        srcPatches = patches)
-      pkg.installTreeMirror()
-    finally:
-      clearCurrentOwningPackageOverride()
+    let root = packageProjectRoot("caCertificatesSource")
+    let source = root / VendoredBundle
+    let bundle = buildFs.copyFile(source, root / InstalledBundle,
+      actionId = "ca-certificates.install-bundle")
+    caBundle = buildFs.copyFile(source, root / InstalledAlias,
+      actionId = "ca-certificates.install-alias", after = [bundle])
+    setRegisteredActionDeclaredOutputs(caBundle.id, [root / InstallRoot])
+    setRegisteredActionPublish(caBundle.id, true, some(sourceCacheEntryIdentity(
+      root, "caCertificatesSource", "2026-07-16", "data")))
+    defaultBuildAction(caBundle)
 
   runtimeDeps:
     discard

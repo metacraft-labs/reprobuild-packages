@@ -1,6 +1,7 @@
-import std/unittest
+import std/[options, os, unittest]
 
 import repro_project_dsl
+import repro_binary_cache_client/cache_key
 
 import ./repro
 
@@ -12,22 +13,22 @@ const ExpectedHash =
 
 suite "caCertificatesSource source recipe":
 
-  test "fetches the pinned Mozilla bundle as a data file":
-    let spec = registeredFetchSpec("caCertificatesSource")
-    check spec.packageName == "caCertificatesSource"
-    check spec.url == ExpectedUrl
-    check spec.hashHex == ExpectedHash
-    check spec.hashAlg == dshaSha256
-    check spec.kind == dfkDataFile
-    check spec.extractStrip == 0
+  test "pins vendored source data without registering a downloader":
+    check BundleSha256 == ExpectedHash
+    check registeredFetchSpec("caCertificatesSource").packageName.len == 0
 
-  test "declares the data-only build closure":
-    let nativeDeps = registeredNativeBuildDeps("caCertificatesSource")
-    for tool in ["make", "sh", "rm", "mkdir", "curl", "mv", "sha256sum",
-                 "cp", "chmod", "find", "sed", "grep", "patchelf"]:
-      check tool in nativeDeps
+  test "has no downloader or compiler bootstrap dependencies":
+    check registeredNativeBuildDeps("caCertificatesSource").len == 0
     check registeredBuildDeps("caCertificatesSource").len == 0
     check registeredRuntimeDeps("caCertificatesSource").len == 0
+
+  test "accepts only the exact pinned trust data":
+    const data = staticRead(VendoredBundle)
+    check bundleMatchesPin(data)
+    var changed = data
+    changed[0] = '!'
+    check not bundleMatchesPin(changed)
+    check not bundleMatchesPin("")
 
   test "registers the trust bundle as files":
     let artifacts = registeredArtifacts("caCertificatesSource")
@@ -44,3 +45,22 @@ suite "caCertificatesSource source recipe":
     check versions[0].sourceUrl == ExpectedUrl
     check versions[0].sourceRepository ==
       "https://hg.mozilla.org/projects/nss"
+
+  test "builds both trust paths with graph-owned file copies":
+    resetBuildActionRegistry()
+    buildCaCertificatesSourcePackage()
+    let root = packageProjectRoot("caCertificatesSource")
+    let actions = registeredBuildActions()
+    require actions.len == 2
+    check actions[0].id == "ca-certificates.install-bundle"
+    check actions[1].id == "ca-certificates.install-alias"
+    check actions[1].deps == @[actions[0].id]
+    for action in actions:
+      check action.toolIdentityRefs.len == 0
+      check action.inputs == @[root / VendoredBundle]
+    check actions[0].outputs == @[root / InstalledBundle]
+    check actions[1].outputs == @[root / InstalledAlias]
+    check actions[1].declaredOutputs == @[root / InstallRoot]
+    check registeredDefaultBuildAction() == actions[1].id
+    require actions[1].cacheEntryIdentity.isSome
+    check cacheEntryIdentityError(actions[1].cacheEntryIdentity.get()).len > 0
