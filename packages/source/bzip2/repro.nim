@@ -17,6 +17,7 @@ package bzip2Source:
   nativeBuildDeps:
     "make >=4.3"
     "gcc >=11"
+    "cmp"
 
   config:
     discard
