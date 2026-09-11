@@ -15,6 +15,8 @@ package zstdSource:
   nativeBuildDeps:
     "make"
     "gcc >=11"
+  buildDeps:
+    "zlib"
   config:
     discard
   library libzstd:
@@ -24,9 +26,13 @@ package zstdSource:
     try:
       let pkg = autotools_package(srcDir = "./src", configureOptions = @[
         "PREFIX=/usr",
+        # Keep optional formats independent of libraries in the caller's shell.
+        "HAVE_ZLIB=1",
+        "HAVE_LZMA=0",
+        "HAVE_LZ4=0",
       ], skipConfigure = true)
       discard pkg.library("libzstd")
     finally:
       clearCurrentOwningPackageOverride()
   runtimeDeps:
-    discard
+    "zlib"
