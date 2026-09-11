@@ -19,6 +19,7 @@ package patchelfSource:
   nativeBuildDeps:
     "make"
     "gcc >=11"
+    "awk"
 
   buildDeps:
     discard
