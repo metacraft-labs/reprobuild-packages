@@ -6,13 +6,12 @@
 ## pipeline + every log scanner + every config-search Makefile rule
 ## + every IDE file-search backend shells out to ``/usr/bin/grep``.
 ##
-## Coverage (>=8 tests with multiple assertions each):
+## Coverage:
 ##
 ##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
 ##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the one-flag set + channel-isolation
-##     spot-check (meson + cmake + make channels MUST be empty).
+##   * Declared awk dependency and the real configure action's flags
+##     and tool identities (the action check uses reproProviderMode).
 ##   * SINGLE executable artifact registration (M3) — ``grep`` tagged
 ##     ``dakExecutable``.
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
@@ -27,15 +26,15 @@ import repro_project_dsl
 # ``grepSource`` at module init time.
 import ./repro
 
+when defined(reproProviderMode):
+  import std/[os, strutils]
+  import repro_core
+
 const ExpectedUrl =
   "https://ftp.gnu.org/gnu/grep/grep-3.11.tar.xz"
 
 const ExpectedHash =
   "1db2aedde89d0dea42b16d9528f894c8d15dae4e190b59aecc78f5a951276eab"
-
-const ExpectedConfigureFlags = @[
-  "--disable-perl-regexp",
-]
 
 suite "grepSource — from-source recipe smoke test":
 
@@ -62,14 +61,30 @@ suite "grepSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "declares awk for the generated configure script":
+    check "awk" in registeredNativeBuildDeps("grepSource")
+
+  when defined(reproProviderMode):
+    test "configure action preserves flags and receives the declared awk tool":
+      let projectRoot = currentSourcePath.parentDir
+      let request = ProviderGraphRequest(kind: prkGraphInvocation,
+        providerArtifactId: "test-provider", entryPointId: "grepSource.root",
+        entryPointBodyHash: "test-body", reason: girExplicitUserRequest,
+        arguments: projectRoot, namespace: "project")
+      let fragment = buildPackageFragment(PackageDef(packageName: "grepSource",
+        sourceFile: projectRoot / "repro.nim"), request,
+        proc() = buildGrepSourcePackage(), includeDefault = false)
+      var configureCount = 0
+      for node in fragment.nodes:
+        if node.kind != gnkAction: continue
+        let action = decodeBuildActionPayload(toBytes(node.payload))
+        for argument in action.call.arguments:
+          if argument.name == "argv" and "/configure" in argument.encodedValue:
+            inc configureCount
+            check "--disable-perl-regexp" in argument.encodedValue
+            check "awk" in action.toolIdentityRefs
+      check configureCount == 1
+
   test "artifacts register a single grep executable tagged dakExecutable":
     # M3 artifact registry: ``grep`` is tagged ``dakExecutable``.
     # grep's autotools build emits a single load-bearing binary

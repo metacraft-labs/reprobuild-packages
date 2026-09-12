@@ -151,6 +151,7 @@ package grepSource:
     ## automake provides the ``Makefile.in`` templates the release
     ## tarball pre-generates.
     "automake"
+    "awk"
     ## make is the build-system driver — the c_cpp_autotools convention's
     ## compile action invokes ``make`` after ``./configure``.
     "make"
