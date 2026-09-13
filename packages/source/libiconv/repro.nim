@@ -19,6 +19,9 @@ const
   LibiconvNativeBuildDeps* = [
     "make",
     "gcc >=11",
+    "cmp",
+    "diff",
+    "awk",
   ]
 
 proc libiconvPostConfigureCommands*(): seq[string] =
@@ -42,6 +45,9 @@ package libiconvSource:
   nativeBuildDeps:
     "make"
     "gcc >=11"
+    "cmp"
+    "diff"
+    "awk"
 
   config:
     discard
