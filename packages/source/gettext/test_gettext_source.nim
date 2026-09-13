@@ -42,6 +42,7 @@ suite "gettext source recipe":
     check registeredAuthoredNativeBuildDeps("gettextSource") ==
       @GettextNativeBuildDeps
     check registeredBuildDeps("gettextSource") == @GettextBuildDeps
+    check registeredRuntimeDeps("gettextSource") == @["gcc >=11"]
 
   test "declares the tools required by the release configure scripts":
     let tools = registeredNativeBuildDeps("gettextSource")

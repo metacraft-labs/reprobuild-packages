@@ -116,6 +116,9 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
+proc xzConfigureOptions*(): seq[string] =
+  @["--disable-static", "--disable-doc", "--disable-rpath"]
+
 package xzSource:
   ## From-source xz / liblzma — sixty-third M9.H/I/K production recipe.
   ## THE canonical modern LZMA2 compressor on Linux; every ``.tar.xz``
@@ -182,6 +185,9 @@ package xzSource:
     ## pkg-config is used by the autotools configure step to probe for
     ## gettext's libintl when NLS is enabled (default on).
     "pkg-config"
+    "awk"
+    "cmp"
+    "diff"
     ## gettext provides ``libintl`` for the NLS message-catalog
     ## machinery xz's CLI uses for translated error messages.
     "gettext >=0.21"
@@ -214,12 +220,8 @@ package xzSource:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
     setCurrentOwningPackageOverride("xzSource")
     try:
-      let opts = @[
-        "--disable-static",
-        "--disable-doc",
-        "--disable-rpath",
-      ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      let pkg = autotools_package(
+        srcDir = "./src", configureOptions = xzConfigureOptions())
       discard pkg.executable("xz")
       discard pkg.library("libLzma")
     finally:

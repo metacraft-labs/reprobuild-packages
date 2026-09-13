@@ -53,7 +53,7 @@ suite "sedSource — from-source recipe smoke test":
 
   test "declares the tools invoked by upstream configure":
     let dependencies = registeredNativeBuildDeps("sedSource")
-    for tool in ["awk", "diff"]:
+    for tool in ["awk", "cmp", "diff"]:
       check tool in dependencies
 
   test "artifacts register a single sed executable tagged dakExecutable":

@@ -144,4 +144,5 @@ package gettextSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
-    discard
+    # The catalog tools use GCC's OpenMP runtime for parallel matching.
+    "gcc >=11"
