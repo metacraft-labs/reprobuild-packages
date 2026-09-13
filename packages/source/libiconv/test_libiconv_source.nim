@@ -23,8 +23,16 @@ suite "libiconv source recipe":
       "https://git.savannah.gnu.org/git/libiconv.git"
 
   test "uses the release archive toolchain only":
-    check registeredNativeBuildDeps("libiconvSource") ==
-      @LibiconvNativeBuildDeps
+    let dependencies = registeredNativeBuildDeps("libiconvSource")
+    for tool in LibiconvNativeBuildDeps:
+      check tool in dependencies
+    for tool in ["autoconf", "automake", "libtool"]:
+      check tool notin dependencies
+
+  test "declares the text tools invoked by upstream configure":
+    let dependencies = registeredNativeBuildDeps("libiconvSource")
+    for tool in ["cmp", "diff", "awk"]:
+      check tool in dependencies
 
   test "exports the converter CLI and both public libraries":
     let artifacts = registeredArtifacts("libiconvSource")
