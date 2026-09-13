@@ -42,7 +42,6 @@ const ExpectedConfigureFlags = @[
   "--without-history",
   "--without-html",
   "--without-debug",
-  "--without-mem-debug",
 ]
 
 suite "libxml2Source — from-source recipe smoke test":
@@ -81,6 +80,11 @@ suite "libxml2Source — from-source recipe smoke test":
       check libxml2BuildEnvironment() == @[("LIBS", "-lbcrypt")]
     else:
       check libxml2BuildEnvironment().len == 0
+
+  test "declares the tools invoked by upstream configure":
+    let dependencies = registeredNativeBuildDeps("libxml2Source")
+    for tool in ["pkg-config", "cmp", "diff", "awk"]:
+      check tool in dependencies
 
   test "artifacts register a single library":
     # M3 artifact registry: ``libXml2`` is the only artifact and
