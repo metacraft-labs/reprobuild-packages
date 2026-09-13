@@ -39,9 +39,15 @@ suite "gettext source recipe":
     check versions[0].sourceRepository == GettextSourceRepository
 
   test "declares the expected build closure":
-    check registeredNativeBuildDeps("gettextSource") ==
+    check registeredAuthoredNativeBuildDeps("gettextSource") ==
       @GettextNativeBuildDeps
     check registeredBuildDeps("gettextSource") == @GettextBuildDeps
+    check registeredRuntimeDeps("gettextSource") == @["gcc >=11"]
+
+  test "declares the tools required by the release configure scripts":
+    let tools = registeredNativeBuildDeps("gettextSource")
+    for tool in ["awk", "cmp", "diff"]:
+      check tool in tools
 
   test "selects platform-specific libintl and linker options":
     var expectedOptions = @GettextBaseConfigureOptions

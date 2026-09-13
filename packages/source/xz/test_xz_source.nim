@@ -1,32 +1,14 @@
 ## Smoke test for the from-source ``xzSource`` recipe.
 ##
-## Pins the M9.H/I/K trio's behaviour on the SIXTY-THIRD real
-## production from-source recipe. xz's unique coverage angle vs the
-## prior sixty-two is being THE canonical modern LZMA2 compressor on
-## Linux + a ONE-executable + ONE-library mixed-kind autotools shape
-## (libcap-style pairing where both kinds emerge off a single
-## ``./configure`` + ``make`` invocation), with a THREE-flag
-## ``configureFlags:`` block.
-##
-## Coverage (>=8 tests with multiple assertions each):
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the three-flag set + channel-isolation
-##     spot-check (meson + cmake + make channels MUST be empty).
-##   * MIXED artifact registration (M3) — one executable
-##     (``dakExecutable``) + one library (``dakLibrary``) attributed
-##     to ``xzSource`` with kind discriminators preserved per-artifact.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
+## Covers the pinned archive, constructor options, configure tools,
+## executable and library exports, and upstream version metadata.
 
 import std/[unittest]
 
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + configure flags + one executable + one library artifact
+# fetch spec, dependencies and one executable + one library artifact
 # under ``xzSource`` at module init time.
 import ./repro
 
@@ -44,7 +26,7 @@ const ExpectedConfigureFlags = @[
 
 suite "xzSource — from-source recipe smoke test":
 
-  test "fetch spec carries the vendored URL verbatim":
+  test "fetch spec carries the upstream URL verbatim":
     # M9.H registry round-trip — URL is recorded exactly as declared.
     let spec = registeredFetchSpec("xzSource")
     check spec.packageName == "xzSource"
@@ -66,14 +48,14 @@ suite "xzSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "autotools constructor receives the exact production options":
+    check xzConfigureOptions() == ExpectedConfigureFlags
+
+  test "declares the tools invoked by upstream configure":
+    let dependencies = registeredNativeBuildDeps("xzSource")
+    for tool in ["awk", "cmp", "diff"]:
+      check tool in dependencies
+
   test "artifacts register one executable + one library mixed-kind":
     # M3 artifact registry: ``xz`` is tagged ``dakExecutable`` while
     # ``libLzma`` is tagged ``dakLibrary``. The unique coverage of THIS

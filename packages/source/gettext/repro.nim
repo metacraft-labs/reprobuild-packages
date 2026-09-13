@@ -34,6 +34,9 @@ const
     "make",
     "gcc >=11",
     "pkg-config",
+    "awk",
+    "cmp",
+    "diff",
   ]
   GettextBuildDeps* = [
     "libiconv >=1.19",
@@ -104,6 +107,9 @@ package gettextSource:
     "make"
     "gcc >=11"
     "pkg-config"
+    "awk"
+    "cmp"
+    "diff"
 
   buildDeps:
     "libiconv >=1.19"
@@ -138,4 +144,5 @@ package gettextSource:
       clearCurrentOwningPackageOverride()
 
   runtimeDeps:
-    discard
+    # The catalog tools use GCC's OpenMP runtime for parallel matching.
+    "gcc >=11"

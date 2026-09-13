@@ -155,6 +155,7 @@ package sedSource:
     ## generates the sed manpage.
     "perl >=5.32"
     "awk"
+    "cmp"
     "diff"
 
   config:
