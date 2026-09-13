@@ -98,9 +98,6 @@
 ##                               functionality).
 ##   * ``--without-debug``    — skip the debug-mode XML tree introspection
 ##                               helpers (saves binary size at runtime).
-##   * ``--without-mem-debug`` — skip the memory-allocation debug
-##                               instrumentation.
-##
 ## Downstream configuration knobs would live here when the per-distro
 ## variants need different strategies (e.g. a developer variant that
 ## flips ``--with-debug`` for the at-spi accessibility debug bundle).
@@ -116,7 +113,6 @@ proc libxml2ConfigureOptions*(): seq[string] =
     "--without-history",
     "--without-html",
     "--without-debug",
-    "--without-mem-debug",
   ]
   when defined(windows):
     # The shell reports an MSYS host, while GCC targets native Windows.
@@ -191,6 +187,12 @@ package libxml2Source:
     ## gcc is the host C toolchain — libxml2 is C89 / C99 with light
     ## use of autoconf macros.
     "gcc >=11"
+
+    # Configure probes and generated Makefile transforms.
+    "pkg-config"
+    "cmp"
+    "diff"
+    "awk"
 
   buildDeps:
     ## zlib is consumed by libxml2's gzip-compressed XML stream
