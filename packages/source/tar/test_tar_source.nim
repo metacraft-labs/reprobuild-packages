@@ -1,29 +1,14 @@
 ## Smoke test for the from-source ``tarSource`` recipe.
 ##
-## Pins the M9.H/I/K trio's behaviour on the SEVENTY-FIRST real
-## production from-source recipe. GNU tar is THE canonical archive
-## packer/unpacker on every modern Linux distribution — every installer
-## + every backup tool + every configuration-management agent + every
-## container image builder shells out to ``/usr/bin/tar``.
-##
-## Coverage (>=8 tests with multiple assertions each):
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the three-flag set + channel-isolation
-##     spot-check (meson + cmake + make channels MUST be empty).
-##   * SINGLE executable artifact registration (M3) — ``tar`` tagged
-##     ``dakExecutable``.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
+## Covers the pinned archive, constructor options, configure tools,
+## executable export, and upstream version metadata.
 
 import std/[unittest]
 
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
-# fetch spec + configure flags + one executable artifact under
+# fetch spec, dependencies and one executable artifact under
 # ``tarSource`` at module init time.
 import ./repro
 
@@ -64,14 +49,14 @@ suite "tarSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "autotools constructor receives the exact production options":
+    check tarConfigureOptions() == ExpectedConfigureFlags
+
+  test "declares the tools invoked by upstream configure":
+    let dependencies = registeredNativeBuildDeps("tarSource")
+    for tool in ["awk", "diff"]:
+      check tool in dependencies
+
   test "artifacts register a single tar executable tagged dakExecutable":
     # M3 artifact registry: ``tar`` is tagged ``dakExecutable``.
     # tar's autotools build emits a single load-bearing binary (the

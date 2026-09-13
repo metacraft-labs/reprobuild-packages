@@ -92,6 +92,9 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
+proc sedConfigureOptions*(): seq[string] =
+  @["--disable-acl", "--without-selinux"]
+
 package sedSource:
   ## From-source GNU sed — seventy-third M9.H/I/K production recipe.
   ## THE canonical stream-editor CLI on every modern Linux
@@ -151,6 +154,8 @@ package sedSource:
     ## perl is required by the build for the help2man pass that
     ## generates the sed manpage.
     "perl >=5.32"
+    "awk"
+    "diff"
 
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
@@ -168,11 +173,8 @@ package sedSource:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
     setCurrentOwningPackageOverride("sedSource")
     try:
-      let opts = @[
-        "--disable-acl",
-        "--without-selinux",
-      ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      let pkg = autotools_package(
+        srcDir = "./src", configureOptions = sedConfigureOptions())
       discard pkg.executable("sed")
     finally:
       clearCurrentOwningPackageOverride()

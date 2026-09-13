@@ -108,6 +108,9 @@ import repro_dsl_stdlib/types/package_result
 # Package declaration
 # ---------------------------------------------------------------------------
 
+proc tarConfigureOptions*(): seq[string] =
+  @["--without-selinux", "--without-posix-acls", "--without-xattrs"]
+
 package tarSource:
   ## From-source GNU tar — seventy-first M9.H/I/K production recipe.
   ## THE canonical archive packer/unpacker on every modern Linux
@@ -164,6 +167,8 @@ package tarSource:
     "make"
     ## gcc is the host C toolchain — tar is C99 + GNU extensions.
     "gcc >=11"
+    "awk"
+    "diff"
 
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
@@ -181,14 +186,9 @@ package tarSource:
     ## M9.R.5b — explicit `build:` block constructed from the lifted `config:` values + the inlined verbatim flags. Calls the M9.R.2b high-level `autotools_package(...)` constructor.
     setCurrentOwningPackageOverride("tarSource")
     try:
-      let opts = @[
-        "--without-selinux",
-        "--without-posix-acls",
-        "--without-xattrs",
-      ]
       let pkg = autotools_package(
         srcDir = "./src",
-        configureOptions = opts,
+        configureOptions = tarConfigureOptions(),
         extraEnv = @[("FORCE_UNSAFE_CONFIGURE", "1")])
       discard pkg.executable("tar")
     finally:
