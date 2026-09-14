@@ -32,6 +32,11 @@ suite "libffi source recipe":
     check "automake" notin registeredNativeBuildDeps("libffiSource")
     check "libtool" notin registeredNativeBuildDeps("libffiSource")
 
+  test "declares the text tools used by the release configure script":
+    let dependencies = registeredAuthoredNativeBuildDeps("libffiSource")
+    for tool in ["awk", "cmp", "diff"]:
+      check tool in dependencies
+
   test "exports the shared library interface":
     let artifacts = registeredArtifacts("libffiSource")
     check artifacts.len == 1
@@ -100,6 +105,8 @@ suite "libffi source recipe":
 
       let configureScript = configure.inlineScriptOf()
       check configure.id.len > 0
+      for tool in ["awk", "cmp", "diff"]:
+        check tool in configure.toolIdentityRefs
       check compile.id.len > 0
       check install.id.len > 0
       check stageLibrary.id.len > 0

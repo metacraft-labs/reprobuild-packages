@@ -25,6 +25,9 @@ const
   LibffiNativeBuildDeps* = [
     "make",
     "gcc >=11",
+    "awk",
+    "cmp",
+    "diff",
   ]
   LibffiMakeDepfiles* = [
     "src/.deps/prep_cif.Plo",
@@ -55,6 +58,9 @@ package libffiSource:
   nativeBuildDeps:
     "make"
     "gcc >=11"
+    "awk"
+    "cmp"
+    "diff"
 
   config:
     discard
