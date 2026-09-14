@@ -1,27 +1,10 @@
 ## Smoke test for the from-source ``bashSource`` recipe.
 ##
-## Pins the M9.H/I/K trio's behaviour on the FIFTY-NINTH real
-## production from-source recipe. bash's unique coverage angle vs the
-## prior fifty-eight is being THE canonical POSIX shell — ``/bin/bash``
-## is the login shell on every major Linux distribution, the shebang
-## target for every ``#!/bin/bash`` script, and the implicit
-## interpreter every Makefile recipe + every systemd-unit
-## ``ExecStart=`` with shell metacharacters is evaluated under.
-##
-## Coverage (>=8 tests with multiple assertions each):
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * ``configureFlags:`` block round-trip (M9.I) — exact-order
-##     sequence equality on the production five-flag set + channel-
-##     isolation spot-check (meson + cmake + make channels MUST be
-##     empty).
-##   * Executable artifact registration (M3) — ``bash`` and its
-##     ``sh`` alias, both tagged ``dakExecutable``.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
+## Checks the release pin, emitted configure flags, required awk/cmp tool
+## identities, POSIX sh installation target, and public artifacts. These
+## registry/graph tests do not replace a real from-source build.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -43,6 +26,26 @@ const ExpectedConfigureFlags = @[
   "--enable-history",
   "--enable-job-control",
 ]
+
+proc argValues(action: BuildActionDef; name: string): seq[string] =
+  for arg in action.call.arguments:
+    if arg.name == name and arg.encodedValue.len > 0:
+      return arg.encodedValue.split('\x1f')
+  @[]
+
+proc actionById(id: string): BuildActionDef =
+  for action in registeredBuildActions():
+    if action.id == id:
+      return action
+  raise newException(ValueError, "action not found: " & id)
+
+proc configureAction(): BuildActionDef =
+  for action in registeredBuildActions():
+    let argv = action.argValues("argv")
+    if argv.len == 3 and argv[0 .. 1] == @["sh", "-c"] and
+        "../src/configure " in argv[2]:
+      return action
+  raise newException(ValueError, "configure action not found")
 
 suite "bashSource — from-source recipe smoke test":
 
@@ -69,14 +72,33 @@ suite "bashSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "configure command retains the production flag sequence":
+    resetBuildActionRegistry()
+    buildBashSourcePackage()
+    let argv = configureAction().argValues("argv")
+    check argv[2].endsWith("../src/configure --prefix=/usr " &
+      ExpectedConfigureFlags.join(" "))
+
+  test "declares utilities for configure and generated headers":
+    for tool in ["awk", "cmp"]:
+      check tool in registeredAuthoredNativeBuildDeps("bashSource")
+
+  test "configure action carries the required utility identities":
+    resetBuildActionRegistry()
+    buildBashSourcePackage()
+    for tool in ["awk", "cmp"]:
+      check tool in configureAction().toolIdentityRefs
+
+  test "build and installation retain utilities and the POSIX shell alias target":
+    resetBuildActionRegistry()
+    buildBashSourcePackage()
+    let build = actionById("autotools-make-build-bashSource-build")
+    let install = actionById("autotools-make-install-bashSource-build")
+    for tool in ["awk", "cmp"]:
+      check tool in build.toolIdentityRefs
+      check tool in install.toolIdentityRefs
+    check install.argValues("targets") == @["install-sh-alias"]
+
   test "artifacts register the bash interpreter plus its sh alias":
     # M3 artifact registry: bash's autotools build emits one load-
     # bearing binary (the shell interpreter) and the recipe's
