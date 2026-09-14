@@ -171,6 +171,10 @@ package bashSource:
     ## ``parse.y`` is touched (or the release tarball's pre-generated
     ## ``y.tab.c`` is stripped by a downstream patch).
     "bison"
+    # The release's config.status uses awk to generate Makefiles.
+    "awk"
+    # Make compares generated parser and platform headers before replacing them.
+    "cmp"
 
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
