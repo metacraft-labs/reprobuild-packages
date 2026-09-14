@@ -1,57 +1,20 @@
-## Smoke test for the from-source ``gccSource`` recipe.
-##
-## Pins the M9.H/I + M3 registry behaviour on the M9.N Batch E
-## compiler-chain slice. gcc's unique coverage angles vs the prior 81
-## from-source recipes:
-##
-##   * FIRST recipe in the corpus to declare MIXED-KIND artifacts
-##     under the ``from-source-custom`` convention (three
-##     ``executable`` + two ``library`` sharing a single
-##     ``mkdir-configure-build-install`` install-tree). Pins the
-##     per-artifact stage-copy fan-out at the (3 exec, 2 lib) mixed
-##     cardinality from a multi-shell custom pipeline.
-##   * SECOND multi-shell ``from-source-custom`` consumer with a
-##     FOUR-shell ``build:`` block (vs cmake's three-shell
-##     bootstrap-build-install pipeline) — pins the M9.N Batch C.1
-##     shell-action registry round-trip on the gcc out-of-tree
-##     pattern (``mkdir`` + out-of-tree ``configure`` + ``make`` +
-##     ``make install``).
-##   * Real sha256 on the fetch channel — the test asserts the exact
-##     64-char hex hash recorded in the recipe + the algorithm tag.
-##
-## Coverage (>=8 tests with multiple assertions each):
-##
-##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
-##     algorithm + kind discriminant + extractStrip.
-##   * No-flags state on ALL FOUR build channels (M9.I) — configure +
-##     meson + cmake + make all empty (gcc's from-source-custom
-##     pipeline records the configure invocation as a shell action,
-##     not as a flag-block entry).
-##   * MIXED-KIND artifact registration (M3) — gcc + g++ + cpp
-##     tagged ``dakExecutable``, libgcc_s + libstdc++ tagged
-##     ``dakLibrary``.
-##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
-##     repository for ``repro update-source``.
-##   * ``shell()`` action registry round-trip (M9.N Batch C.1) — four
-##     verbatim commands recorded in declaration order under the
-##     ``gcc`` artifact.
+## Registry checks for GCC's source pin, compiler/runtime interface, and
+## bootstrap/configure/build/install/staging pipeline. These checks do not
+## substitute for compiling GCC and exercising the installed compiler.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
-# Side-effect import: triggers the package macro which registers
-# fetch spec + three executable + two library artifacts + four shell
-# actions under ``gccSource`` at module init time.
 import ./repro
 
 const ExpectedUrl =
-  "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
+  "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz"
 
-# Real sha256 over the upstream gcc-14.2.0.tar.xz tarball; see
+# Real sha256 over the upstream gcc-14.2.0.tar.gz tarball; see
 # ``repro.nim``'s sha256 strategy section.
 const ExpectedHash =
-  "a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9"
+  "7d376d445f93126dc545e2c0086d0f647c3094aae081cdb78f42ce2bc25e7293"
 
 suite "gccSource — from-source recipe smoke test":
 
@@ -77,27 +40,24 @@ suite "gccSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "no flags registered on the configure channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "no flags registered on the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "no flags registered on the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "no flags registered on the make channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "artifacts register three executables + two libraries mixed-kind":
-    # M3 artifact registry: gcc + g++ + cpp tagged
-    # ``dakExecutable``; libgcc_s + libstdc++ tagged ``dakLibrary``.
-    # A regression that flattened the kind discriminator at the
-    # (3, 2) mixed cardinality would surface here (mis-routing the
-    # M9.L install path: ``lib/`` vs ``bin/``).
+  test "declares a bootstrap compiler and source arithmetic libraries":
+    check registeredAuthoredNativeBuildDeps("gccSource") == @[
+      "clang", "binutils >=2.39", "make >=4.3", "perl >=5.32",
+      "bison >=3.6", "flex >=2.6"]
+    check registeredBuildDeps("gccSource") == @[
+      "gmp >=6.2", "mpfr >=4.1", "mpc >=1.2"]
+    check registeredRuntimeDeps("gccSource") == @["binutils >=2.39"]
+
+  test "artifacts register three executables and four runtime libraries":
     let arts = registeredArtifacts("gccSource")
-    check arts.len == 5
+    check arts.len == 7
     var seenGcc = false
     var seenGxx = false
     var seenCpp = false
     var seenLibgccS = false
     var seenLibstdcxx = false
+    var seenLibgomp = false
+    var seenLibatomic = false
     for art in arts:
       check art.packageName == "gccSource"
       case art.artifactName
@@ -116,13 +76,21 @@ suite "gccSource — from-source recipe smoke test":
       of "libstdc++":
         seenLibstdcxx = true
         check art.kind == dakLibrary
+      of "libgomp":
+        seenLibgomp = true
+        check art.kind == dakLibrary
+      of "libatomic":
+        seenLibatomic = true
+        check art.kind == dakLibrary
       else:
-        discard
+        check false
     check seenGcc
     check seenGxx
     check seenCpp
     check seenLibgccS
     check seenLibstdcxx
+    check seenLibgomp
+    check seenLibatomic
 
   test "versions block records the upstream tag + URL + repository":
     # M2 versions registry: the upstream ftp.gnu.org release tag is
@@ -132,34 +100,61 @@ suite "gccSource — from-source recipe smoke test":
     check vs.len == 1
     check vs[0].version == "14.2.0"
     check vs[0].sourceRevision == "releases/gcc-14.2.0"
-    check vs[0].sourceUrl ==
-      "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
+    check vs[0].sourceUrl == ExpectedUrl
     check vs[0].sourceRepository ==
       "https://gcc.gnu.org/git/gcc.git"
 
   test "shell() action registry records the gcc mkdir-configure-build-install pipeline":
-    # M9.N Batch C.1 — the recipe's ``build:`` block records four
-    # shell actions: ``mkdir -p $extracted/build`` + out-of-tree
-    # configure + build + install. The from-source-custom convention
-    # consumes the sequence verbatim.
     let rows = registeredShellActions("gccSource")
-    check rows.len == 4
+    require rows.len == 5
     for r in rows:
       check r.packageName == "gccSource"
       check r.artifactName == "gcc"
-    check rows[0].command == "mkdir -p $extracted/build"
-    check rows[1].command ==
-      "cd $extracted/build && ../configure --prefix=$out --enable-languages=c,c++ --disable-multilib --disable-bootstrap --disable-nls --without-headers"
-    check rows[2].command == "cd $extracted/build && make"
-    check rows[3].command == "cd $extracted/build && make install"
+    check "mkdir -p $extracted/build $bootstrap_sysroot/usr" in rows[0].command
+    check "bootstrap_sysroot=$extracted/bootstrap-sysroot" in rows[0].command
+    check "ln -sfn $glibc_include $bootstrap_sysroot/usr/include" in rows[0].command
+    check "ln -sfn $glibc_lib $bootstrap_sysroot/lib" in rows[0].command
+    for command in [rows[0].command, rows[1].command]:
+      check command.startsWith("LD_LIBRARY_PATH=; export LD_LIBRARY_PATH;")
+    let configure = rows[1].command
+    check "cd $extracted/build && CC=clang CXX=clang++ LD=$raw_binutils/bin/ld " in configure
+    check "LDFLAGS_FOR_TARGET=-Wl,--dynamic-linker=$glibc_lib/ld-linux-x86-64.so.2 " in configure
+    check configure.endsWith("../configure --prefix=$out --enable-languages=c,c++ " &
+      "--disable-multilib --disable-bootstrap --disable-nls --disable-werror " &
+      "--disable-libsanitizer --disable-libitm --disable-libvtv --disable-libssp " &
+      "--disable-libquadmath --with-build-sysroot=$extracted/bootstrap-sysroot " &
+      "--with-gmp=$gmp_prefix --with-mpfr=$mpfr_prefix --with-mpc=$mpc_prefix")
+    check "--without-headers" notin configure
+    for library in ["gmp", "mpfr", "mpc"]:
+      check library & "_prefix=$(pwd)/../../" & library &
+        "/.repro/output/install/usr" in configure
+      for command in [rows[2].command, rows[3].command]:
+        check "$extracted/../../" & library & "/.repro/output/install/usr/lib" in command
+    check rows[2].command.endsWith(
+      "cd $extracted/build && LD_LIBRARY_PATH=$source_libs NIX_HARDENING_ENABLE= make -j8")
+    check rows[3].command.endsWith(
+      "cd $extracted/build && LD_LIBRARY_PATH=$source_libs make install")
+
+  test "stages the complete sysroot and compiled compiler drivers":
+    let rows = registeredShellActions("gccSource")
+    require rows.len == 5
+    let stage = rows[4].command
+    for library in ["libgcc_s", "libstdc++", "libgomp", "libatomic"]:
+      check library & ".so " in stage
+    check "test -e $out/lib/ld-linux-x86-64.so.2" in stage
+    check "ln -sfn $bootstrap_include $out/include/bootstrap-libc" in stage
+    check "ln -sfn ../../../include/bootstrap-libc $out/lib/bootstrap-sysroot/usr/include" in stage
+    check "wrapper_src=$(dirname $extracted)/gcc-driver-wrapper.c" in stage
+    check "for driver in gcc g++; do" in stage
+    check "$out/bin/gcc.real --sysroot=$out/lib/bootstrap-sysroot -O2" in stage
+    check "$wrapper_src -o $out/bin/$driver" in stage
+    check stage.endsWith("rm -f $out/bin/c++; ln -s g++ $out/bin/c++")
 
   test "shell() ids carry the per-artifact sequence number":
     # M9.N Batch C.1 — auto-generated ids follow the
     # ``<package>-<artifact>-<seq>`` shape; sequence increments per
     # artifact.
     let rows = registeredShellActions("gccSource")
-    check rows.len == 4
-    check rows[0].id == "gccSource-gcc-1"
-    check rows[1].id == "gccSource-gcc-2"
-    check rows[2].id == "gccSource-gcc-3"
-    check rows[3].id == "gccSource-gcc-4"
+    require rows.len == 5
+    for index, row in rows:
+      check row.id == "gccSource-gcc-" & $(index + 1)

@@ -50,9 +50,9 @@ const ExpectedConfigureFlags = @[
 suite "procpsSource — from-source recipe smoke test":
 
   test "build dependencies cover autoreconf and top's terminal UI":
-    check registeredNativeBuildDeps("procpsSource") == @[
+    check registeredAuthoredNativeBuildDeps("procpsSource") == @[
       "autoconf", "automake", "libtool", "m4", "make", "gcc >=11",
-      "pkg-config",
+      "pkg-config", "gettext", "tar",
     ]
     check registeredBuildDeps("procpsSource") == @["ncurses >=6.0"]
 

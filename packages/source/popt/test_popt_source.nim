@@ -21,7 +21,7 @@ suite "poptSource from-source recipe":
     check spec.extractStrip == 1
 
   test "build tools and artifact are registered":
-    check registeredNativeBuildDeps("poptSource") == @[
+    check registeredAuthoredNativeBuildDeps("poptSource") == @[
       "make", "gcc >=11", "pkg-config",
     ]
     let artifacts = registeredArtifacts("poptSource")

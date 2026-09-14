@@ -26,7 +26,7 @@ suite "zlib source recipe":
     check versions[0].sourceRepository == "https://github.com/madler/zlib"
 
   test "declares the complete build-tool contract":
-    check registeredNativeBuildDeps("zlibSource") ==
+    check registeredAuthoredNativeBuildDeps("zlibSource") ==
       @ZlibNativeBuildDeps
 
   test "exports the compression library interface":

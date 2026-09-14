@@ -75,7 +75,7 @@ suite "glib2Source source recipe":
     check versions[0].sourceRepository == GlibSourceRepository
 
   test "declares the complete source dependency interface":
-    check registeredNativeBuildDeps("glib2Source") == @GlibNativeBuildDeps
+    check registeredAuthoredNativeBuildDeps("glib2Source") == @GlibNativeBuildDeps
     check registeredBuildDeps("glib2Source") == @GlibBuildDeps
 
   test "configures a hermetic release build without fallbacks":

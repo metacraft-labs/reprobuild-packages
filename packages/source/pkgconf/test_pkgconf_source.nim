@@ -26,7 +26,7 @@ suite "pkgconf source recipe":
     check versions[0].sourceRepository == "https://github.com/pkgconf/pkgconf"
 
   test "uses only tools required by the release archive":
-    check registeredNativeBuildDeps("pkgconfSource") ==
+    check registeredAuthoredNativeBuildDeps("pkgconfSource") ==
       @PkgconfNativeBuildDeps
 
   test "exports the implementation, compatibility command, and library":

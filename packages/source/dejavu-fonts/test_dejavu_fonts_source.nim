@@ -67,7 +67,7 @@ suite "DejaVu fonts source recipe":
     # FontForge generates the TTFs from the upstream SFD sources; make
     # drives the generated Makefile. Losing either dependency means no
     # font family is produced at all.
-    check registeredNativeBuildDeps("dejavuFontsSource") ==
+    check registeredAuthoredNativeBuildDeps("dejavuFontsSource") ==
       @["make", "fontforge"]
     check registeredBuildDeps("dejavuFontsSource").len == 0
     check registeredRuntimeDeps("dejavuFontsSource").len == 0
