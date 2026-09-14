@@ -15,6 +15,9 @@ package pcre2Source:
   nativeBuildDeps:
     "make"
     "gcc >=11"
+    # Libtool's configure probes and config.status require these utilities.
+    "awk"
+    "diff"
   config:
     discard
   library pcre2:
