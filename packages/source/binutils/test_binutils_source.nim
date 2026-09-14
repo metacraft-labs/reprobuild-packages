@@ -110,7 +110,7 @@ suite "binutilsSource — from-source recipe smoke test":
       check makeVarsEncoding.contains(name & "=" & value)
 
   test "uses only tools required by the release archive":
-    let native = registeredNativeBuildDeps("binutilsSource")
+    let native = registeredAuthoredNativeBuildDeps("binutilsSource")
     check native == @["gcc >=11", "make >=4.3", "perl >=5.32"]
     check "bison >=3.6" notin native
     check "flex >=2.6" notin native

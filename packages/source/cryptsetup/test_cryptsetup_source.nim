@@ -31,9 +31,9 @@ suite "cryptsetupSource — from-source recipe smoke test":
     check spec.extractStrip == 1
 
   test "build dependencies cover source runtime libraries":
-    check registeredNativeBuildDeps("cryptsetupSource") == @[
+    check registeredAuthoredNativeBuildDeps("cryptsetupSource") == @[
       "autoconf", "automake", "libtool", "m4", "make", "gcc >=11",
-      "pkg-config", "gettext",
+      "pkg-config", "gettext", "tar",
     ]
     check registeredBuildDeps("cryptsetupSource") == @[
       "libgcrypt", "json-c", "popt", "lvm2", "util-linux",

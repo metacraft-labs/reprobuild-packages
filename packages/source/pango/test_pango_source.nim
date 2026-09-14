@@ -165,6 +165,6 @@ suite "pangoSource — from-source recipe smoke test":
     check vs[0].sourceUrl == ExpectedUrl
     check vs[0].sourceRepository ==
       "https://gitlab.gnome.org/GNOME/pango"
-    check registeredNativeBuildDeps("pangoSource") ==
+    check registeredAuthoredNativeBuildDeps("pangoSource") ==
       ExpectedNativeBuildDeps
     check registeredBuildDeps("pangoSource") == ExpectedBuildDeps

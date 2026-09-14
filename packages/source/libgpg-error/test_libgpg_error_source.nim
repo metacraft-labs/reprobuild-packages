@@ -21,7 +21,7 @@ suite "libgpgErrorSource from-source recipe":
     check spec.extractStrip == 1
 
   test "build tools and artifact are registered":
-    check registeredNativeBuildDeps("libgpgErrorSource") == @[
+    check registeredAuthoredNativeBuildDeps("libgpgErrorSource") == @[
       "make", "gcc >=11", "pkg-config",
     ]
     let artifacts = registeredArtifacts("libgpgErrorSource")

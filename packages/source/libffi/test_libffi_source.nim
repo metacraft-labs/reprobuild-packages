@@ -26,7 +26,7 @@ suite "libffi source recipe":
     check versions[0].sourceRepository == "https://github.com/libffi/libffi"
 
   test "uses only tools required by a release archive":
-    check registeredNativeBuildDeps("libffiSource") ==
+    check registeredAuthoredNativeBuildDeps("libffiSource") ==
       @LibffiNativeBuildDeps
     check "autoconf" notin registeredNativeBuildDeps("libffiSource")
     check "automake" notin registeredNativeBuildDeps("libffiSource")

@@ -30,7 +30,7 @@ suite "gdiskSource — from-source recipe smoke test":
     check spec.extractStrip == 1
 
   test "build dependencies are exact":
-    check registeredNativeBuildDeps("gdiskSource") == @[
+    check registeredAuthoredNativeBuildDeps("gdiskSource") == @[
       "make", "gcc >=11", "pkg-config",
     ]
     check registeredBuildDeps("gdiskSource") == @[

@@ -85,7 +85,7 @@ suite "mesaSource — from-source recipe smoke test":
 
   test "M9.R.80 enables LLVM-backed llvmpipe":
     let native = registeredNativeBuildDeps("mesaSource")
-    check "llvm-config" in native
+    check "llvm" in native
 
     resetBuildActionRegistry()
     buildMesaSourcePackage()
