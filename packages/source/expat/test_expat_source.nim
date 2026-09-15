@@ -10,7 +10,8 @@
 ## pin below would surface a regression that leaks ``./configure``
 ## flags into the meson, cmake, or make channels (or vice versa).
 ##
-## Coverage (10 check assertions across 8 tests):
+## Coverage includes fetch metadata, configure actions, tool declarations,
+## library registration and version metadata.
 ##
 ##   * ``fetch:`` block round-trip (M9.H) — URL + sha256 length +
 ##     algorithm + kind discriminant + extractStrip.
@@ -23,6 +24,10 @@
 ##     repository for ``repro update-source``.
 
 import std/[unittest]
+
+when defined(reproProviderMode):
+  import std/[os, strutils]
+  import repro_core
 
 import repro_project_dsl
 
@@ -69,12 +74,11 @@ suite "expatSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "declares the text tools used by configure and config.status":
+    let dependencies = registeredAuthoredNativeBuildDeps("expatSource")
+    for tool in ["awk", "cmp", "diff"]:
+      check tool in dependencies
+
   test "artifacts register a single library":
     # M3 artifact registry: ``libExpat`` is the only artifact and
     # must be tagged ``dakLibrary``. expat's autotools build emits
@@ -102,3 +106,57 @@ suite "expatSource — from-source recipe smoke test":
       "https://github.com/libexpat/libexpat/releases/download/R_2_7_0/expat-2.7.0.tar.xz"
     check vs[0].sourceRepository ==
       "https://github.com/libexpat/libexpat"
+
+  when defined(reproProviderMode):
+    proc emittedActions(): seq[BuildActionDef] =
+      let projectRoot = currentSourcePath.parentDir
+      let package = PackageDef(
+        packageName: "expatSource", sourceFile: projectRoot / "repro.nim",
+        hasDevEnv: false, devEnvBodyHash: "", toolUses: @[])
+      let request = ProviderGraphRequest(
+        kind: prkGraphInvocation, providerArtifactId: "test-provider",
+        entryPointId: "expatSource.root", entryPointBodyHash: "test-body",
+        reason: girExplicitUserRequest, arguments: projectRoot,
+        namespace: "project")
+      let fragment = buildPackageFragment(package, request,
+        proc() = buildExpatSourcePackage(), includeDefault = false)
+      for node in fragment.nodes:
+        if node.kind == gnkAction:
+          result.add(decodeBuildActionPayload(toBytes(node.payload)))
+
+    proc configureAction(): BuildActionDef =
+      for action in emittedActions():
+        if action.commandStatsId == "autotools_package.configure":
+          return action
+      raise newException(ValueError, "Expat configure action is missing")
+
+    proc configureScript(action: BuildActionDef): string =
+      for arg in action.call.arguments:
+        if arg.name == "argv":
+          let argv = arg.encodedValue.split("\x1f")
+          if argv.len >= 3:
+            return argv[2]
+      raise newException(ValueError, "Expat configure command is missing")
+
+    test "configure action preserves the production flag order":
+      let script = configureAction().configureScript()
+      var previous = -1
+      for flag in ExpectedConfigureFlags:
+        let position = script.find(flag)
+        check position > previous
+        previous = position
+
+    test "configureFlags does not leak into the meson channel":
+      for action in emittedActions():
+        check action.call.packageName != "meson"
+        check not action.commandStatsId.startsWith("meson")
+
+    test "configureFlags does not leak into the cmake channel":
+      for action in emittedActions():
+        check action.call.packageName != "cmake"
+        check not action.commandStatsId.startsWith("cmake")
+
+    test "configure action includes the declared text tools":
+      let configure = configureAction()
+      for tool in ["awk", "cmp", "diff"]:
+        check tool in configure.toolIdentityRefs
