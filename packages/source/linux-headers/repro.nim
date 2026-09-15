@@ -21,6 +21,8 @@ package linuxHeadersSource:
   nativeBuildDeps:
     "gcc >=11"
     "make >=4.3"
+    # headers_install copies the exported UAPI header tree with rsync.
+    "rsync"
 
   executable `linux-headers`:
     build:

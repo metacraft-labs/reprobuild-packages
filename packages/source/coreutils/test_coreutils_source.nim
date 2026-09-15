@@ -33,13 +33,35 @@ import repro_project_dsl
 # ``coreutilsSource`` at module init time.
 import ./repro
 
+when defined(reproProviderMode):
+  import std/os
+  import repro_core
+
+  proc configureAction(): BuildActionDef =
+    let projectRoot = currentSourcePath.parentDir
+    let package = PackageDef(
+      packageName: "coreutilsSource", sourceFile: projectRoot / "repro.nim",
+      hasDevEnv: false, devEnvBodyHash: "", toolUses: @[])
+    let request = ProviderGraphRequest(
+      kind: prkGraphInvocation, providerArtifactId: "test-provider",
+      entryPointId: "coreutilsSource.root", entryPointBodyHash: "test-body",
+      reason: girExplicitUserRequest, arguments: projectRoot,
+      namespace: "project")
+    let fragment = buildPackageFragment(package, request,
+      proc() = buildCoreutilsSourcePackage(), includeDefault = false)
+    for node in fragment.nodes:
+      if node.kind == gnkAction:
+        let action = decodeBuildActionPayload(toBytes(node.payload))
+        if action.commandStatsId == "autotools_package.configure":
+          return action
+    raise newException(ValueError, "coreutils configure action is missing")
+
 const ExpectedUrl =
   "https://ftp.gnu.org/gnu/coreutils/coreutils-9.5.tar.xz"
 
 const ExpectedHash =
   "cd328edeac92f6a665de9f323c93b712af1858bc2e0d88f3f7100469470a1b8a"
 
-const RecipeSource = staticRead("repro.nim")
 
 const ExpectedConfigureFlags = @[
   "--disable-static",
@@ -72,14 +94,35 @@ suite "coreutilsSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "configureFlags registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the meson channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "configureFlags does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "root builds opt in through the upstream safety gate":
-    check "FORCE_UNSAFE_CONFIGURE" in RecipeSource
+  test "declares configure and config.status text tools":
+    let dependencies = registeredAuthoredNativeBuildDeps("coreutilsSource")
+    for tool in ["awk", "cmp", "diff"]:
+      check tool in dependencies
+
+  when defined(reproProviderMode):
+    test "binds configure text tools to their package identities":
+      let action = configureAction()
+      for tool in ["awk", "cmp", "diff"]:
+        check tool in action.toolIdentityRefs
+
+    test "passes the production flags to the configure action":
+      let action = configureAction()
+      var script: string
+      for argument in action.call.arguments:
+        if argument.name == "argv":
+          let argv = argument.encodedValue.split('\x1f')
+          if argv.len >= 3:
+            script = argv[2]
+      check script.len > 0
+      var previous = -1
+      for flag in ExpectedConfigureFlags:
+        let position = script.find(flag)
+        check position > previous
+        previous = position
+
+    test "root builds opt in through the upstream safety gate":
+      let action = configureAction()
+      check ("FORCE_UNSAFE_CONFIGURE", "1") in action.env
   test "ACL support is explicit in the build and runtime closures":
     check registeredBuildDeps("coreutilsSource") == @["libacl"]
     check registeredRuntimeDeps("coreutilsSource") == @["libacl"]

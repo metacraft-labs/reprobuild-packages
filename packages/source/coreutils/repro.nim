@@ -170,6 +170,10 @@ package coreutilsSource:
     ## perl is required by the build for the help2man pass that
     ## generates the per-binary manpages.
     "perl >=5.32"
+    # configure and config.status use these for probes and generated files.
+    "awk"
+    "cmp"
+    "diff"
 
   buildDeps:
     # The file-manipulation tools enable POSIX ACL support when libacl is
