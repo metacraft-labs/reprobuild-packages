@@ -19,6 +19,9 @@ package libaclSource:
     "make"
     "gcc >=11"
     "pkg-config"
+    "awk"
+    "cmp"
+    "diff"
   buildDeps:
     "libattr"
   config:

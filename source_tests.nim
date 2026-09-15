@@ -111,6 +111,8 @@ const sourceTestFiles* = [
   "packages/source/kxmlgui/test_kxmlgui_source.nim",
   "packages/source/ldd/test_ldd_source.nim",
   "packages/source/less/test_less_source.nim",
+  "packages/source/libacl/test_libacl_source.nim",
+  "packages/source/libattr/test_libattr_source.nim",
   "packages/source/libcanberra/test_libcanberra_source.nim",
   "packages/source/libcap-ng/test_libcap_ng_source.nim",
   "packages/source/libcap/test_libcap_source.nim",
