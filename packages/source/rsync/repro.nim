@@ -23,6 +23,8 @@ package rsyncSource:
     ## runtime library path. Keep those helpers on the source toolchain.
     "coreutils"
     "sed"
+    "awk"
+    "diff"
 
   buildDeps:
     "libacl >=2.3"

@@ -149,6 +149,7 @@ const sourceTestFiles* = [
   "packages/source/libxrandr/test_libxrandr_source.nim",
   "packages/source/libxrender/test_libxrender_source.nim",
   "packages/source/libxshmfence/test_libxshmfence_source.nim",
+  "packages/source/linux-headers/test_linux_headers_source.nim",
   "packages/source/lvm2/test_lvm2_source.nim",
   "packages/source/make/test_make_source.nim",
   "packages/source/mesa/test_mesa_source.nim",
