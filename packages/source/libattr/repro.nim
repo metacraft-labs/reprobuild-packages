@@ -18,6 +18,9 @@ package libattrSource:
     "libtool"
     "make"
     "gcc >=11"
+    "awk"
+    "cmp"
+    "diff"
   config:
     discard
   library libattr:
