@@ -190,11 +190,14 @@ package glibcSource:
     ## bison is required by the build for the parser-generator passes
     ## in the localedef / iconv tools.
     "bison >=3.0"
-
-  buildDeps:
+    ## configure requires GNU awk; config.status compares generated files.
+    "awk"
+    "diff"
     ## python is required by the build for the misc/syscall-list code
     ## generators glibc 2.x switched to in the 2.32 cut.
     "python3 >=3.9"
+
+  buildDeps:
     ## Linux kernel headers — glibc's syscall layer pulls
     ## ``<linux/*>`` headers from the host kernel-headers package.
     "linux-headers >=4.19"
@@ -270,6 +273,8 @@ package glibcSource:
       # otherwise injects _FORTIFY_SOURCE into every compiler invocation,
       # which conflicts with glibc's fortified inline declarations.
       let glibcBuildEnv = @[
+        # Use the canonical tool name; configure still verifies GNU awk.
+        ("AWK", "awk"),
         # The linux-headers dependency makes CFLAGS nonempty, so glibc's
         # configure script does not add its usual -O2 default. glibc rejects
         # unoptimized builds; CPPFLAGS retains the injected header path.
