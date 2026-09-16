@@ -211,6 +211,7 @@ const sourceTestFiles* = [
   "packages/source/systemd/test_systemd_source.nim",
   "packages/source/tar/test_tar_source.nim",
   "packages/source/test_source_recipe_paths.nim",
+  "packages/source/test_xorg_configure_tools.nim",
   "packages/source/util-linux/test_util_linux_source.nim",
   "packages/source/util-macros/test_util_macros_source.nim",
   "packages/source/vim/test_vim_source.nim",
