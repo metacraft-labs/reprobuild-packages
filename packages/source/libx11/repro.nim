@@ -19,6 +19,9 @@ package libx11Source:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

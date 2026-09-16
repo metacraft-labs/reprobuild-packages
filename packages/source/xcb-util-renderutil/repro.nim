@@ -13,6 +13,9 @@ package xcbUtilRenderutilSource:
     sha256: "3e15d4f0e22d8ddbfbb9f5d77db43eacd7a304029bf25a6166cc63caa96d04ba"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "make"
     "gcc >=11"
     "pkg-config"

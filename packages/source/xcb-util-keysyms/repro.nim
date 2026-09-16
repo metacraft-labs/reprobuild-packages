@@ -13,6 +13,9 @@ package xcbUtilKeysymsSource:
     sha256: "7c260a5294412aed429df1da2f8afd3bd07b7cba3fec772fba15a613a6d5c638"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "make"
     "gcc >=11"
     "pkg-config"

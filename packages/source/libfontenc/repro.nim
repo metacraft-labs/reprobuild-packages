@@ -13,6 +13,9 @@ package libfontencSource:
     sha256: "7b02c3d405236e0d86806b1de9d6868fe60c313628b38350b032914aa4fd14c6"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "make"
     "gcc >=11"
     "pkg-config"

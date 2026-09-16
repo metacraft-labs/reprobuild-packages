@@ -13,6 +13,9 @@ package xcbUtilSource:
     sha256: "5abe3bbbd8e54f0fa3ec945291b7e8fa8cfd3cccc43718f8758430f94126e512"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "make"
     "gcc >=11"
     "pkg-config"

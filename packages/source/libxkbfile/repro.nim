@@ -24,6 +24,9 @@ package libxkbfileSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "autoconf"
     "automake"
     "libtool"
