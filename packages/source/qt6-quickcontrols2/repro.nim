@@ -185,11 +185,24 @@ package qt6QuickControls2Source:
         actionId = "qt6QuickControls2Source.publish_interface",
         after = @[stageAction])
       setRegisteredActionDeclaredOutputs(publishAction.id, @[selfMirrorRoot])
-      setRegisteredActionPublish(publishAction.id, true,
-        some(sourceCacheEntryIdentity(
-          activeProviderProjectRoot(),
-          "qt6QuickControls2Source",
-          "6.8.1",
-          "custom")))
+      # The project root has to be a real one before a binary-cache
+      # identity is derived from it. The DSL runs this body once at
+      # provider startup, before any request exists and so with no root,
+      # and `sourceCacheEntryIdentity` does not refuse an empty one -- it
+      # resolves the recipe file RELATIVE TO THE CWD and digests whatever
+      # it finds, yielding an identity that looks valid and is not. A
+      # wrong key in a content-addressed cache is worse than a missing
+      # one, so derive the tag only when there is a root to derive it
+      # from. The startup pass registers nothing that survives anyway:
+      # `buildPackageFragment` resets the action registry before the real
+      # invocation rebuilds it.
+      let providerRoot = activeProviderProjectRoot()
+      if providerRoot.len > 0:
+        setRegisteredActionPublish(publishAction.id, true,
+          some(sourceCacheEntryIdentity(
+            providerRoot,
+            "qt6QuickControls2Source",
+            "6.8.1",
+            "custom")))
     finally:
       clearCurrentOwningPackageOverride()
