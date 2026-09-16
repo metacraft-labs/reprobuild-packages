@@ -51,6 +51,7 @@ suite "procpsSource — from-source recipe smoke test":
 
   test "build dependencies cover autoreconf and top's terminal UI":
     check registeredAuthoredNativeBuildDeps("procpsSource") == @[
+      "awk", "cmp", "diff",
       "autoconf", "automake", "libtool", "m4", "make", "gcc >=11",
       "pkg-config", "gettext", "tar",
     ]

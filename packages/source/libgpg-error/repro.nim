@@ -18,6 +18,9 @@ package libgpgErrorSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "make"
     "gcc >=11"
     "pkg-config"

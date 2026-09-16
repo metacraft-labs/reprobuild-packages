@@ -175,6 +175,9 @@ package procpsSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     ## autoconf is REQUIRED (not just a fallback): procps's GitLab
     ## archive ships ``configure.ac`` but NO pre-generated
     ## ``configure`` script, so the convention layer runs

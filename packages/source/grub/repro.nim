@@ -39,6 +39,9 @@ package grubSource:
     "sh"
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "autoconf"
     "automake"
     "make"

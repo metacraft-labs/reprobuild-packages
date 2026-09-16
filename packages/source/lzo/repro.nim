@@ -13,6 +13,8 @@ package lzoSource:
     sha256: "c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

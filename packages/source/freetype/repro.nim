@@ -160,6 +160,9 @@ package freetypeSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``.
     "autoconf"

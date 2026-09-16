@@ -32,6 +32,7 @@ suite "cryptsetupSource — from-source recipe smoke test":
 
   test "build dependencies cover source runtime libraries":
     check registeredAuthoredNativeBuildDeps("cryptsetupSource") == @[
+      "awk", "cmp", "diff",
       "autoconf", "automake", "libtool", "m4", "make", "gcc >=11",
       "pkg-config", "gettext", "tar",
     ]

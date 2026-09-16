@@ -13,6 +13,7 @@ package pcre2Source:
     sha256: "15fbc5aba6beee0b17aecb04602ae39432393aba1ebd8e39b7cabf7db883299f"
     extractStrip: 1
   nativeBuildDeps:
+    "cmp"
     "make"
     "gcc >=11"
     # Libtool's configure probes and config.status require these utilities.

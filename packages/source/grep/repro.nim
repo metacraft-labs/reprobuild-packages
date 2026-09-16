@@ -143,6 +143,7 @@ package grepSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``. grep's release
     ## tarball pre-generates ``configure`` but the convention's

@@ -13,6 +13,7 @@ package icuSource:
     sha256: "dfacb46bfe4747410472ce3e1144bf28a102feeaa4e3875bac9b4c6cf30f4f3e"
     extractStrip: 1
   nativeBuildDeps:
+    "diff"
     "gcc >=11"
     "make"
     "pkg-config"

@@ -17,6 +17,8 @@ package nanoSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "make"
     "gcc >=11"
     "pkg-config"

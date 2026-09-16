@@ -13,6 +13,9 @@ package mtdevSource:
     sha256: "a107adad2101fecac54ac7f9f0e0a0dd155d954193da55c2340c97f2ff1d814e"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "make"
     "gcc >=11"
   config:

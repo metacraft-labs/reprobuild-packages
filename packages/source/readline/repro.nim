@@ -146,6 +146,8 @@ package readlineSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``. readline 8.x
     ## tarballs pre-generate ``configure`` but the convention's

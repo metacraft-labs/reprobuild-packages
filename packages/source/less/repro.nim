@@ -134,6 +134,7 @@ package lessSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``. less's release
     ## tarball pre-generates ``configure`` but the convention's

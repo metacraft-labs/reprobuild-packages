@@ -17,6 +17,8 @@ package straceSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "make"
     "gcc >=11"
 

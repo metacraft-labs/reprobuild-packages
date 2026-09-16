@@ -154,6 +154,7 @@ package bashSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``. bash 5.2.x
     ## tarballs pre-generate ``configure`` but the convention's

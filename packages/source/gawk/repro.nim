@@ -157,6 +157,8 @@ package gawkSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``. gawk's release
     ## tarball pre-generates ``configure`` but the convention's
