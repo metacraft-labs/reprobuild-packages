@@ -27,6 +27,8 @@ package reprobuildPackages:
     "xz"
     "sed"
     "mkdir"
+    "cp"
+    "chmod"
     "ln"
     "cat"
     "head"
@@ -100,6 +102,9 @@ package reprobuildPackages:
       if name == "test-gettext-source":
         appendRegisteredActionToolIdentityRefs(executed.id,
           ["sh", "find", "awk", "cmp", "mv", "rm", "sort", "grep"])
+      elif name == "test-python3-with-modules-source":
+        appendRegisteredActionToolIdentityRefs(executed.id,
+          ["sh", "mkdir", "find", "rm", "cp", "chmod", "ln"])
       elif integration:
         appendRegisteredActionToolIdentityRefs(executed.id,
           ["sh", "make", "gcc", "binutils", "flex", "bison", "m4", "bc", "curl", "sha256sum",
