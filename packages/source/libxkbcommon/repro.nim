@@ -178,6 +178,8 @@ package libxkbcommonSource:
     ## ninja is meson's default backend — the compile action invokes
     ## ``ninja`` against the meson build directory.
     "ninja >=1.10"
+    # Meson discovers the declared X11 and Wayland libraries through pkg-config.
+    "pkg-config"
     ## gcc is the host C toolchain — libxkbcommon is plain C11 with
     ## a small C++ helper layer the C compiler handles.
     "gcc >=7"
