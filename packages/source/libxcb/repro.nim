@@ -16,6 +16,9 @@ package libxcbSource:
     "make"
     "gcc >=11"
     "pkg-config"
+    "awk"
+    "cmp"
+    "diff"
     "python3"
   buildDeps:
     "libxslt"

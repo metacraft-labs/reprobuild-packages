@@ -16,6 +16,9 @@ package libxdmcpSource:
     "make"
     "gcc >=11"
     "pkg-config"
+    "awk"
+    "cmp"
+    "diff"
   buildDeps:
     "xorgproto"
   config:

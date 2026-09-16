@@ -33,6 +33,9 @@ package libxauSource:
     "make"
     "gcc >=11"
     "pkg-config"
+    "awk"
+    "cmp"
+    "diff"
 
   buildDeps:
     "xorgproto"
