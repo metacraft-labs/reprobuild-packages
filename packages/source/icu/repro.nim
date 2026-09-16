@@ -16,6 +16,7 @@ package icuSource:
     "gcc >=11"
     "make"
     "pkg-config"
+    "awk"
   config:
     discard
   library libIcuUc:
