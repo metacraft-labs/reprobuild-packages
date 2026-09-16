@@ -22,7 +22,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[strutils, unittest]
 
 import repro_project_dsl
 
@@ -31,6 +31,26 @@ import repro_project_dsl
 # ``libxkbcommonSource`` at module init time.
 import ./repro
 
+when defined(reproProviderMode):
+  import std/os
+  import repro_core
+
+  proc emittedActions(): seq[BuildActionDef] =
+    let projectRoot = currentSourcePath.parentDir
+    let package = PackageDef(
+      packageName: "libxkbcommonSource", sourceFile: projectRoot / "repro.nim",
+      hasDevEnv: false, devEnvBodyHash: "", toolUses: @[])
+    let request = ProviderGraphRequest(
+      kind: prkGraphInvocation, providerArtifactId: "test-provider",
+      entryPointId: "libxkbcommonSource.root", entryPointBodyHash: "test-body",
+      reason: girExplicitUserRequest, arguments: projectRoot,
+      namespace: "project")
+    let fragment = buildPackageFragment(package, request,
+      proc() = buildLibxkbcommonSourcePackage(), includeDefault = false)
+    for node in fragment.nodes:
+      if node.kind == gnkAction:
+        result.add(decodeBuildActionPayload(toBytes(node.payload)))
+
 const ExpectedUrl =
   "https://github.com/xkbcommon/libxkbcommon/archive/refs/tags/xkbcommon-1.13.2.tar.gz"
 
@@ -38,11 +58,13 @@ const ExpectedHash =
   "acc4d5f7c3cbba5f9f8d08d8bdbeede84ecede46792f47929aa9321873385528"
 
 const ExpectedMesonOptions = @[
-  "-Denable-docs=false",
-  "-Denable-x11=false",
-  "-Denable-wayland=true",
-  "-Denable-tools=true",
-  "--buildtype=release",
+  "enable-docs=false",
+  "enable-x11=true",
+  "enable-wayland=true",
+  "enable-tools=true",
+  "libdir=lib",
+  "xkb-config-unversioned-extensions-path=/etc/xkb",
+  "xkb-config-versioned-extensions-path=/etc/xkb",
 ]
 
 suite "libxkbcommonSource — from-source recipe smoke test":
@@ -71,10 +93,44 @@ suite "libxkbcommonSource — from-source recipe smoke test":
     check spec.kind == dfkTarball
     check spec.extractStrip == 1
 
-  test "mesonOptions registers the exact production flag sequence":
-    check true  # M9.R.6.1: registry retired — assertion gutted
-  test "mesonOptions does not leak into the cmake channel":
-    check true  # M9.R.6.1: registry retired — assertion gutted
+  test "pkg-config is a build-machine tool, not a target dependency":
+    check "pkg-config" in registeredAuthoredNativeBuildDeps("libxkbcommonSource")
+    check "pkg-config" notin registeredBuildDeps("libxkbcommonSource")
+    check "pkg-config" notin registeredRuntimeDeps("libxkbcommonSource")
+
+  when defined(reproProviderMode):
+    test "Meson actions carry the native pkg-config identity":
+      var subcommands: seq[string]
+      for action in emittedActions():
+        if action.call.packageName == "meson" and
+            action.call.executableName == "mesonBin":
+          require action.toolIdentityRefKinds.len == action.toolIdentityRefs.len
+          let index = action.toolIdentityRefs.find("pkg-config")
+          require index >= 0
+          check action.toolIdentityRefKinds[index] == tirkNative
+          subcommands.add(action.call.subcommand)
+      check subcommands == @["setup", "compile", "install"]
+
+    test "Meson setup keeps X11, Wayland and tools enabled":
+      var setupCount = 0
+      for action in emittedActions():
+        if action.call.packageName == "meson" and
+            action.call.executableName == "mesonBin" and
+            action.call.subcommand == "setup":
+          inc setupCount
+          var checkedOptions = false
+          var checkedBuildtype = false
+          for arg in action.call.arguments:
+            if arg.name == "options":
+              check arg.encodedValue.split('\x1f') == ExpectedMesonOptions
+              checkedOptions = true
+            elif arg.name == "buildtype":
+              check arg.encodedValue == "release"
+              checkedBuildtype = true
+          check checkedOptions
+          check checkedBuildtype
+      check setupCount == 1
+
   test "ICU-backed build helper has an explicit source dependency":
     check "icu >=70" in registeredBuildDeps("libxkbcommonSource")
   test "artifacts register one library plus one executable":
