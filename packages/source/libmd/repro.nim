@@ -13,6 +13,9 @@ package libmdSource:
     sha256: "1bd6aa42275313af3141c7cf2e5b964e8b1fd488025caf2f971f43b00776b332"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

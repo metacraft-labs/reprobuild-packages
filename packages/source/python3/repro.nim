@@ -22,6 +22,8 @@ package python3Source:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "autoconf"
     "make"
     "pkg-config"

@@ -13,6 +13,9 @@ package libbsdSource:
     sha256: "b88cc9163d0c652aaf39a99991d974ddba1c3a9711db8f1b5838af2a14731014"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

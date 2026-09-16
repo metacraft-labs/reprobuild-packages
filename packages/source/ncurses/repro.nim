@@ -181,6 +181,8 @@ package ncursesSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``. ncurses's
     ## release tarball pre-generates ``configure`` but the convention's

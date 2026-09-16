@@ -146,6 +146,8 @@ package libgcryptSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac`` (the upstream
     ## release tarball does ship a pre-generated ``configure`` but we

@@ -13,6 +13,9 @@ package auditSource:
     sha256: "5911200423909b141e45bb1ae9d1608b1c974e5a5a52226d2f21501eb4ca809c"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

@@ -17,6 +17,7 @@ package utilMacrosSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
     "autoconf"
     "automake"
     "m4"

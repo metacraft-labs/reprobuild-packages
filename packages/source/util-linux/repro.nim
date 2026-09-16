@@ -208,6 +208,9 @@ package utilLinuxSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac`` (the upstream
     ## tarball does ship a pre-generated ``configure`` but we list

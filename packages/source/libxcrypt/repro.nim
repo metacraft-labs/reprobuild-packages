@@ -13,6 +13,9 @@ package libxcryptSource:
     sha256: "71513a31c01a428bccd5367a32fd95f115d6dac50fb5b60c779d5c7942aec071"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "cmp"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

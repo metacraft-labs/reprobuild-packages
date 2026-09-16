@@ -25,6 +25,8 @@ package e2fsprogsSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "autoconf"
     "automake"
     "libtool"
