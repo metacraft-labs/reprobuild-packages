@@ -13,6 +13,7 @@ package xcbProtoSource:
     sha256: "2c1bacd2110f4799f74de6ebb714b94cf6f80fb112316b1219480fd22562148c"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
     "make"
     "gcc >=11"
     "pkg-config"
