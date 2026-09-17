@@ -253,3 +253,6 @@ package gobjectIntrospectionSource:
     ## temporary introspection binary. Keep that tool in the scanner's runtime
     ## interface so every GIR-generating consumer receives it transitively.
     "ldd >=2.42"
+    ## The installed scanner's shebang needs this interpreter in every
+    ## consumer's runtime closure, not only while building the scanner.
+    "python3-with-modules"
