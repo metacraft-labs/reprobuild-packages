@@ -105,6 +105,8 @@ package reprobuildPackages:
       elif name == "test-python3-with-modules-source":
         appendRegisteredActionToolIdentityRefs(executed.id,
           ["sh", "mkdir", "find", "rm", "cp", "chmod", "ln"])
+      elif name == "test-gobject-introspection-source":
+        appendRegisteredActionToolIdentityRefs(executed.id, ["sh", "sed", "chmod"])
       elif integration:
         appendRegisteredActionToolIdentityRefs(executed.id,
           ["sh", "make", "gcc", "binutils", "flex", "bison", "m4", "bc", "curl", "sha256sum",
