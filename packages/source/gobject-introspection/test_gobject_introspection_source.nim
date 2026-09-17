@@ -147,7 +147,14 @@ suite "gobjectIntrospectionSource — from-source recipe smoke test":
       "libffi",
       "glibc >=2.29",
       "ldd >=2.42",
+      "python3-with-modules",
     ]
+
+  test "scanner interpreter is available during build and after installation":
+    check "python3-with-modules" in
+      registeredAuthoredNativeBuildDeps("gobjectIntrospectionSource")
+    check "python3-with-modules" in
+      registeredRuntimeDeps("gobjectIntrospectionSource")
 
   test "one library + two executable artifacts registered":
     let arts = registeredArtifacts("gobjectIntrospectionSource")
