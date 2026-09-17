@@ -84,6 +84,8 @@
 ##   * ``doctool=disabled``  — drop the docbook-emit tool (depends on
 ##                              docbook-xsl, not in the v1 closure).
 
+import std/os
+
 import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
@@ -91,10 +93,16 @@ import repro_dsl_stdlib/types/package_result
 import ../source_recipe_paths
 
 proc gobjectIntrospectionLddPatch*(glibcLoader: string): string =
-  "sed -i \"/find_program('g-ir-scanner', native: true),$/a\\  " &
-    "'--use-ldd-wrapper=" & glibcLoader & "',\\n  " &
-    "'--ldd-wrapper-args-begin',\\n  '--list',\\n  " &
-    "'--ldd-wrapper-args-end',\" src/gir/meson.build"
+  # The source loader has no host /lib fallback. Give just this invocation
+  # its matching libc and preserve the scanner's resolved dependency paths.
+  let wrapper = "#!/bin/sh\nexec " & quoteShell(glibcLoader) &
+    " --library-path " & quoteShell(glibcLoader.parentDir) &
+    "\"$" & "{LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\" --list \"$@\"\n"
+  "printf '%s' " & quoteShell(wrapper) & " > src/repro-ldd; " &
+    "chmod 0755 src/repro-ldd; " &
+    "sed -i \"/find_program('g-ir-scanner', native: true),$/a\\  " &
+    "'--use-ldd-wrapper=' + (meson.project_source_root() / 'repro-ldd'),\" " &
+    "src/gir/meson.build"
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -117,6 +125,9 @@ package gobjectIntrospectionSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "sh"
+    "sed"
+    "chmod"
     "meson >=0.62"
     "ninja >=1.10"
     "gcc >=11"
