@@ -1,17 +1,68 @@
 ## Smoke test for the from-source ``gobjectIntrospectionSource`` recipe
 ## (M9.R.15b).
 
-import std/[strutils, unittest]
+import std/[os, strutils, tempfiles, unittest]
+
+import repro_core/ambient_execution
 
 import repro_project_dsl
 
 import ./repro
+
+when defined(reproProviderMode):
+  import repro_core
+
+  proc emittedActions(): seq[BuildActionDef] =
+    let projectRoot = currentSourcePath.parentDir
+    let package = PackageDef(
+      packageName: "gobjectIntrospectionSource", sourceFile: projectRoot / "repro.nim",
+      hasDevEnv: false, devEnvBodyHash: "", toolUses: @[])
+    let request = ProviderGraphRequest(
+      kind: prkGraphInvocation, providerArtifactId: "test-provider",
+      entryPointId: "gobjectIntrospectionSource.root", entryPointBodyHash: "test-body",
+      reason: girExplicitUserRequest, arguments: projectRoot, namespace: "project")
+    let fragment = buildPackageFragment(package, request,
+      proc() = buildGobjectIntrospectionSourcePackage(), includeDefault = false)
+    for node in fragment.nodes:
+      if node.kind == gnkAction:
+        result.add(decodeBuildActionPayload(toBytes(node.payload)))
 
 const ExpectedUrl =
   "https://download.gnome.org/sources/gobject-introspection/1.86/gobject-introspection-1.86.0.tar.xz"
 
 const ExpectedHash =
   "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae"
+
+when defined(linux):
+  proc runLoaderFixture(inherited: string; present: bool; exitCode = 0):
+      tuple[code: int, lines: seq[string], meson: string] =
+    # A recording loader makes argv/environment handling observable. The real
+    # source-build gate separately executes glibc on compiler-generated ELF.
+    let root = createTempDir("gir loader's paths ", "")
+    defer: removeDir(root)
+    let libdir = root / "glibc lib64"
+    createDir(libdir)
+    createDir(root / "src/gir")
+    let loader = libdir / "ld-linux-x86-64.so.2"
+    let shellPath = uncontrolledFindExe("sh")
+    writeFile(loader, "#!" & shellPath & "\nprintf '%s\\n' \"$@\" \"env=$" &
+      "{LD_LIBRARY_PATH-unset}\"\nexit " & $exitCode & "\n")
+    setFilePermissions(loader, {fpUserRead, fpUserWrite, fpUserExec})
+    writeFile(root / "src/gir/meson.build",
+      "command = [\n  find_program('g-ir-scanner', native: true),\n]\n")
+    let patch = uncontrolledExecCmdEx(quoteShellCommand(
+      @[shellPath, "-ec", gobjectIntrospectionLddPatch(loader)]), workingDir = root)
+    doAssert patch.exitCode == 0, patch.output
+    result.meson = readFile(root / "src/gir/meson.build")
+    let envSetup = if present:
+      "export LD_LIBRARY_PATH=" & quoteShell(inherited) & "; "
+      else: "unset LD_LIBRARY_PATH; "
+    let probe = uncontrolledExecCmdEx(quoteShellCommand(@[shellPath, "-ec",
+      envSetup & "exec " & quoteShell(root / "src/repro-ldd") & " " &
+        quoteShell(root / "test ELF")]), workingDir = root)
+    result.code = probe.exitCode
+    for line in probe.output.strip().splitLines():
+      result.lines.add(line.replace(root, "<root>"))
 
 suite "gobjectIntrospectionSource — from-source recipe smoke test":
 
@@ -35,18 +86,60 @@ suite "gobjectIntrospectionSource — from-source recipe smoke test":
     check "pkg-config" in
       registeredNativeBuildDeps("gobjectIntrospectionSource")
 
+  test "source patch helpers are declared native tools":
+    for tool in ["sh", "sed", "chmod"]:
+      check tool in registeredAuthoredNativeBuildDeps("gobjectIntrospectionSource")
+      check tool notin registeredBuildDeps("gobjectIntrospectionSource")
+
+  when defined(reproProviderMode):
+    test "the patch edge records its native shell helpers":
+      var found = false
+      for action in emittedActions():
+        if action.id == "meson-patch-gobjectIntrospectionSource":
+          found = true
+          require action.toolIdentityRefs.len == action.toolIdentityRefKinds.len
+          for tool in ["sh", "sed", "chmod"]:
+            let index = action.toolIdentityRefs.find(tool)
+            require index >= 0
+            check action.toolIdentityRefKinds[index] == tirkNative
+      check found
+
   test "GIR generation uses the source-built ELF loader":
     check "glibc >=2.42" in
       registeredBuildDeps("gobjectIntrospectionSource")
     let patch = gobjectIntrospectionLddPatch(
       "/source/glibc/usr/lib64/ld-linux-x86-64.so.2")
-    check patch.startsWith("sed -i")
+    check "sed -i" in patch
     check "find_program('g-ir-scanner', native: true),$" in patch
     check "--use-ldd-wrapper=" in patch
     check "/source/glibc/usr/lib64/ld-linux-x86-64.so.2" in patch
-    check "--ldd-wrapper-args-begin" in patch
     check "--list" in patch
     check patch.endsWith("src/gir/meson.build")
+
+  when defined(linux):
+    test "loader gets its own libraries without an ambient path":
+      let probe = runLoaderFixture("", false)
+      check probe.code == 0
+      check probe.lines == @["--library-path", "<root>/glibc lib64", "--list",
+        "<root>/test ELF", "env=unset"]
+      check "meson.project_source_root() / 'repro-ldd'" in probe.meson
+
+    test "empty ambient path does not add the working directory":
+      let probe = runLoaderFixture("", true)
+      check probe.code == 0
+      check probe.lines == @["--library-path", "<root>/glibc lib64", "--list",
+        "<root>/test ELF", "env="]
+
+    test "loader preserves dependency paths without exporting its libc":
+      let probe = runLoaderFixture("/deps one/lib:/deps two/lib", true)
+      check probe.code == 0
+      check probe.lines == @["--library-path",
+        "<root>/glibc lib64:/deps one/lib:/deps two/lib", "--list",
+        "<root>/test ELF", "env=/deps one/lib:/deps two/lib"]
+
+    test "loader failures remain failures":
+      let probe = runLoaderFixture("", false, 37)
+      check probe.code == 37
 
   test "runtime closure includes libraries required by libgirepository":
     check registeredRuntimeDeps("gobjectIntrospectionSource") == @[
