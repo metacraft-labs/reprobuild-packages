@@ -61,6 +61,7 @@ const sourceTestFiles* = [
   "packages/source/iputils/test_iputils_source.nim",
   "packages/source/json-c/test_json_c_source.nim",
   "packages/source/json-glib/test_json_glib_source.nim",
+  "packages/source/just/test_just_source.nim",
   "packages/source/karchive/test_karchive_source.nim",
   "packages/source/kauth/test_kauth_source.nim",
   "packages/source/kbookmarks/test_kbookmarks_source.nim",
