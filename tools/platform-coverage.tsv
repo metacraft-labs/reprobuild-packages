@@ -1,0 +1,54 @@
+# Declared platform gaps for the dev-environment tool tier.
+#
+# Read by tools/dev_env_platform_coverage.nim. Every (package, platform) cell
+# that no realization covers must have a row here, and the state has to be
+# one of two things:
+#
+#   upstream-none  Upstream publishes no asset for that platform. A fact
+#                  about the world. It changes when upstream ships one.
+#   not-pinned     Upstream publishes one and this catalog has not pinned
+#                  it. Work, and the reason should say what the asset is so
+#                  the next person does not have to go looking.
+#
+# The reasons below were checked against upstream release listings at the
+# versions this catalog pins, not inferred from the recipe's own prose.
+#
+# The header line that follows is required verbatim, tabs included.
+# package	cpu	os	state	reason
+clippy	aarch64	windows	not-pinned	rust-1.92.0-aarch64-pc-windows-msvc.tar.xz exists on static.rust-lang.org and carries the clippy component; rustc, cargo and rustfmt reach this platform through their scoop slices and clippy has none, so the gap is one missing slice rather than a missing asset.
+shfmt	aarch64	windows	upstream-none	mvdan/sh v3.12.0 publishes shfmt_v3.12.0_windows_386.exe and _windows_amd64.exe and no arm64 Windows asset.
+jq	aarch64	windows	upstream-none	jqlang/jq jq-1.7.1 publishes jq-win64.exe and jq-windows-amd64.exe; its only other Windows asset is i386. Upstream added a windows-arm64 asset in 1.8.x, which is a version bump rather than a missing pin.
+mingw-gcc	aarch64	windows	upstream-none	WinLibs builds the MinGW-w64 toolchain for i686 and x86_64 Windows hosts only.
+mingw-gcc	x86_64	linux	upstream-none	This package IS the WinLibs Windows-hosted toolchain. A MinGW-w64 cross-compiler hosted on Linux exists, but it is a different upstream, a different layout and a different package; claiming this one covers it would make `mingw-gcc` mean two things.
+mingw-gcc	aarch64	linux	upstream-none	Same as linux-x86_64: WinLibs hosts on Windows only.
+mingw-gcc	x86_64	macos	upstream-none	Same as linux-x86_64: WinLibs hosts on Windows only.
+mingw-gcc	aarch64	macos	upstream-none	Same as linux-x86_64: WinLibs hosts on Windows only.
+go	aarch64	windows	not-pinned	go1.25.11.windows-arm64.zip exists on go.dev/dl alongside the windows-amd64 zip this catalog pins.
+postgresql	aarch64	windows	upstream-none	EnterpriseDB publishes the Windows binaries for x86-64 only; there is no arm64 Windows build of the installer payload this package realizes.
+ergo	aarch64	windows	upstream-none	ergochat/ergo v2.18.0 publishes ergo-2.18.0-windows-x86_64.zip and no arm64 Windows asset.
+windows-terminal	x86_64	linux	upstream-none	Windows Terminal is a Windows application; there is no Linux build and there will not be one.
+windows-terminal	aarch64	linux	upstream-none	Windows Terminal is a Windows application.
+windows-terminal	x86_64	macos	upstream-none	Windows Terminal is a Windows application.
+windows-terminal	aarch64	macos	upstream-none	Windows Terminal is a Windows application.
+piper	aarch64	windows	upstream-none	rhasspy/piper 2023.11.14-2 publishes piper_windows_amd64.zip and no arm64 Windows asset.
+piper	x86_64	linux	not-pinned	piper_linux_x86_64.tar.gz exists in the 2023.11.14-2 release. Only the Windows slice is pinned because Windows is where the voice suite would otherwise skip; the three Unix slices are a straightforward addition.
+piper	aarch64	linux	not-pinned	piper_linux_aarch64.tar.gz exists in the 2023.11.14-2 release.
+piper	x86_64	macos	not-pinned	piper_macos_x64.tar.gz exists in the 2023.11.14-2 release.
+piper	aarch64	macos	not-pinned	piper_macos_aarch64.tar.gz exists in the 2023.11.14-2 release.
+cargo-sort	aarch64	windows	upstream-none	DevinR528/cargo-sort v2.0.2 publishes three assets -- x86_64-pc-windows-msvc, x86_64-unknown-linux-gnu, aarch64-apple-darwin -- and no arm64 Windows one.
+wix	aarch64	windows	not-pinned	The electron-builder-binaries wix payload is architecture-neutral: the WiX 3.x tools are x86 PE binaries, and electron-builder's MsiTarget forces wixArch to x64 even when targeting arm64. So the same archive would serve, but the slice qualifies itself `cpu = "x86_64"` and nothing has run it on an arm64 Windows host, so the catalog does not offer what it has not seen work.
+wix	x86_64	linux	upstream-none	The WiX toolset is Windows-only; the MSI target it drives exists only there.
+wix	aarch64	linux	upstream-none	The WiX toolset is Windows-only.
+wix	x86_64	macos	upstream-none	The WiX toolset is Windows-only.
+wix	aarch64	macos	upstream-none	The WiX toolset is Windows-only.
+tmux	aarch64	windows	upstream-none	This is MSYS2's tmux, and MSYS2's `msys` repository builds x86_64 only.
+msys2-libevent	aarch64	windows	upstream-none	MSYS2's `msys` repository builds x86_64 only.
+msys2-libevent	x86_64	linux	upstream-none	This package is the MSYS2 runtime's own libevent, which exists to make MSYS2's tmux link on Windows. Linux and macOS have native libevent, which is a different package; the nix channel supplies it to the tmux those platforms use.
+msys2-libevent	aarch64	linux	upstream-none	Same as linux-x86_64: MSYS2 is a Windows runtime.
+msys2-libevent	x86_64	macos	upstream-none	Same as linux-x86_64: MSYS2 is a Windows runtime.
+msys2-libevent	aarch64	macos	upstream-none	Same as linux-x86_64: MSYS2 is a Windows runtime.
+msys2-ncurses	aarch64	windows	upstream-none	MSYS2's `msys` repository builds x86_64 only.
+msys2-ncurses	x86_64	linux	upstream-none	This package is the MSYS2 runtime's own ncurses, for the same reason as msys2-libevent. Native ncurses on Linux and macOS is a different package.
+msys2-ncurses	aarch64	linux	upstream-none	Same as linux-x86_64: MSYS2 is a Windows runtime.
+msys2-ncurses	x86_64	macos	upstream-none	Same as linux-x86_64: MSYS2 is a Windows runtime.
+msys2-ncurses	aarch64	macos	upstream-none	Same as linux-x86_64: MSYS2 is a Windows runtime.

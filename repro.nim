@@ -149,15 +149,33 @@ package reprobuildPackages:
       registerImplicitName = false,
       cacheable = false)
 
+    ## The platform coverage report's gate. It fails when a
+    ## (package, platform) cell is realized by nothing and explained by
+    ## nothing -- the state a new package or a new platform axis arrives in.
+    let coverageTest = buildNimUnittest.build(
+      source = "tests/test_platform_coverage.nim",
+      binary = "build" / "test-bin" / ("test-platform-coverage" & ExeExt),
+      actionId = "packages.build.platform-coverage",
+      defines = @["reproProviderMode"],
+      extraInputs = @["config.nims", "tools/platform-coverage.tsv",
+                      "tools/dev_env_platform_coverage.nim"])
+    appendRegisteredActionToolIdentityRefs(coverageTest.action.id, ["gcc"])
+    let coverageTestRun = coverageTest.testBinary.run(
+      actionId = "packages.test-platform-coverage",
+      after = @[coverageTest.action],
+      registerImplicitName = false,
+      cacheable = false)
+
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("check-source-tests", inventory)
     discard target("test-source-inventory", inventoryTests)
     discard target("test-source-graph", graphTestRun)
     discard target("test-tier-realizations", tierTestRun)
+    discard target("test-platform-coverage", coverageTestRun)
     discard collect("lint", actions = @[catalog, inventory])
     discard collect("test-source-recipes", actions = sourceTests)
     discard collect("test-source-integration", actions = integrationTests)
     discard collect("test", actions =
-      @[catalogTests, inventoryTests, graphTestRun, tierTestRun] &
-      sourceTests)
+      @[catalogTests, inventoryTests, graphTestRun, tierTestRun,
+        coverageTestRun] & sourceTests)
