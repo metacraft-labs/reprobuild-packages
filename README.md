@@ -27,6 +27,24 @@ Set `REPROBUILD_SRC` when the sibling `reprobuild` checkout is not available at
 Run `nim c -r tools/package_interface_fingerprints.nim` to print the canonical
 interface pins used by external provisioning catalogs.
 
+## Platform coverage
+
+`just coverage` prints, for every package a cross-platform dev environment
+provisions from this catalog and reprobuild's standard library, what the
+catalog can do on each of six platforms. It exists to separate the two very
+different reasons a cell can be empty:
+
+- `upstream-none` — upstream publishes no asset for that platform, so there
+  is nothing to realize until upstream ships one;
+- `not-pinned` — upstream publishes one and nobody has pinned it. Work, and
+  the reason says what the asset is.
+
+The tool never decides which a gap is. Every gap has to be declared in
+`tools/platform-coverage.tsv` with its state and a reason, and an undeclared
+gap is `UNCLASSIFIED`. `just coverage-check` fails on exactly that, and on a
+declaration for a cell the catalog has since covered. So the gate does not
+forbid gaps; it forbids unexamined ones.
+
 ## Contributor Checks
 
 Run `repro lint` to validate the source catalog layout, package identity
@@ -43,6 +61,8 @@ binary and execution edge; the root graph does not import the recipe modules.
 | `repro build test-catalog test-source-inventory test-source-graph` | Run the lightweight catalog and graph checks |
 | `repro build test-source-integration` | Run the real kernel configuration gate on x86-64 Linux |
 | `repro run refresh-source-tests` | Update the tracked test inventory after adding or removing tests |
+| `repro build test-tier-realizations` | Check that each pinned CLI tool's from-source recipe and its canonical release-archive interface publish the same command at the same version |
+| `repro build test-platform-coverage` | Check that every (package, platform) cell is either realized or declared |
 
 Source tests live beside their recipe as `packages/source/<selector>/test_*.nim`;
 shared source tests may live directly under `packages/source`. The generated
