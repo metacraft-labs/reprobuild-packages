@@ -15,6 +15,7 @@ const sourceTestFiles* = [
   "packages/source/bzip2/test_bzip2_source.nim",
   "packages/source/ca-certificates/test_ca_certificates_source.nim",
   "packages/source/cairo/test_cairo_source.nim",
+  "packages/source/cargo-sort/test_cargo_sort_source.nim",
   "packages/source/clingo/test_clingo_source.nim",
   "packages/source/cmake/test_cmake_source.nim",
   "packages/source/coreutils/test_coreutils_source.nim",
