@@ -61,6 +61,7 @@ const sourceTestFiles* = [
   "packages/source/icu/test_icu_source.nim",
   "packages/source/iproute2/test_iproute2_source.nim",
   "packages/source/iputils/test_iputils_source.nim",
+  "packages/source/jq/test_jq_source.nim",
   "packages/source/json-c/test_json_c_source.nim",
   "packages/source/json-glib/test_json_glib_source.nim",
   "packages/source/just/test_just_source.nim",
