@@ -132,13 +132,32 @@ package reprobuildPackages:
       registerImplicitName = false,
       cacheable = false)
 
+    ## The pinned CLI tool tier's two realizations, checked against each
+    ## other. It imports both the canonical interfaces from
+    ## `repro_dsl_stdlib` and the eight `packages/source/` recipes, which no
+    ## per-recipe test can do -- the claim is about a PAIR.
+    let tierTest = buildNimUnittest.build(
+      source = "tests/test_tier_realizations_agree.nim",
+      binary = "build" / "test-bin" / ("test-tier-realizations" & ExeExt),
+      actionId = "packages.build.tier-realizations",
+      defines = @["reproProviderMode"],
+      extraInputs = @["config.nims"])
+    appendRegisteredActionToolIdentityRefs(tierTest.action.id, ["gcc"])
+    let tierTestRun = tierTest.testBinary.run(
+      actionId = "packages.test-tier-realizations",
+      after = @[tierTest.action],
+      registerImplicitName = false,
+      cacheable = false)
+
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("check-source-tests", inventory)
     discard target("test-source-inventory", inventoryTests)
     discard target("test-source-graph", graphTestRun)
+    discard target("test-tier-realizations", tierTestRun)
     discard collect("lint", actions = @[catalog, inventory])
     discard collect("test-source-recipes", actions = sourceTests)
     discard collect("test-source-integration", actions = integrationTests)
     discard collect("test", actions =
-      @[catalogTests, inventoryTests, graphTestRun] & sourceTests)
+      @[catalogTests, inventoryTests, graphTestRun, tierTestRun] &
+      sourceTests)

@@ -35,6 +35,37 @@ const
   JqSourceSha256* =
     "478c9ca129fd2e3443fe27314b455e211e0d8c60bc8ff7df703873deeee580c2"
 
+  ## `src/builtin.inc` is jq's standard library compiled into a C string
+  ## literal, and it is NOT in the tarball -- jq's own Makefile generates it
+  ## from `src/builtin.jq`.
+  ##
+  ## This runs the same pipeline the Makefile has, one step earlier, and
+  ## leaves the result newer than its source so make's rule does not fire.
+  ## The reason is a `make` defect rather than a jq one: run from a shell
+  ## script the pipeline is correct, but MSYS2's GNU make 4.4.1 delivers the
+  ## doubled backslash in `s/$/\n"/` to sed as a single one. The
+  ## replacement then becomes a REAL newline instead of the two characters
+  ## `\` and `n`, and every line of the generated header is an unterminated
+  ## string literal:
+  ##
+  ##   ./src/builtin.inc:1:1: error: missing terminating " character
+  ##
+  ## Harmless where make behaves: the commands are the same bytes, so the
+  ## generated header is identical and make skips its own rule on every
+  ## platform.
+  ## `srcdir` is read out of the generated Makefile rather than assumed,
+  ## because the build is out-of-tree: `src/builtin.jq` is under the source
+  ## directory and `src/builtin.inc` belongs in the build one, which is
+  ## exactly the distinction jq's own rule makes with `$(srcdir)`.
+  JqBuiltinIncCommand* =
+    "jq_srcdir=$(sed -n 's/^srcdir = //p' Makefile | head -1) && " &
+    "test -n \"$jq_srcdir\" && " &
+    "mkdir -p src && " &
+    "sed -e 's/\\\\/\\\\\\\\/g' -e 's/\"/\\\\\"/g' " &
+    "-e 's/^/\"/' -e 's/$/\\\\n\"/' \"$jq_srcdir/src/builtin.jq\" " &
+    "> src/builtin.inc && " &
+    "touch src/builtin.inc"
+
 package jqSource:
   versions:
     "1.7.1":
@@ -66,6 +97,10 @@ package jqSource:
     "cmp"
     "diff"
     "awk"
+    # `src/builtin.inc` is generated before make runs; see
+    # `JqBuiltinIncCommand` for why, and for what these three do.
+    "head"
+    "touch"
     # Artifact staging and runtime-path normalization.
     "cp"
     "chmod"
@@ -82,7 +117,16 @@ package jqSource:
     try:
       let pkg = autotools_package(
         srcDir = "./src",
+        postConfigureCommands = @[JqBuiltinIncCommand],
         configureOptions = @[
+          # `-std=gnu17` rather than the compiler default. The bundled
+          # oniguruma 6.9.x declares its hash-table callbacks with empty
+          # parameter lists -- `int (*hash)()` -- which C23 reads as
+          # `(void)`, so every call through one becomes "too many arguments
+          # to function". GCC 16 defaults to `-std=gnu23`; this pins the
+          # dialect the source was written against instead of suppressing
+          # the diagnostics one at a time.
+          "CFLAGS=-O2 -std=gnu17",
           # The bundled copy under `modules/oniguruma`, not a system one:
           # a system oniguruma is a dependency this recipe has not pinned,
           # and `--without-oniguruma` would silently drop `test`, `match`,
