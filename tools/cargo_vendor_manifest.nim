@@ -21,9 +21,10 @@
 ## implementation, so a manifest this tool writes is by construction one the
 ## build can read.
 
-import std/[os, osproc, sequtils, streams, strutils]
+import std/[os, osproc, sequtils, streams, strutils, tables]
 
 import repro_core/cargo_lock
+import repro_core/cargo_deinherit
 
 proc usage(): string =
   "usage: cargo_vendor_manifest <Cargo.lock> [<output>] [--git-cache DIR]\n" &
@@ -111,17 +112,75 @@ proc findCrateSubdir(repoRoot, crateName: string): string =
       "crate the repo does not provide", 1)
   found
 
-proc resolveGitSubdirs(plan: var seq[VendorEntry]; cacheDir: string) =
+proc hasWorkspaceTable(cargoTomlPath: string): bool =
+  ## Whether a Cargo.toml declares `[workspace]` — the test for a workspace
+  ## root.
+  try:
+    for line in readFile(cargoTomlPath).splitLines():
+      if line.strip() == "[workspace]":
+        return true
+  except CatchableError:
+    discard
+  false
+
+proc findWorkspaceRoot(cloneRoot, crateSubdir: string): string =
+  ## The Cargo.toml of the workspace `crateSubdir` belongs to: the nearest
+  ## ancestor, at or above the crate, that declares `[workspace]`. Empty
+  ## when none exists (the crate inherits nothing, or is its own root).
+  ## Bounded by `cloneRoot` — the search never climbs out of the clone.
+  var dir =
+    if crateSubdir == ".": cloneRoot
+    else: cloneRoot / crateSubdir
+  let stop = cloneRoot.parentDir
+  while dir.len > 0 and dir != stop:
+    let ct = dir / "Cargo.toml"
+    if fileExists(ct) and hasWorkspaceTable(ct):
+      return ct
+    let up = dir.parentDir
+    if up == dir:
+      break
+    dir = up
+  ""
+
+proc resolveGitSubdirs(plan: var seq[VendorEntry]; cacheDir: string):
+    Table[string, string] =
   ## Fill each git entry's `gitSubdir` by cloning its repo and finding the
   ## crate. Clones are keyed by commit and shared, so a repo that provides
   ## several crates is cloned once.
+  ##
+  ## Returns the de-inherited-manifest overrides: for every git crate that
+  ## is a workspace MEMBER — its own Cargo.toml carries `workspace = true`
+  ## fields — the `<name>-<version>` directory mapped to a Cargo.toml with
+  ## those fields inlined from the workspace root. A crate that inherits
+  ## nothing is absent. cargo cannot resolve a `workspace = true` field once
+  ## the crate is vendored standalone, so this is what lets such a crate
+  ## build offline; see `repro_core/cargo_deinherit`.
   createDir(cacheDir)
+  result = initTable[string, string]()
   for entry in plan.mitems:
     if not entry.isGit:
       continue
     let clone = cacheDir / ("git-" & entry.gitCommit)
     cloneGitAt(entry.gitUrl, entry.gitCommit, clone)
     entry.gitSubdir = findCrateSubdir(clone, entry.name)
+    let crateToml =
+      if entry.gitSubdir == ".": clone / "Cargo.toml"
+      else: clone / entry.gitSubdir / "Cargo.toml"
+    let text =
+      try: readFile(crateToml)
+      except CatchableError: ""
+    if text.len == 0 or not usesWorkspaceInheritance(text):
+      continue
+    let wsRoot = findWorkspaceRoot(clone, entry.gitSubdir)
+    if wsRoot.len == 0:
+      quit("cargo_vendor_manifest: crate '" & entry.name & "' inherits from " &
+        "a workspace but no [workspace] root was found above " & crateToml, 1)
+    let ws = parseWorkspaceInheritance(readFile(wsRoot))
+    try:
+      result[entry.directoryName] = deinheritCargoToml(text, ws)
+    except CargoDeinheritError as err:
+      quit("cargo_vendor_manifest: de-inheriting '" & entry.name & "': " &
+        err.msg, 1)
 
 when isMainModule:
   let raw = commandLineParams()
@@ -156,14 +215,16 @@ when isMainModule:
       quit("cargo_vendor_manifest: cannot read " & lockPath & ": " &
         err.msg, 2)
 
+  var overrides = initTable[string, string]()
   let manifest =
     try:
       var plan = vendorPlan(parseCargoLock(text))
       if plan.anyIt(it.isGit):
-        # A git-bearing lockfile: clone each git repo at its commit and
-        # record the crate's subdirectory. Skipped entirely for a
-        # crates.io-only lockfile, which needs neither git nor network.
-        resolveGitSubdirs(plan, gitCache)
+        # A git-bearing lockfile: clone each git repo at its commit, record
+        # each crate's subdirectory, and de-inherit any that are workspace
+        # members. Skipped entirely for a crates.io-only lockfile, which
+        # needs neither git nor network.
+        overrides = resolveGitSubdirs(plan, gitCache)
       renderVendorManifest(plan)
     except CargoLockError as err:
       # The reader's refusals are the useful output here: each one names a
@@ -177,8 +238,30 @@ when isMainModule:
     let outputPath = positional[1]
     createDir(outputPath.parentDir)
     writeFile(outputPath, manifest)
+    # De-inherited manifests go in a committed sibling directory the vendor
+    # action reads. Rewritten from scratch so a crate that stopped inheriting
+    # (a pin moving to a version that inlined its own fields) leaves no stale
+    # override behind.
+    let overridesRoot = outputPath.parentDir / CargoVendorOverridesDirName
+    removeDir(overridesRoot)
+    for dirName, content in overrides:
+      let dest = overridesRoot / dirName
+      createDir(dest)
+      writeFile(dest / "Cargo.toml", content)
     let crates = manifest.strip().splitLines().len - 1
     stderr.writeLine("cargo_vendor_manifest: wrote " & $crates &
-      " crates to " & outputPath)
+      " crates to " & outputPath &
+      (if overrides.len > 0: " (" & $overrides.len &
+        " de-inherited git crate manifest(s) in " &
+        CargoVendorOverridesDirName & "/)" else: ""))
   else:
+    # The stdout form is for piping a diff of the manifest. It has no
+    # directory to put the de-inherited overrides beside, so refuse it when
+    # there are any rather than write a manifest whose git crates the build
+    # cannot resolve.
+    if overrides.len > 0:
+      quit("cargo_vendor_manifest: this closure has " & $overrides.len &
+        " workspace-member git crate(s) that need de-inherited manifests, " &
+        "which are written into a directory beside the output. Give an " &
+        "output path so they have somewhere to go.", 2)
     stdout.write(manifest)
