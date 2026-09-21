@@ -148,15 +148,32 @@ proc resolveGitSubdirs(plan: var seq[VendorEntry]; cacheDir: string):
   ## crate. Clones are keyed by commit and shared, so a repo that provides
   ## several crates is cloned once.
   ##
-  ## Returns the de-inherited-manifest overrides: for every git crate that
-  ## is a workspace MEMBER — its own Cargo.toml carries `workspace = true`
-  ## fields — the `<name>-<version>` directory mapped to a Cargo.toml with
-  ## those fields inlined from the workspace root. A crate that inherits
-  ## nothing is absent. cargo cannot resolve a `workspace = true` field once
-  ## the crate is vendored standalone, so this is what lets such a crate
-  ## build offline; see `repro_core/cargo_deinherit`.
+  ## Returns the corrected-manifest overrides: the `<name>-<version>` vendor
+  ## directory mapped to a rewritten Cargo.toml, for every git crate that
+  ## needs one. Two corrections, either of which triggers an override:
+  ##
+  ##   * **de-inheriting** — the crate's own Cargo.toml carries
+  ##     `workspace = true` fields, inlined from the workspace root so cargo
+  ##     can resolve the standalone-vendored crate (see `cargo_deinherit`);
+  ##   * **path repointing** — the crate depends on a SIBLING vendored crate
+  ##     by `path`, which was written relative to the workspace root and now
+  ##     points nowhere; it is repointed at the sibling's `<name>-<version>`
+  ##     vendor directory (`rewriteWorkspacePathDeps`).
+  ##
+  ## A crate needing neither is absent. Because path deps cross between crates,
+  ## the repoint needs every git crate's `<name>-<version>` in hand first, so
+  ## this runs in two passes: clone-and-read, then correct.
   createDir(cacheDir)
   result = initTable[string, string]()
+
+  # Pass 1: clone each repo, resolve each git entry's subdirectory, and read
+  # its upstream Cargo.toml. Siblings — crates vendored from the same repo
+  # checkout, keyed by commit — are collected so a path dep to one can be
+  # repointed at its vendor directory.
+  var rawToml = initTable[string, string]()       # directoryName -> upstream toml
+  var cloneOf = initTable[string, string]()       # directoryName -> clone dir
+  var subdirOf = initTable[string, string]()      # directoryName -> gitSubdir
+  var siblingsByCommit = initTable[string, Table[string, string]]()
   for entry in plan.mitems:
     if not entry.isGit:
       continue
@@ -166,21 +183,42 @@ proc resolveGitSubdirs(plan: var seq[VendorEntry]; cacheDir: string):
     let crateToml =
       if entry.gitSubdir == ".": clone / "Cargo.toml"
       else: clone / entry.gitSubdir / "Cargo.toml"
-    let text =
+    rawToml[entry.directoryName] =
       try: readFile(crateToml)
       except CatchableError: ""
-    if text.len == 0 or not usesWorkspaceInheritance(text):
+    cloneOf[entry.directoryName] = clone
+    subdirOf[entry.directoryName] = entry.gitSubdir
+    if not siblingsByCommit.hasKey(entry.gitCommit):
+      siblingsByCommit[entry.gitCommit] = initTable[string, string]()
+    siblingsByCommit[entry.gitCommit][entry.name] = entry.directoryName
+
+  # Pass 2: de-inherit then repoint each crate. An override is emitted whenever
+  # the corrected manifest differs from what upstream shipped.
+  for entry in plan:
+    if not entry.isGit:
       continue
-    let wsRoot = findWorkspaceRoot(clone, entry.gitSubdir)
-    if wsRoot.len == 0:
-      quit("cargo_vendor_manifest: crate '" & entry.name & "' inherits from " &
-        "a workspace but no [workspace] root was found above " & crateToml, 1)
-    let ws = parseWorkspaceInheritance(readFile(wsRoot))
-    try:
-      result[entry.directoryName] = deinheritCargoToml(text, ws)
-    except CargoDeinheritError as err:
-      quit("cargo_vendor_manifest: de-inheriting '" & entry.name & "': " &
-        err.msg, 1)
+    let text = rawToml[entry.directoryName]
+    if text.len == 0:
+      continue
+    var corrected = text
+    if usesWorkspaceInheritance(text):
+      let wsRoot = findWorkspaceRoot(
+        cloneOf[entry.directoryName], subdirOf[entry.directoryName])
+      if wsRoot.len == 0:
+        quit("cargo_vendor_manifest: crate '" & entry.name & "' inherits " &
+          "from a workspace but no [workspace] root was found above it", 1)
+      let ws = parseWorkspaceInheritance(readFile(wsRoot))
+      try:
+        corrected = deinheritCargoToml(corrected, ws)
+      except CargoDeinheritError as err:
+        quit("cargo_vendor_manifest: de-inheriting '" & entry.name & "': " &
+          err.msg, 1)
+    # Repoint sibling path deps, excluding the crate itself from its siblings.
+    var siblings = siblingsByCommit[entry.gitCommit]
+    siblings.del(entry.name)
+    corrected = rewriteWorkspacePathDeps(corrected, siblings)
+    if corrected != text:
+      result[entry.directoryName] = corrected
 
 when isMainModule:
   let raw = commandLineParams()
