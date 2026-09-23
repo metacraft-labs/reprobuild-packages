@@ -16,20 +16,46 @@
 ##
 ## ## The dependency closure
 ##
-## `npm-build-closure.manifest` beside this file pins all 1356 archives of the
+## `npm-build-closure.manifest` beside this file pins every archive of the
 ## whole `npm ci` install — dev tools (esbuild, tsc) and every workspace's
-## dependencies — by URL and SHA-256, generated from upstream's own
-## `package-lock.json` by
+## dependencies — by URL and SHA-256, generated from the corrected lock
+## described below (NOT upstream's, which is not installable offline) by
 ## `reprobuild-llm-agent-packages/tools/npm_closure_manifest.nim
 ## --build-closure`. It is committed rather than derived at build time because
-## the closure has to be readable at graph-emission time, and the lockfile it
-## comes from arrives inside the fetched source the fetch action has not run
+## the closure has to be readable at graph-emission time, and upstream's
+## lockfile arrives inside the fetched source the fetch action has not run
 ## yet — the same reason `cargo-vendor.manifest` is committed.
 ##
-## Refreshing it on a version bump is one command:
+## ## Why a corrected lock is committed too
+##
+## Upstream's `package-lock.json` at v0.59.0 is not installable as written,
+## so `npm-build-closure.package-lock.json` beside this file replaces it
+## before the offline rewrite (see `NpmBuildClosureLockName` in
+## `repro_project_dsl/npm_vendor`). Two defects, both of which online
+## `npm ci` papers over by re-resolving edges from the registry:
+##
+## * Six workspace edges are stale: the workspaces pin `tar@7.5.8`,
+##   `vitest@3.2.4` (twice), `clipboardy@5.2.0` and `typescript@5.8.3`, but
+##   the lock nests `7.5.11`, `3.1.1`, `5.2.1` and `5.9.3` under them.
+## * One hoisted `ansi-styles` (and its `color-convert`) is shared between
+##   the conflicting `overrides` scopes `cliui -> wrap-ansi 7.0.0` and
+##   `wrap-ansi -> 9.0.2`; npm revalidates such a node by fetching its
+##   packument. `wrap-ansi-cjs` gets its own nested copy instead.
+##
+## The corrected lock is exactly the tree upstream's own online `npm ci`
+## installs (tar 7.5.8 and clipboardy 5.2.0 hoisted, the stale subtrees
+## gone), and it passes `npm ci --dry-run --offline` against an EMPTY npm
+## cache — i.e. it needs no registry metadata at all. Reproduce it from the
+## pristine lock with the pinned npm: drop the stale nested entries,
+## `npm install --package-lock-only`, then nest `ansi-styles` and
+## `color-convert` under `node_modules/wrap-ansi-cjs`, re-checking with the
+## empty-cache offline dry-run after each step.
+##
+## Refreshing the closure on a version bump is then one command, run
+## against the CORRECTED lock:
 ##
 ##     nim r ../../reprobuild-llm-agent-packages/tools/npm_closure_manifest.nim \
-##       --lock=<extracted>/package-lock.json \
+##       --lock=packages/source/gemini-cli/npm-build-closure.package-lock.json \
 ##       --out=packages/source/gemini-cli/npm-build-closure.manifest \
 ##       --build-closure
 
