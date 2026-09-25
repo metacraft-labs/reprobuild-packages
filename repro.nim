@@ -1,5 +1,6 @@
 import std/[os, strutils]
 import repro_project_dsl
+import repro_dsl_stdlib/foreign_env
 import repro_dsl_stdlib/packages/python3
 import ct_test_nim_unittest
 import source_tests
@@ -44,6 +45,9 @@ package reprobuildPackages:
     "realpath"
 
   devEnv:
+    # Reuse the workspace toolchain until native provisioning replaces the flake.
+    when not defined(windows):
+      useFlakeDevShell("..")
     task("refresh-source-tests",
       "python3 scripts/source_test_catalog.py --write",
       description = "Refresh the source recipe test inventory")
