@@ -7,3 +7,6 @@ packages/source/grub/build-grub-*/
 /tools/package_interface_fingerprints
 /tools/package_interface_fingerprints.exe
 __pycache__/
+# Per-checkout nimcache (config.nims): every Nim compile in this checkout
+# keeps its intermediate files here, never in the shared ~/.cache/nim.
+.nimcache/
