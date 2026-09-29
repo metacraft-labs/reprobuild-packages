@@ -69,6 +69,14 @@ const
     GeminiVersion & ".tar.gz"
   GeminiSourceSha256 =
     "6e698510dcae4341f94efe93704447b2fe456062c138f64f95da1c30996d0f33"
+  GeminiSourceCommit = "fb0d535"
+    ## The commit tag `v0.59.0` points at, abbreviated as
+    ## `git rev-parse --short HEAD` prints it. Upstream's build embeds that
+    ## hash; a tag tarball carries no `.git`, so without this the script
+    ## either finds no repository (and, in the same `try`, skips reading the
+    ## version: `gemini --version` says `UNKNOWN`) or walks up into whatever
+    ## repository holds the checkout and embeds ITS commit. Bump with the
+    ## version: `gh api repos/google-gemini/gemini-cli/commits/v<version>`.
 
 package geminiCliSource:
   versions:
@@ -103,8 +111,17 @@ package geminiCliSource:
     try:
       # Upstream's `bundle` script produces `bundle/gemini.js`; the installed
       # `gemini` launcher runs that under node.
+      #
+      # `ignoreScripts`: the dependencies' install scripts only compile
+      # `@github/keytar` with node-gyp — against the host's MSVC, a Python
+      # found by probing well-known install locations and headers cached in
+      # the user profile — and the bundle merely TRIES to load keytar at run
+      # time. Measured on 0.59.0: the bundle is byte-identical (419 of 419
+      # files) with and without the scripts.
       let pkg = node_package(bundleScript = "bundle",
-                             entry = "bundle/gemini.js")
+                             entry = "bundle/gemini.js",
+                             extraEnv = @[("GIT_COMMIT", GeminiSourceCommit)],
+                             ignoreScripts = true)
       discard pkg.executable("gemini")
     finally:
       clearCurrentOwningPackageOverride()
