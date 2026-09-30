@@ -140,7 +140,9 @@ suite "the committed report":
     # The weakest useful claim about the machine this runs on: every tool
     # the dev environment declares has a realization here. If this fails,
     # the dev environment cannot activate, whatever the rest of the table
-    # says.
+    # says. A tool a dev environment declares only on other operating
+    # systems (`coverage.DeclaredOnlyOn`) is not asked for here, so its
+    # declared gap does not stop activation.
     const hostCpu = when defined(amd64): "x86_64"
                     elif defined(arm64): "aarch64"
                     else: ""
@@ -157,7 +159,25 @@ suite "the committed report":
           index = i
       check index >= 0
       for row in rows:
+        if not coverage.declaredOn(row.package, hostOs):
+          continue
         checkpoint(row.package & " on " & hostOs & "-" & hostCpu & ": " &
           row.states[index].label)
         check row.states[index] in
           [coverage.covDirect, coverage.covNix, coverage.covScoop]
+
+  test "an OS-limited declaration names real packages and real systems":
+    # A typo in `DeclaredOnlyOn` would silently exempt a tool that IS
+    # declared everywhere from the host check above.
+    var systems: seq[string] = @[]
+    for (_, os) in coverage.Platforms:
+      if os notin systems:
+        systems.add(os)
+    for (name, oses) in coverage.DeclaredOnlyOn:
+      checkpoint(name)
+      check name in coverage.DeclaredTools
+      check oses.len > 0
+      for os in oses:
+        check os in systems
+      # Limiting a tool to every system is not a limit.
+      check oses.len < systems.len

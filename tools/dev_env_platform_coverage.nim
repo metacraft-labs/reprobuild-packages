@@ -22,10 +22,14 @@
 ##
 ## ## What set of packages
 ##
-## The 29 imported below are the tools Agent Harbor's `repro.nim` declares
-## in its `uses:` block and resolves from `repro_dsl_stdlib` — the first dev
-## environment this catalog was driven to completion against, and the one
-## whose milestones ask for this report. The set is spelled out as imports
+## Two dev environments' tools. The first 29 are the tools Agent Harbor's
+## `repro.nim` declares in its `uses:` block — the first dev environment this
+## catalog was driven to completion against, and the one whose milestones ask
+## for this report. Most resolve from `repro_dsl_stdlib`; `prek` and `shfmt`
+## have moved to `packages/interfaces/`. The rest are the lint and formatting
+## tools RunQuota's flake dev shell carries and its `repro.nim` now declares
+## too (`shellcheck`, `typos`, `nixfmt`, `repomix`), all defined in
+## `packages/interfaces/`. The set is spelled out as imports
 ## rather than read from a list, because Nim resolves imports at compile
 ## time and a name that stopped existing should fail to build rather than
 ## silently drop a row.
@@ -62,8 +66,8 @@ import repro_dsl_stdlib/packages/python3
 import repro_dsl_stdlib/packages/just
 import repro_dsl_stdlib/packages/node
 import repro_dsl_stdlib/packages/uv
-import repro_dsl_stdlib/packages/prek
-import repro_dsl_stdlib/packages/shfmt
+import ../packages/interfaces/prek/repro as prekInterface
+import ../packages/interfaces/shfmt/repro as shfmtInterface
 import repro_dsl_stdlib/packages/addlicense
 import repro_dsl_stdlib/packages/jq
 import repro_dsl_stdlib/packages/clang
@@ -83,8 +87,15 @@ import repro_dsl_stdlib/packages/tmux
 import repro_dsl_stdlib/packages/msys2_libevent
 import repro_dsl_stdlib/packages/msys2_ncurses
 
+# RunQuota's lint and formatting tools.
+import ../packages/interfaces/shellcheck/repro as shellcheckInterface
+import ../packages/interfaces/typos/repro as typosInterface
+import ../packages/interfaces/nixfmt/repro as nixfmtInterface
+import ../packages/interfaces/repomix/repro as repomixInterface
+
 const
-  ## The tools Agent Harbor's `repro.nim` names and this catalog owns. Kept
+  ## The tools Agent Harbor's and RunQuota's `repro.nim` name and this
+  ## catalog owns. Kept
   ## as data beside the imports so a package that is imported but not
   ## declared, or declared but not imported, shows up as a diff rather than
   ## as a quietly shorter table.
@@ -97,6 +108,19 @@ const
     "neovim", "windows-terminal", "piper",
     "taplo", "cargo-sort", "wix",
     "tmux", "msys2-libevent", "msys2-ncurses",
+    "shellcheck", "typos", "nixfmt", "repomix",
+  ]
+
+  ## Tools a dev environment declares on SOME operating systems only, and
+  ## which. RunQuota's `repro.nim` puts `nixfmt` and `repomix` under
+  ## `when not defined(windows)`, because neither has a Windows realization
+  ## (the `platform-coverage.tsv` rows say why). Their Windows cells are still
+  ## in the table -- the gap is real and is declared -- but no dev environment
+  ## asks for them there, so they do not stop one activating. Every tool not
+  ## listed here is declared on every platform.
+  DeclaredOnlyOn* = [
+    ("nixfmt", @["linux", "macos"]),
+    ("repomix", @["linux", "macos"]),
   ]
 
   ## The platforms a Reprobuild realization can name. `cpu` and `os` are the
@@ -125,6 +149,14 @@ type
   CoverageNote* = object
     package*, cpu*, os*, reason*: string
     state*: Coverage
+
+proc declaredOn*(package, os: string): bool =
+  ## Whether some dev environment asks for `package` on `os`. See
+  ## `DeclaredOnlyOn`.
+  for (name, systems) in DeclaredOnlyOn:
+    if name == package:
+      return os in systems
+  true
 
 proc label*(state: Coverage): string =
   case state

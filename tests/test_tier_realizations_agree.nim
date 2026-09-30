@@ -1,7 +1,9 @@
 ## The pinned CLI tool tier: one interface, two realizations that agree.
 ##
-## Agent Harbor pins eight small CLIs. Each has a canonical interface in
-## `repro_dsl_stdlib` that realizes it from an upstream release archive, and
+## Agent Harbor pins eight small CLIs. Each has a canonical interface --
+## in `repro_dsl_stdlib`, or under `packages/interfaces/` for the ones that
+## have moved here (`shfmt`, `prek`) -- that realizes it from an upstream
+## release archive, and
 ## a recipe under `packages/source/` that realizes the same interface by
 ## building it. The promise those two make together is that selecting either
 ## one leaves the consuming `repro.nim` unchanged — so what has to hold is
@@ -28,9 +30,9 @@ import repro_project_dsl
 # The canonical interfaces — the release-archive realizations.
 import repro_dsl_stdlib/packages/just
 import repro_dsl_stdlib/packages/jq
-import repro_dsl_stdlib/packages/shfmt
+import ../packages/interfaces/shfmt/repro as shfmtInterface
 import repro_dsl_stdlib/packages/taplo
-import repro_dsl_stdlib/packages/prek
+import ../packages/interfaces/prek/repro as prekInterface
 import repro_dsl_stdlib/packages/cargo_sort
 import repro_dsl_stdlib/packages/cargo_nextest
 import repro_dsl_stdlib/packages/addlicense
