@@ -8,6 +8,7 @@ import source_tests
 package reprobuildPackages:
   nativeBuildDeps:
     "python3 >=3.10"
+    "git"
     "nim >=2.2 <3.0"
     "gcc"
     "sh"
@@ -51,6 +52,10 @@ package reprobuildPackages:
     task("refresh-source-tests",
       "python3 scripts/source_test_catalog.py --write",
       description = "Refresh the source recipe test inventory")
+    task("audit-consumers",
+      "python3 scripts/audit_catalog_consumers.py",
+      description = "List the workspace repositories whose recipes use this " &
+        "catalog and check each declares how its CI reaches it")
 
   build:
     let catalog = buildAction(
@@ -65,6 +70,14 @@ package reprobuildPackages:
       call = inlineExecCall(["python3", "scripts/test_check_catalog.py"]),
       inputs = ["scripts/check_catalog.py", "scripts/test_check_catalog.py"],
       toolIdentityRefs = ["python3"],
+      dependencyPolicy = automaticMonitorPolicy(),
+      cacheable = false)
+    let consumerAuditTests = buildAction(
+      id = "packages.test-consumer-audit",
+      call = inlineExecCall(["python3", "scripts/test_audit_catalog_consumers.py"]),
+      inputs = ["scripts/audit_catalog_consumers.py",
+                "scripts/test_audit_catalog_consumers.py"],
+      toolIdentityRefs = ["python3", "git"],
       dependencyPolicy = automaticMonitorPolicy(),
       cacheable = false)
     let inventory = buildAction(
@@ -172,6 +185,7 @@ package reprobuildPackages:
 
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
+    discard target("test-consumer-audit", consumerAuditTests)
     discard target("check-source-tests", inventory)
     discard target("test-source-inventory", inventoryTests)
     discard target("test-source-graph", graphTestRun)

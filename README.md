@@ -27,6 +27,25 @@ Set `REPROBUILD_SRC` when the sibling `reprobuild` checkout is not available at
 Run `nim c -r tools/package_interface_fingerprints.nim` to print the canonical
 interface pins used by external provisioning catalogs.
 
+## Consumers and how they reach the catalog
+
+A `uses:` name reprobuild's stdlib does not bundle is looked up here, as
+`packages/interfaces/<name>/repro.nim`, in `$REPROBUILD_PACKAGES_ROOT`, in a
+`reprobuild-packages` checkout beside the consuming project or any directory
+above it, or beside the reprobuild checkout. A package that moved here from
+the stdlib (today `sqlite3`) is a compile error when none of those defines it,
+and the error lists every place it looked.
+
+So a repository that uses one of these packages must say how its CI provides
+the catalog: a `reprobuild-packages` entry in its `.github/sibling-repos`
+(cloned beside the checkout by `setup-dev-env`), or `REPROBUILD_PACKAGES_ROOT`
+exported from the Nix dev shell that compiles the recipe, from a flake input.
+`just audit-consumers` (or `repro run audit-consumers`) scans the workspace
+beside this checkout, lists every consumer with the lines that use the
+catalog, and fails when one declares neither. Run it whenever a package moves
+here. The decision is recorded in reprobuild-specs
+`Provisioning-Contributions.md`, "Catalog Lookup And Provisioning".
+
 ## Platform coverage
 
 `just coverage` prints, for every package a cross-platform dev environment
@@ -63,6 +82,7 @@ binary and execution edge; the root graph does not import the recipe modules.
 | `repro run refresh-source-tests` | Update the tracked test inventory after adding or removing tests |
 | `repro build test-tier-realizations` | Check that each pinned CLI tool's from-source recipe and its canonical release-archive interface publish the same command at the same version |
 | `repro build test-platform-coverage` | Check that every (package, platform) cell is either realized or declared |
+| `repro build test-consumer-audit` | Run the consumer audit's regression tests |
 
 Source tests live beside their recipe as `packages/source/<selector>/test_*.nim`;
 shared source tests may live directly under `packages/source`. The generated

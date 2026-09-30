@@ -1,6 +1,11 @@
 check:
   pwsh -NoProfile -File scripts/check-catalog.ps1
 
+# Which workspace repositories use this catalog, and whether each declares how
+# its CI reaches it. Run after moving a package here from reprobuild's stdlib.
+audit-consumers *args:
+  python3 scripts/audit_catalog_consumers.py {{args}}
+
 fingerprints:
   nim c -r --nimcache:build/nimcache-interface-fingerprints tools/package_interface_fingerprints.nim
 
