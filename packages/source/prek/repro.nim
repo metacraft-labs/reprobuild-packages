@@ -23,8 +23,8 @@
 ##
 ## ## What the version pins
 ##
-## 0.3.2, the same version `repro_dsl_stdlib/packages/prek.nim` fetches as
-## a release binary — an alternative realization of one package, not a
+## 0.3.2, the same version `packages/interfaces/prek` fetches as a release
+## binary — an alternative realization of one package, not a
 ## second package.
 
 import repro_project_dsl

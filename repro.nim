@@ -137,8 +137,9 @@ package reprobuildPackages:
       cacheable = false)
 
     ## The pinned CLI tool tier's two realizations, checked against each
-    ## other. It imports both the canonical interfaces from
-    ## `repro_dsl_stdlib` and the eight `packages/source/` recipes, which no
+    ## other. It imports both the canonical interfaces (from
+    ## `repro_dsl_stdlib` and `packages/interfaces/`) and the eight
+    ## `packages/source/` recipes, which no
     ## per-recipe test can do -- the claim is about a PAIR.
     let tierTest = buildNimUnittest.build(
       source = "tests/test_tier_realizations_agree.nim",
@@ -170,6 +171,21 @@ package reprobuildPackages:
       registerImplicitName = false,
       cacheable = false)
 
+    ## The lint tools' release-archive slices, held to one identity shape:
+    ## URL, `packageId`, platform and `lockIdentity` all agree.
+    let lintInterfacesTest = buildNimUnittest.build(
+      source = "tests/test_lint_tool_interfaces.nim",
+      binary = "build" / "test-bin" / ("test-lint-tool-interfaces" & ExeExt),
+      actionId = "packages.build.lint-tool-interfaces",
+      defines = @["reproProviderMode"],
+      extraInputs = @["config.nims"])
+    appendRegisteredActionToolIdentityRefs(lintInterfacesTest.action.id, ["gcc"])
+    let lintInterfacesTestRun = lintInterfacesTest.testBinary.run(
+      actionId = "packages.test-lint-tool-interfaces",
+      after = @[lintInterfacesTest.action],
+      registerImplicitName = false,
+      cacheable = false)
+
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("check-source-tests", inventory)
@@ -177,9 +193,10 @@ package reprobuildPackages:
     discard target("test-source-graph", graphTestRun)
     discard target("test-tier-realizations", tierTestRun)
     discard target("test-platform-coverage", coverageTestRun)
+    discard target("test-lint-tool-interfaces", lintInterfacesTestRun)
     discard collect("lint", actions = @[catalog, inventory])
     discard collect("test-source-recipes", actions = sourceTests)
     discard collect("test-source-integration", actions = integrationTests)
     discard collect("test", actions =
       @[catalogTests, inventoryTests, graphTestRun, tierTestRun,
-        coverageTestRun] & sourceTests)
+        coverageTestRun, lintInterfacesTestRun] & sourceTests)

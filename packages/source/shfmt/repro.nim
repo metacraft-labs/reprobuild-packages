@@ -10,8 +10,8 @@
 ##
 ## ## What the version pins
 ##
-## 3.12.0, the same version `repro_dsl_stdlib/packages/shfmt.nim` fetches as
-## a release binary. Deliberately the same: this is an alternative
+## 3.12.0, the same version `packages/interfaces/shfmt` fetches as a release
+## binary. Deliberately the same: this is an alternative
 ## REALIZATION of one package, not a second package.
 ##
 ## ## The module path is not the repository name

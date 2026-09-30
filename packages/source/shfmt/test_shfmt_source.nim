@@ -51,6 +51,5 @@ suite "shfmt source recipe":
   test "realizes the same version the binary package fetches":
     # An alternative REALIZATION of one package, not a second package: a
     # consumer selecting either path must get the same `shfmt --version`.
-    # The binary side pins 3.12.0 in
-    # `repro_dsl_stdlib/packages/shfmt.nim`.
+    # The binary side pins 3.12.0 in `packages/interfaces/shfmt`.
     check registeredFetchSpec("shfmtSource").url.contains("v3.12.0")
