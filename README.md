@@ -46,6 +46,17 @@ catalog, and fails when one declares neither. Run it whenever a package moves
 here. The decision is recorded in reprobuild-specs
 `Provisioning-Contributions.md`, "Catalog Lookup And Provisioning".
 
+It also fails for a recipe that imports a moved package's stdlib module by
+path (`import repro_dsl_stdlib/packages/<name>`) instead of naming it in
+`uses:`: such an import stops compiling once the engine drops the module, so
+it has to go in the same promotion window as the engine change. A direct
+import of a module the stdlib still has but this catalog also defines is
+listed as the hazard it becomes on the next move. The moved list is read from
+the reprobuild checkout given by `--reprobuild` (default: the workspace's), so
+point it at the engine that will compile the recipes. Repositories outside the
+workspace are added with `--also <checkout>` (repeatable), for example
+`just audit-consumers --also ../../agent-harbor`.
+
 ## Platform coverage
 
 `just coverage` prints, for every package a cross-platform dev environment

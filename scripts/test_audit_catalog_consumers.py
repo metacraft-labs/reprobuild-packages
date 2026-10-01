@@ -12,7 +12,7 @@ import tempfile
 import textwrap
 import unittest
 
-from audit_catalog_consumers import dependency_literals
+from audit_catalog_consumers import dependency_literals, stdlib_package_imports
 
 SCRIPT = Path(__file__).resolve().with_name("audit_catalog_consumers.py")
 
@@ -43,13 +43,38 @@ class DependencyLiteralTests(unittest.TestCase):
         self.assertEqual(dependency_literals(source), [(4, "sqlite3")])
 
 
+class StdlibPackageImportTests(unittest.TestCase):
+    def test_every_import_spelling_is_found(self):
+        source = textwrap.dedent('''\
+            import repro_dsl_stdlib/packages/prek
+            import std/os, repro_dsl_stdlib/packages/shfmt as shfmt_module
+            from repro_dsl_stdlib/packages/sqlite3 import nil
+            import "repro_dsl_stdlib/packages/pkg_config"
+            import repro_dsl_stdlib/packages/[gcc, nim except package]
+            import repro_dsl_stdlib/packages/[
+              make,
+              ninja]
+            ''')
+        self.assertEqual([(line, name) for line, name, _ in stdlib_package_imports(source)], [
+            (1, "prek"), (2, "shfmt"), (3, "sqlite3"), (4, "pkg_config"),
+            (5, "gcc"), (5, "nim"), (6, "make"), (6, "ninja")])
+
+    def test_comments_and_non_imports_are_not_imports(self):
+        source = textwrap.dedent('''\
+            # import repro_dsl_stdlib/packages/prek
+            import std/os  # was: repro_dsl_stdlib/packages/shfmt
+            const path = "repro_dsl_stdlib/packages/prek.nim"
+            ''')
+        self.assertEqual(stdlib_package_imports(source), [])
+
+
 class AuditTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="catalog audit ")
         self.addCleanup(self.temp.cleanup)
         self.workspace = Path(self.temp.name)
         catalog = self.workspace / "reprobuild-packages"
-        for name in ["sqlite3", "patchelf"]:
+        for name in ["sqlite3", "patchelf", "prek", "shfmt"]:
             interface = catalog / "packages" / "interfaces" / name
             interface.mkdir(parents=True)
             (interface / "repro.nim").write_text(f"package {name}:\n  discard\n")
@@ -62,14 +87,16 @@ class AuditTests(unittest.TestCase):
                 selector in [
                   "gcc",
                   # "patchelf" is not bundled
-                  "nim"
+                  "nim",
+                  "shfmt"
                 ]
             '''))
         (dsl / "reprobuild_packages_catalog.nim").write_text(
-            'const MovedToReprobuildPackages*: seq[string] = @["sqlite3"]\n')
+            'const MovedToReprobuildPackages*: seq[string] =\n'
+            '  @["sqlite3", "prek"]\n')
 
-    def repo(self, name, files):
-        repo = self.workspace / name
+    def repo(self, name, files, parent=None):
+        repo = (parent or self.workspace) / name
         repo.mkdir()
         git(repo, "init", "-q")
         for relative, text in files.items():
@@ -79,11 +106,13 @@ class AuditTests(unittest.TestCase):
         git(repo, "add", ".")
         return repo
 
-    def audit(self, *repos):
+    def audit(self, *repos, also=()):
         args = [sys.executable, str(SCRIPT), "--catalog", str(self.catalog),
                 "--workspace", str(self.workspace)]
         for repo in repos:
             args += ["--repo", str(repo)]
+        for repo in also:
+            args += ["--also", str(repo)]
         return subprocess.run(args, capture_output=True, text=True)
 
     recipe = 'package c:\n  uses:\n    "sqlite3 >=3"\n    "gcc >=12"\n'
@@ -131,8 +160,69 @@ class AuditTests(unittest.TestCase):
                                    **self.workflow})
         result = self.audit(repo)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("catalog-only names: patchelf, sqlite3", result.stdout)
+        self.assertIn("catalog-only names: patchelf, prek, sqlite3", result.stdout)
         self.assertIn("0 consume the catalog", result.stdout)
+
+    importing_recipe = textwrap.dedent('''\
+        import repro_dsl_stdlib/packages/[prek, shfmt]
+
+        package c:
+          uses:
+            "prek"
+            "shfmt"
+        ''')
+    sibling = {".github/sibling-repos": "reprobuild-packages=dev\n"}
+
+    def test_a_direct_import_of_a_moved_module_fails_and_is_named(self):
+        repo = self.repo("consumer", {"repro.nim": self.importing_recipe,
+                                      **self.workflow, **self.sibling})
+        result = self.audit(repo)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("imports repro_dsl_stdlib/packages/prek "
+                      "[MOVED: no longer in the stdlib]  repro.nim:1", result.stdout)
+        self.assertIn("imports repro_dsl_stdlib/packages/shfmt "
+                      "[still in the stdlib; breaks when it moves]  repro.nim:1",
+                      result.stdout)
+        self.assertIn("1 direct import(s) of a stdlib module that moved", result.stderr)
+        self.assertIn("consumer: repro.nim:1: repro_dsl_stdlib/packages/prek",
+                      result.stderr)
+        self.assertIn("rely on the package's `uses:` line", result.stderr)
+
+    def test_a_direct_import_still_in_the_stdlib_is_a_hazard_not_a_failure(self):
+        repo = self.repo("consumer", {
+            "repro.nim": "import repro_dsl_stdlib/packages/shfmt\n", **self.workflow})
+        result = self.audit(repo)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("imports repro_dsl_stdlib/packages/shfmt "
+                      "[still in the stdlib; breaks when it moves]  repro.nim:1",
+                      result.stdout)
+
+    def test_imports_of_modules_the_catalog_does_not_define_are_ignored(self):
+        repo = self.repo("consumer", {
+            "repro.nim": "import repro_dsl_stdlib/packages/gcc\n", **self.workflow})
+        result = self.audit(repo)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("0 consume the catalog", result.stdout)
+
+    def test_a_checkout_outside_the_workspace_is_audited_with_also(self):
+        outside = tempfile.TemporaryDirectory(prefix="outside workspace ")
+        self.addCleanup(outside.cleanup)
+        repo = self.repo("agent-harbor", {"repro.nim": self.importing_recipe,
+                                          **self.workflow, **self.sibling},
+                         parent=Path(outside.name))
+        self.repo("bystander", {"repro.nim": "package b:\n  discard\n"})
+        without = self.audit()
+        self.assertEqual(without.returncode, 0, without.stdout + without.stderr)
+        self.assertNotIn("agent-harbor", without.stdout + without.stderr)
+        result = self.audit(also=[repo])
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("agent-harbor: repro.nim:1: repro_dsl_stdlib/packages/prek",
+                      result.stderr)
+
+    def test_also_refuses_a_path_that_is_not_a_checkout(self):
+        result = self.audit(also=[self.workspace / "no-such-checkout"])
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("not a git checkout", result.stderr)
 
 
 if __name__ == "__main__":

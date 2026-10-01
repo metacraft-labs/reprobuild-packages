@@ -1,8 +1,10 @@
 check:
   pwsh -NoProfile -File scripts/check-catalog.ps1
 
-# Which workspace repositories use this catalog, and whether each declares how
-# its CI reaches it. Run after moving a package here from reprobuild's stdlib.
+# Which workspace repositories use this catalog, whether each declares how its
+# CI reaches it, and which import a moved package's stdlib module directly.
+# Run after moving a package here from reprobuild's stdlib; `--also <checkout>`
+# adds a repository outside the workspace.
 audit-consumers *args:
   python3 scripts/audit_catalog_consumers.py {{args}}
 
