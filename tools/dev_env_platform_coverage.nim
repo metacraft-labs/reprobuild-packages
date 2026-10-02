@@ -112,14 +112,33 @@ const
   ]
 
   ## Tools a dev environment declares on SOME operating systems only, and
-  ## which. RunQuota's `repro.nim` puts `nixfmt` under
-  ## `when not defined(windows)`, because it has no Windows realization (the
-  ## `platform-coverage.tsv` rows say why). Its Windows cells are still in the
-  ## table -- the gap is real and is declared -- but no dev environment asks
-  ## for it there, so it does not stop one activating. Every tool not listed
-  ## here is declared on every platform.
+  ## which. RunQuota's `repro.nim` still puts `nixfmt` under
+  ## `when not defined(windows)`: its Windows realization is a source recipe
+  ## (see `SourceRealized`), which reprobuild's tarball provisioning cannot
+  ## select until it falls through to source recipes. A tool listed here
+  ## keeps its cells in the table, but its gaps on the other systems do not
+  ## stop a dev environment activating. Every tool not listed here is
+  ## declared on every platform.
   DeclaredOnlyOn* = [
     ("nixfmt", @["linux", "macos"]),
+  ]
+
+  ## Cells realized by a from-source recipe in `packages/source/<name>/`,
+  ## for a package with no binary realization there. Listed rather than
+  ## derived: a recipe does not say which hosts it builds on, so a cell
+  ## appears here only once the recipe has been built and run on that
+  ## platform. The report checks that the recipe exists.
+  ##
+  ## nixfmt on Windows x86_64: the recipe's build (`packages/source/nixfmt`:
+  ## its Hackage closure as the only package repository, its patch, GHC
+  ## 9.12.1 and cabal 3.16.1.0) was run by hand with the commands
+  ## `cabal_package` emits, and the executable checked against RunQuota's
+  ## flake.nix (2026-10-03). `repro build` of the recipe has not been run on
+  ## Windows: engines built from agents fail there before any recipe builds
+  ## (reprobuild-specs
+  ## issues/2026-10-03-windows-dev-env-provider-compile-dies-in-asyncdispatch-not-a-socket.md).
+  SourceRealized* = [
+    ("nixfmt", "x86_64", "windows"),
   ]
 
   ## The platforms a Reprobuild realization can name. `cpu` and `os` are the
@@ -141,6 +160,7 @@ type
     covDirect          ## A tarball slice names this exact cpu/os.
     covNix             ## Reached through the pinned nixpkgs channel.
     covScoop           ## Reached through a Scoop app (Windows).
+    covSource          ## Built from this catalog's source recipe.
     covUpstreamNone    ## Upstream ships nothing here. Declared.
     covNotPinned       ## Upstream ships something; nothing pins it. Declared.
     covUnclassified    ## Nobody has looked. The state the gate fails on.
@@ -148,6 +168,12 @@ type
   CoverageNote* = object
     package*, cpu*, os*, reason*: string
     state*: Coverage
+
+const RealizedStates* = {covDirect, covNix, covScoop, covSource}
+
+proc sourceRecipePath*(package: string): string =
+  currentSourcePath.parentDir.parentDir / "packages" / "source" / package /
+    "repro.nim"
 
 proc declaredOn*(package, os: string): bool =
   ## Whether some dev environment asks for `package` on `os`. See
@@ -162,6 +188,7 @@ proc label*(state: Coverage): string =
   of covDirect: "direct"
   of covNix: "nix"
   of covScoop: "scoop"
+  of covSource: "source"
   of covUpstreamNone: "upstream-none"
   of covNotPinned: "not-pinned"
   of covUnclassified: "UNCLASSIFIED"
@@ -250,6 +277,9 @@ proc realizationOf*(pkg: PackageDef; cpu, os: string): Coverage =
     return covScoop
   if os in ["linux", "macos"] and pkg.nixProvisioning.len > 0:
     return covNix
+  for (name, sourceCpu, sourceOs) in SourceRealized:
+    if name == pkg.packageName and sourceCpu == cpu and sourceOs == os:
+      return covSource
   covUnclassified
 
 proc coverageOf*(pkg: PackageDef; cpu, os: string;
@@ -348,7 +378,7 @@ proc checkProblems*(rows: seq[Row]; notes: seq[CoverageNote]): seq[string] =
   var covered = initHashSet[string]()
   for row in rows:
     for i, state in row.states:
-      if state in [covDirect, covNix, covScoop]:
+      if state in RealizedStates:
         let (cpu, os) = Platforms[i]
         covered.incl(row.package & "\t" & cpu & "\t" & os)
   for note in notes:
@@ -358,6 +388,11 @@ proc checkProblems*(rows: seq[Row]; notes: seq[CoverageNote]): seq[string] =
         platformHeading(note.cpu, note.os) &
         " is covered by this catalog now, so the " & CoverageNotesFile &
         " row claiming `" & note.state.label & "` is wrong")
+  for (name, cpu, os) in SourceRealized:
+    if not fileExists(sourceRecipePath(name)):
+      result.add("missing recipe: " & name & " " & platformHeading(cpu, os) &
+        " is listed as realized from source, but " & sourceRecipePath(name) &
+        " does not exist")
   var known = initHashSet[string]()
   for name in DeclaredTools:
     known.incl(name)
@@ -405,8 +440,8 @@ when isMainModule:
     let counts = summarize(rows)
     stdout.write(&"\n{rows.len} packages x {Platforms.len} platforms: ")
     var parts: seq[string] = @[]
-    for state in [covDirect, covScoop, covNix, covNotPinned, covUpstreamNone,
-                  covUnclassified]:
+    for state in [covDirect, covScoop, covNix, covSource, covNotPinned,
+                  covUpstreamNone, covUnclassified]:
       let n = counts.getOrDefault(state, 0)
       if n > 0:
         parts.add($n & " " & state.label)

@@ -1,0 +1,4 @@
+# Byte-exact on every checkout: `git apply` needs the patch to match the
+# fetched (LF) sources, and the vendor step reads the manifest with `read`.
+patches/*.patch -text
+hackage-vendor.manifest -text
