@@ -64,6 +64,20 @@ gap is `UNCLASSIFIED`. `just coverage-check` fails on exactly that, and on a
 declaration for a cell the catalog has since covered. So the gate does not
 forbid gaps; it forbids unexamined ones.
 
+## Pinned dependency closures
+
+A realization that needs more than one archive commits the extra archives as
+a generated manifest, each by URL and SHA-256, so nothing resolves a version
+range or reaches the network unpinned at build time. The generators:
+
+| Tool | Writes | From |
+| --- | --- | --- |
+| `tools/cargo_vendor_manifest.nim` | `cargo-vendor.manifest` (from-source Rust) | a `Cargo.lock` |
+| `tools/npm_closure_manifest.nim` | an npm tarball realization's `closureManifest` (repomix) | a `package-lock.json`; every archive is checked against the lock's sha512 `integrity` |
+
+Each tool's header has its usage; each consuming recipe's header has the
+exact command that refreshes its manifest.
+
 ## Contributor Checks
 
 Run `repro lint` to validate the source catalog layout, package identity
