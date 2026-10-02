@@ -11,7 +11,7 @@
 ## shape. They say nothing about whether a digest is RIGHT -- each module's
 ## header records how its digests were checked against the downloaded bytes.
 
-import std/[sequtils, sets, strutils, unittest]
+import std/[os, sequtils, sets, strutils, unittest]
 
 import repro_project_dsl
 import repro_dsl_stdlib/nixpkgs_pin
@@ -29,7 +29,6 @@ const Interfaces = [
   ("typos", "1.45.0", "https://github.com/crate-ci/typos/releases/download/v1.45.0/"),
   ("prek", "0.3.2", "https://github.com/j178/prek/releases/download/v0.3.2/"),
   ("nixfmt", "1.2.0", "https://github.com/NixOS/nixfmt/releases/download/v1.2.0/"),
-  ("repomix", "", ""),
 ]
 
 proc interfaceNamed(name: string): PackageDef =
@@ -86,3 +85,53 @@ suite "lint tool interfaces":
           (name == "shellcheck" and slice.archiveType == "tar.xz") or
           (name == "prek" and slice.archiveType == "tar.gz")
         check slice.stripComponents == (if wrapped: 1 else: 0)
+
+suite "repomix's npm realization":
+  # Not a release archive: the npm registry tarball, run by `node`, with its
+  # runtime dependency closure from `closures/repomix.manifest`. So it is
+  # held to its own shape rather than the release-archive one above.
+  let pkg = interfaceNamed("repomix")
+  let manifestPath = currentSourcePath.parentDir.parentDir / "packages" /
+    "interfaces" / "repomix" / "closures" / "repomix.manifest"
+
+  test "one platform-neutral slice, launched by node":
+    check pkg.tarballProvisioning.len == 1
+    let slice = pkg.tarballProvisioning[0]
+    # JavaScript and WebAssembly: the same bytes on every host.
+    check slice.cpu == ""
+    check slice.os == ""
+    check slice.url == "https://registry.npmjs.org/repomix/-/repomix-1.18.1.tgz"
+    check slice.packageId == "repomix@1.18.1"
+    check slice.lockIdentity == "tarball:repomix@1.18.1:sha256:" & slice.sha256
+    check slice.stripComponents == 1
+    check slice.executablePath == "bin/repomix.cjs"
+    check slice.executableAlias == "repomix"
+    check slice.launcher == "node"
+    check slice.closureManifest == "closures/repomix.manifest"
+    check pkg.nixProvisioning.len == 1
+    check pkg.nixProvisioning[0].selector == "nixpkgs#repomix"
+
+  test "every closure entry is a pinned registry archive under node_modules":
+    var paths = initHashSet[string]()
+    var count = 0
+    for line in readFile(manifestPath).splitLines():
+      if line.len == 0 or line.startsWith("#"):
+        continue
+      let fields = line.splitWhitespace()
+      checkpoint(line)
+      check fields.len == 3
+      check fields[0].startsWith("node_modules/")
+      check ".." notin fields[0]
+      check fields[0] notin paths
+      paths.incl(fields[0])
+      check fields[1].len == 64
+      check fields[1].allIt(it in {'0' .. '9', 'a' .. 'f'})
+      check fields[2].startsWith("https://registry.npmjs.org/")
+      inc count
+    # The 170 archives `npm install --omit=dev` installs for 1.18.1 from
+    # upstream's lock. A count that moved without the version moving means
+    # the pin and its closure have come apart.
+    check count == 170
+    # Two of them nest a second version under their dependent, where npm
+    # puts a version that conflicts with the hoisted one.
+    check "node_modules/body-parser/node_modules/content-type" in paths

@@ -112,15 +112,14 @@ const
   ]
 
   ## Tools a dev environment declares on SOME operating systems only, and
-  ## which. RunQuota's `repro.nim` puts `nixfmt` and `repomix` under
-  ## `when not defined(windows)`, because neither has a Windows realization
-  ## (the `platform-coverage.tsv` rows say why). Their Windows cells are still
-  ## in the table -- the gap is real and is declared -- but no dev environment
-  ## asks for them there, so they do not stop one activating. Every tool not
-  ## listed here is declared on every platform.
+  ## which. RunQuota's `repro.nim` puts `nixfmt` under
+  ## `when not defined(windows)`, because it has no Windows realization (the
+  ## `platform-coverage.tsv` rows say why). Its Windows cells are still in the
+  ## table -- the gap is real and is declared -- but no dev environment asks
+  ## for it there, so it does not stop one activating. Every tool not listed
+  ## here is declared on every platform.
   DeclaredOnlyOn* = [
     ("nixfmt", @["linux", "macos"]),
-    ("repomix", @["linux", "macos"]),
   ]
 
   ## The platforms a Reprobuild realization can name. `cpu` and `os` are the
