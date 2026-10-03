@@ -156,7 +156,7 @@ package reprobuildPackages:
     ## per-recipe test can do -- the claim is about a PAIR.
     let tierTest = buildNimUnittest.build(
       source = "tests/test_tier_realizations_agree.nim",
-      binary = "build" / "test-bin" / ("test-tier-realizations" & ExeExt),
+      binary = "build" / "test-bin" / ("build-test-tier-realizations" & ExeExt),
       actionId = "packages.build.tier-realizations",
       defines = @["reproProviderMode"],
       extraInputs = @["config.nims"])
@@ -172,7 +172,7 @@ package reprobuildPackages:
     ## nothing -- the state a new package or a new platform axis arrives in.
     let coverageTest = buildNimUnittest.build(
       source = "tests/test_platform_coverage.nim",
-      binary = "build" / "test-bin" / ("test-platform-coverage" & ExeExt),
+      binary = "build" / "test-bin" / ("build-test-platform-coverage" & ExeExt),
       actionId = "packages.build.platform-coverage",
       defines = @["reproProviderMode"],
       extraInputs = @["config.nims", "tools/platform-coverage.tsv",
@@ -188,7 +188,7 @@ package reprobuildPackages:
     ## URL, `packageId`, platform and `lockIdentity` all agree.
     let lintInterfacesTest = buildNimUnittest.build(
       source = "tests/test_lint_tool_interfaces.nim",
-      binary = "build" / "test-bin" / ("test-lint-tool-interfaces" & ExeExt),
+      binary = "build" / "test-bin" / ("build-test-lint-tool-interfaces" & ExeExt),
       actionId = "packages.build.lint-tool-interfaces",
       defines = @["reproProviderMode"],
       extraInputs = @["config.nims"])
