@@ -10,7 +10,7 @@
 ## gate itself. Everything above it is there so a failure in that one case
 ## points at the cause rather than just at the total.
 
-import std/[sequtils, strutils, unittest]
+import std/[os, sequtils, strutils, unittest]
 
 import ../tools/dev_env_platform_coverage as coverage
 
@@ -163,8 +163,14 @@ suite "the committed report":
           continue
         checkpoint(row.package & " on " & hostOs & "-" & hostCpu & ": " &
           row.states[index].label)
-        check row.states[index] in
-          [coverage.covDirect, coverage.covNix, coverage.covScoop]
+        check row.states[index] in coverage.RealizedStates
+
+  test "every source-realized cell names a real package, platform and recipe":
+    for (name, cpu, os) in coverage.SourceRealized:
+      checkpoint(name & " " & os & "-" & cpu)
+      check name in coverage.DeclaredTools
+      check (cpu, os) in coverage.Platforms
+      check fileExists(coverage.sourceRecipePath(name))
 
   test "an OS-limited declaration names real packages and real systems":
     # A typo in `DeclaredOnlyOn` would silently exempt a tool that IS
