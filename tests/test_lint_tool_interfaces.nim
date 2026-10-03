@@ -1,4 +1,5 @@
-## The lint and formatting tools' interfaces: every hand-written identity in
+## The lint and formatting tools' interfaces (RunQuota's, and reprobuild's
+## `actionlint`): every hand-written identity in
 ## a release-archive slice has to agree with the others.
 ##
 ## A slice spells its version, platform and digest several times over -- in
@@ -22,6 +23,7 @@ import ../packages/interfaces/typos/repro as typosInterface
 import ../packages/interfaces/prek/repro as prekInterface
 import ../packages/interfaces/nixfmt/repro as nixfmtInterface
 import ../packages/interfaces/repomix/repro as repomixInterface
+import ../packages/interfaces/actionlint/repro as actionlintInterface
 
 const Interfaces = [
   ("shellcheck", "0.11.0", "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/"),
@@ -29,6 +31,7 @@ const Interfaces = [
   ("typos", "1.45.0", "https://github.com/crate-ci/typos/releases/download/v1.45.0/"),
   ("prek", "0.3.2", "https://github.com/j178/prek/releases/download/v0.3.2/"),
   ("nixfmt", "1.2.0", "https://github.com/NixOS/nixfmt/releases/download/v1.2.0/"),
+  ("actionlint", "1.7.9", "https://github.com/rhysd/actionlint/releases/download/v1.7.9/"),
 ]
 
 proc interfaceNamed(name: string): PackageDef =
