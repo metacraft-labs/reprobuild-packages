@@ -10,30 +10,25 @@
 ## * Linux and macOS, both architectures: the pinned nixpkgs' `nixfmt`, built
 ##   by Hydra. The x86_64 Linux release binary above is preferred over it
 ##   where a host runs tarball provisioning.
+## * Windows x86_64: built from source by `packages/source/nixfmt`, from
+##   upstream's 1.2.0 tag with a small patch that makes the executable
+##   portable (it depends on the POSIX-only `unix` package), against a pinned
+##   Hackage closure. Nothing publishes a Windows binary -- not upstream, not
+##   nixpkgs (which does not target Windows), not Scoop, MSYS2 or conda-forge
+##   (checked 2026-09-30) -- so this interface declares no Windows slice.
+##   A dev environment in tarball mode reaches the recipe once reprobuild
+##   falls through to a source recipe for a package with no tarball for the
+##   host (reprobuild-specs spec/Dependency-Provisioning-In-Build-Graph.md,
+##   section 4.3, approved and not yet on `agents`); until then it is reached
+##   with `--tool-provisioning=from-source` or a `repro build` of the recipe.
+##   The recipe records the patch, the closure and how to refresh both.
+## * Windows arm64: nothing. GHC publishes no Windows arm64 build, so the
+##   recipe cannot run there either (`tools/platform-coverage.tsv`).
 ##
 ## The SHA-256 below was computed over the downloaded file and matches the
 ## digest GitHub's release API reports for the asset (2026-09-30). The pinned
 ## nixpkgs carries 1.1.0, a release upstream attached no binary to; 1.2.0 is
 ## also the version RunQuota's flake dev shell carries.
-##
-## ## Windows: no realization, and why
-##
-## Nothing publishes a Windows nixfmt: not upstream, not nixpkgs (which does
-## not target Windows), not Scoop, MSYS2 or conda-forge (checked 2026-09-30).
-##
-## Building it from source for Windows is not just a missing recipe. The
-## `nixfmt` library is portable Haskell, but the `nixfmt` EXECUTABLE depends on
-## the `unix` package (`build-depends: unix` in `nixfmt.cabal`): `main/Main.hs`
-## imports `System.Posix.Process` and `System.Posix.Signals` for its Ctrl-C
-## handler, and `main/System/IO/Atomic.hs` imports `System.Posix.Files` to
-## carry a file's mode and owner across its atomic rewrite. `unix` declares
-## itself unbuildable on Windows (`if os(windows) buildable: False` in
-## `unix.cabal`), so cabal cannot produce the executable there as upstream
-## wrote it. A Windows build therefore needs two things this catalog does not
-## have: a patch to upstream's executable that replaces those three POSIX uses,
-## and a way to pin a Hackage dependency closure for an offline cabal build
-## (the cargo, npm and Go shapes each have one; Haskell has none yet). The gap
-## is recorded in `tools/platform-coverage.tsv`.
 
 import repro_project_dsl
 import repro_dsl_stdlib/nixpkgs_pin

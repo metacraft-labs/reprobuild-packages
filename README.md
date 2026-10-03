@@ -69,6 +69,12 @@ different reasons a cell can be empty:
 - `not-pinned` — upstream publishes one and nobody has pinned it. Work, and
   the reason says what the asset is.
 
+A cell can also read `source`: no binary exists for that platform, and the
+package is built from its recipe under `packages/source/` instead (nixfmt on
+Windows). Those cells are listed in `SourceRealized` in
+`tools/dev_env_platform_coverage.nim` only once the recipe has been built and
+run there, because a recipe does not say which hosts it builds on.
+
 The tool never decides which a gap is. Every gap has to be declared in
 `tools/platform-coverage.tsv` with its state and a reason, and an undeclared
 gap is `UNCLASSIFIED`. `just coverage-check` fails on exactly that, and on a
@@ -85,6 +91,7 @@ range or reaches the network unpinned at build time. The generators:
 | --- | --- | --- |
 | `tools/cargo_vendor_manifest.nim` | `cargo-vendor.manifest` (from-source Rust) | a `Cargo.lock` |
 | `tools/npm_closure_manifest.nim` | an npm tarball realization's `closureManifest` (repomix) | a `package-lock.json`; every archive is checked against the lock's sha512 `integrity` |
+| `tools/hackage_closure_manifest.nim` | `hackage-vendor.manifest` (from-source Haskell, nixfmt) | the `plan.json` of a cabal plan solved at a pinned Hackage index state; every tarball and revised `.cabal` is checked against the plan's digests |
 
 Each tool's header has its usage; each consuming recipe's header has the
 exact command that refreshes its manifest.

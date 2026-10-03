@@ -1,0 +1,210 @@
+Build the nixfmt executable on Windows.
+
+Upstream: NixOS/nixfmt v1.2.0 (https://github.com/NixOS/nixfmt/tree/v1.2.0).
+Not yet submitted upstream; written to be (see packages/source/nixfmt/repro.nim
+in reprobuild-packages for the assessment). Every change is either guarded by
+`mingw32_HOST_OS` / `os(windows)` or is a no-op on POSIX.
+
+* nixfmt.cabal: depend on `unix` only off Windows (`unix` declares itself
+  unbuildable there), and list the new System.Interrupt module. Relax
+  `filepath < 1.5` to `< 1.6` -- upstream dropped the bound in 1.3.0 -- so
+  GHC 9.12's own filepath satisfies it rather than cabal rebuilding filepath
+  and every boot package above it.
+* main/System/Interrupt.hs (new): the SIGINT handler Main installed
+  (System.Posix.Signals / exitImmediately), off Windows only; on Windows GHC's
+  runtime turns Ctrl-C into an exception, which System.IO.Atomic's rollback
+  already handles. A module of its own so that only it needs CPP: CPP in
+  Main.hs would break the string gaps in its help texts.
+* main/System/IO/Atomic.hs: on Windows, carry the original file's
+  permissions over with System.Directory instead of POSIX mode and owner.
+* main/System/IO/Utf8.hs, main/Main.hs: open files and standard handles with
+  `noNewlineTranslation`, so Windows writes LF exactly as POSIX does instead of
+  turning every LF into CRLF. A no-op on POSIX, where it is already the mode.
+
+diff --git a/main/Main.hs b/main/Main.hs
+index ae0dd30..764ba4d 100644
+--- a/main/Main.hs
++++ b/main/Main.hs
+@@ -34,13 +34,12 @@ import System.Console.CmdArgs (
+   (&=),
+  )
+ import System.Directory (doesDirectoryExist, listDirectory, renameFile)
+-import System.Exit (ExitCode (..), exitFailure, exitSuccess)
++import System.Exit (exitFailure, exitSuccess)
+ import System.FilePath ((</>))
+-import System.IO (hPutStrLn, hSetEncoding, stderr)
++import System.IO (hPutStrLn, hSetEncoding, hSetNewlineMode, noNewlineTranslation, stderr)
+ import System.IO.Atomic (withOutputFile)
+ import System.IO.Utf8 (readFileUtf8, withUtf8StdHandles)
+-import System.Posix.Process (exitImmediately)
+-import System.Posix.Signals (Handler (..), installHandler, keyboardSignal)
++import System.Interrupt (exitOnInterrupt)
+ import System.Process (callProcess)
+ 
+ type Result = Either String ()
+@@ -161,6 +160,7 @@ fileTarget path = Target (readFileUtf8 path) path atomicWriteFile
+   where
+     atomicWriteFile True t = withOutputFile path $ \h -> do
+       hSetEncoding h utf8
++      hSetNewlineMode h noNewlineTranslation
+       TextIO.hPutStr h t
+     -- Don't do anything if the file is already formatted
+     atomicWriteFile False _ = mempty
+@@ -247,11 +247,7 @@ runJobs writeError = mapM (>>= writeErrorBundle writeError)
+ 
+ main :: IO ()
+ main = withUtf8StdHandles $ do
+-  _ <-
+-    installHandler
+-      keyboardSignal
+-      (Catch (exitImmediately $ ExitFailure 2))
+-      Nothing
++  exitOnInterrupt
+   opts <- cmdArgs options
+   results <- runJobs (toWriteError opts) =<< toJobs opts
+   case lefts results of
+diff --git a/main/System/IO/Atomic.hs b/main/System/IO/Atomic.hs
+index 00294a7..8c88aa6 100644
+--- a/main/System/IO/Atomic.hs
++++ b/main/System/IO/Atomic.hs
+@@ -1,3 +1,5 @@
++{-# LANGUAGE CPP #-}
++
+ -- | Atomic file IO.
+ --
+ -- This modules allows one to replace the contents of a file atomically by
+@@ -12,10 +14,16 @@ where
+ 
+ import Control.Exception.Safe (mask, onException)
+ import Control.Monad (when)
++#if defined(mingw32_HOST_OS)
++import System.Directory (doesFileExist, getPermissions, removeFile, renameFile, setPermissions)
++#else
+ import System.Directory (doesFileExist, removeFile, renameFile)
++#endif
+ import System.FilePath (takeDirectory, takeFileName)
+ import System.IO (Handle, hClose, openTempFileWithDefaultPermissions)
++#if !defined(mingw32_HOST_OS)
+ import System.Posix.Files (fileGroup, fileMode, fileOwner, getFileStatus, setFileMode, setOwnerAndGroup)
++#endif
+ 
+ -- | Like @withFile@ but replaces the contents atomically.
+ --
+@@ -47,6 +55,14 @@ withOutputFile path act = transact begin commit rollback $ \(tpath, th) -> do
+     -- TODO: Preserve ctime?
+     -- TODO: Preserve extended attributes (ACLs, ...)?
+     copyAttributes :: (FilePath, Handle) -> IO ()
++#if defined(mingw32_HOST_OS)
++    -- Windows has no POSIX mode or owner; carry over what `directory`
++    -- models portably (the read-only and executable bits).
++    copyAttributes (tpath, _th) = do
++      exists <- doesFileExist path
++      when exists $
++        getPermissions path >>= setPermissions tpath
++#else
+     copyAttributes (tpath, _th) = do
+       exists <- doesFileExist path
+       when exists $ do
+@@ -58,6 +74,7 @@ withOutputFile path act = transact begin commit rollback $ \(tpath, th) -> do
+         -- - The current user has the CAP_CHOWN permission
+         -- See also https://stackoverflow.com/a/49079630 for more context
+         setOwnerAndGroup tpath (fileOwner status) (fileGroup status)
++#endif
+ 
+     commit :: (FilePath, Handle) -> IO ()
+     commit (tpath, th) = hClose th *> renameFile tpath path
+diff --git a/main/System/IO/Utf8.hs b/main/System/IO/Utf8.hs
+index 0ce3e4c..9b79743 100644
+--- a/main/System/IO/Utf8.hs
++++ b/main/System/IO/Utf8.hs
+@@ -46,6 +46,9 @@ hSetBestUtf8Enc h =
+       isTerm <- IO.hIsTerminalDevice h
+       enc' <- chooseBestEnc isTerm enc
+       IO.hSetEncoding h enc'
++      -- Leave line endings alone on every platform (Windows would otherwise
++      -- write each LF as CRLF), so output is byte-identical everywhere.
++      IO.hSetNewlineMode h IO.noNewlineTranslation
+       pure $ flip IO.hSetEncoding enc
+   where
+     chooseBestEnc False _ = pure utf8
+@@ -71,6 +74,7 @@ openFileUtf8 :: IO.FilePath -> IO.IOMode -> IO IO.Handle
+ openFileUtf8 path mode = do
+   h <- IO.openFile path mode
+   IO.hSetEncoding h utf8
++  IO.hSetNewlineMode h IO.noNewlineTranslation
+   pure h
+ 
+ -- | Like @readFile@, but assumes the file is encoded in UTF-8, regardless
+diff --git a/main/System/Interrupt.hs b/main/System/Interrupt.hs
+new file mode 100644
+index 0000000..1ede24c
+--- /dev/null
++++ b/main/System/Interrupt.hs
+@@ -0,0 +1,33 @@
++{-# LANGUAGE CPP #-}
++
++-- | Ctrl-C handling, kept out of "Main" so that only this module needs the
++-- C preprocessor (CPP would mangle the string gaps in Main's help texts).
++module System.Interrupt (
++  exitOnInterrupt,
++)
++where
++
++#if defined(mingw32_HOST_OS)
++
++-- | On Windows GHC's runtime turns Ctrl-C into an asynchronous exception,
++-- which "System.IO.Atomic" already handles by rolling the write back.
++exitOnInterrupt :: IO ()
++exitOnInterrupt = pure ()
++
++#else
++
++import System.Exit (ExitCode (..))
++import System.Posix.Process (exitImmediately)
++import System.Posix.Signals (Handler (..), installHandler, keyboardSignal)
++
++-- | Exit immediately with status 2 on SIGINT.
++exitOnInterrupt :: IO ()
++exitOnInterrupt = do
++  _ <-
++    installHandler
++      keyboardSignal
++      (Catch (exitImmediately $ ExitFailure 2))
++      Nothing
++  pure ()
++
++#endif
+diff --git a/nixfmt.cabal b/nixfmt.cabal
+index 287bfaa..16d8045 100644
+--- a/nixfmt.cabal
++++ b/nixfmt.cabal
+@@ -25,6 +25,7 @@ executable nixfmt
+     Paths_nixfmt
+     System.IO.Utf8
+     System.IO.Atomic
++    System.Interrupt
+   autogen-modules:
+     Paths_nixfmt
+   other-extensions:    DeriveDataTypeable
+@@ -35,15 +36,19 @@ executable nixfmt
+     , cmdargs          >= 0.10.20 && < 0.11
+     , file-embed
+     , nixfmt
+-    , unix             >= 2.7.2 && < 2.9
+     , text             >= 1.2.3 && < 2.2
+     , transformers
+     , process
+ 
+     -- for System.IO.Atomic
+     , directory        >= 1.3.3 && < 1.4
+-    , filepath         >= 1.4.2 && < 1.5
++    , filepath         >= 1.4.2 && < 1.6
+     , safe-exceptions  >= 0.1.7 && < 0.2
++  -- POSIX-only: the Ctrl-C handler in Main and the mode/owner copy in
++  -- System.IO.Atomic. `unix` is not buildable on Windows.
++  if !os(windows)
++    build-depends:
++        unix           >= 2.7.2 && < 2.9
+   default-language:    Haskell2010
+   ghc-options:
+     -Wall
