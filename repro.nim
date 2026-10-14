@@ -199,6 +199,24 @@ package reprobuildPackages:
       registerImplicitName = false,
       cacheable = false)
 
+    ## The macOS application definitions: every one pins a vendor artifact
+    ## and the identity of the bundle it delivers, and resolves the way a
+    ## home profile resolves it. Installing them for real downloads every
+    ## artifact, so that is `just verify-macos-apps`, not a test.
+    let macosAppsTest = buildNimUnittest.build(
+      source = "tests/test_macos_app_contributions.nim",
+      binary = "build" / "test-bin" /
+        ("build-test-macos-app-contributions" & ExeExt),
+      actionId = "packages.build.macos-app-contributions",
+      defines = @["reproProviderMode"],
+      extraInputs = @["config.nims"])
+    appendRegisteredActionToolIdentityRefs(macosAppsTest.action.id, ["gcc"])
+    let macosAppsTestRun = macosAppsTest.testBinary.run(
+      actionId = "packages.test-macos-app-contributions",
+      after = @[macosAppsTest.action],
+      registerImplicitName = false,
+      cacheable = false)
+
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("test-consumer-audit", consumerAuditTests)
@@ -208,9 +226,11 @@ package reprobuildPackages:
     discard target("test-tier-realizations", tierTestRun)
     discard target("test-platform-coverage", coverageTestRun)
     discard target("test-lint-tool-interfaces", lintInterfacesTestRun)
+    discard target("test-macos-app-contributions", macosAppsTestRun)
     discard collect("lint", actions = @[catalog, inventory])
     discard collect("test-source-recipes", actions = sourceTests)
     discard collect("test-source-integration", actions = integrationTests)
     discard collect("test", actions =
       @[catalogTests, inventoryTests, graphTestRun, tierTestRun,
-        coverageTestRun, lintInterfacesTestRun] & sourceTests)
+        coverageTestRun, lintInterfacesTestRun, macosAppsTestRun] &
+        sourceTests)

@@ -81,6 +81,25 @@ gap is `UNCLASSIFIED`. `just coverage-check` fails on exactly that, and on a
 declaration for a cell the catalog has since covered. So the gate does not
 forbid gaps; it forbids unexamined ones.
 
+## macOS applications
+
+`packages/interfaces/` also defines the macOS GUI applications a workstation
+installs (ghostty, iterm2, vscode, utm, ...). Each pins the vendor's own
+artifact -- a disk image, a zip or an installer package -- with
+`installMethod = "app-bundle"` and the bundle it delivers: `appBundle`,
+`bundleId`, `teamId` and `version`, read off the downloaded artifact. Realizing
+one copies the bundle out, refuses it unless its identifier, version,
+signature, Developer ID team and notarization check out, and places a copy in
+`~/Applications`; the shape is specified in reprobuild-specs
+`Store-And-Installation-Layout.md`, "macOS Application Bundles".
+
+`tests/test_macos_app_contributions.nim` holds every definition to that shape.
+`just verify-macos-apps [names...]` installs them for real into a scratch home
+(it downloads every artifact; run it when a definition is added or bumped).
+Karabiner-Elements and OpenWebStart ship only installers that must run, and
+their definitions are refused at resolution until a realizer exists for those
+shapes.
+
 ## Pinned dependency closures
 
 A realization that needs more than one archive commits the extra archives as

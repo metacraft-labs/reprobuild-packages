@@ -51,3 +51,15 @@ coverage *args:
 
 coverage-check:
   just coverage --check
+
+# Install the macOS application definitions for real -- download, verify
+# (bundle id, version, signature, Developer ID team, notarization), place in a
+# SCRATCH ~/Applications, roll back -- with the engine's apply pipeline linked
+# in. Downloads every artifact named (all fourteen realizable applications by
+# default, about 2.5 GB). macOS only; run it when a definition is added or
+# bumped.
+verify-macos-apps *names:
+  nim c -r --hints:off --warnings:off \
+    --out:"$PWD/build/verify-macos-apps" \
+    --nimcache:"$PWD/build/nimcache-verify-macos-apps" \
+    tools/verify_macos_apps.nim {{names}}
