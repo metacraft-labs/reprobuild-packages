@@ -96,9 +96,13 @@ signature, Developer ID team and notarization check out, and places a copy in
 `tests/test_macos_app_contributions.nim` holds every definition to that shape.
 `just verify-macos-apps [names...]` installs them for real into a scratch home
 (it downloads every artifact; run it when a definition is added or bumped).
-Karabiner-Elements and OpenWebStart ship only installers that must run, and
-their definitions are refused at resolution until a realizer exists for those
-shapes.
+OpenWebStart ships only an installer application: its definition names the
+installer (`installerApp`), which realization runs unattended and confined by
+`sandbox-exec` into the store, then verifies the `OpenWebStart` folder it
+installed, which is placed in `~/Applications` as a whole ("Installer
+applications" in the same spec). Karabiner-Elements ships only an installer
+package that must run as root, and its definition is refused at resolution
+until a system-scope realizer exists for that shape.
 
 ## Pinned dependency closures
 

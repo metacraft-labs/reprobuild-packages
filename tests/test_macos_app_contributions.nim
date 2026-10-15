@@ -13,12 +13,15 @@
 ## * each package resolves for aarch64-darwin (and for x86_64-darwin, which
 ##   every one of them offers) through `resolveProfilePackage` -- the
 ##   selection a home profile makes, `selectRealization` with the
-##   `[tarball]` policy -- to the home archive realizer's `app-bundle` shape;
-## * the two packages upstream ships only as installers that must RUN
-##   (Karabiner-Elements' root package, OpenWebStart's installer
-##   application) select their record, and resolution then refuses them
-##   naming the realizer they lack, instead of
-##   pretending to install them.
+##   `[tarball]` policy -- to the home archive realizer: the `app-bundle`
+##   shape, or for OpenWebStart, which ships only an installer application,
+##   the installer-application shape (`installer-silent` with
+##   `installerApp`, run confined; Store-And-Installation-Layout.md
+##   § Installer applications);
+## * the one package upstream ships only as an installer package that must
+##   RUN as root (Karabiner-Elements) selects its record, and resolution
+##   then refuses it naming the realizer it lacks, instead of pretending to
+##   install it.
 ##
 ## The packages are linked into THIS process by importing their modules,
 ## which registers the same definitions a home profile reaches through the
@@ -51,10 +54,12 @@ import ../packages/interfaces/sqlitebrowser/repro as sqlitebrowserInterface
 const
   Realizable = ["ghostty", "iterm2", "hammerspoon", "inkscape", "figma",
     "neovide", "vscode", "claude-desktop", "codex-desktop", "windows-app",
-    "tigervnc", "turbovnc", "utm", "sqlitebrowser"]
+    "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart"]
+    ## Fifteen. OpenWebStart is an installer application; the rest are
+    ## app bundles.
+  InstallerApplications = ["openwebstart"]
   InstallerOnly = [
-    ("karabiner-elements", MacosPkgInstallRefusal),
-    ("openwebstart", MacosInstallerAppRefusal)]
+    ("karabiner-elements", MacosPkgInstallRefusal)]
 
 proc definition(name: string): PackageDef =
   var hits = 0
@@ -93,6 +98,7 @@ proc macosTarget(arch: string): RealizationTarget =
 suite "macOS application definitions":
 
   test "the sixteen applications are each defined exactly once":
+    check Realizable.len == 15
     check allNames().len == 16
     for name in allNames():
       discard definition(name)
@@ -115,14 +121,23 @@ suite "macOS application definitions":
         check '.' in record.detail.bundleId
         check record.detail.version.len > 0
         check record.detail.appBundle.endsWith(".app")
-        let leaf = record.detail.appBundle.split('/')[^1]
-        check record.executablePath.startsWith(leaf & "/Contents/MacOS/")
+        if record.detail.installMethod == "installer-silent":
+          # An installer application: the installer's path in the archive,
+          # and the product bundle's path in the installed prefix.
+          check record.detail.installerApp.endsWith(".app")
+          check record.detail.installerArgs.len > 0
+          check record.executablePath.startsWith(record.detail.appBundle &
+            "/Contents/MacOS/")
+        else:
+          check record.detail.installerApp.len == 0
+          let leaf = record.detail.appBundle.split('/')[^1]
+          check record.executablePath.startsWith(leaf & "/Contents/MacOS/")
         check record.archiveType in ["dmg", "pkg", "zip"]
         check record.cpu in ["any", "aarch64", "x86_64"]
       check macRecords > 0
 
   test "each realizable application resolves for aarch64- and " &
-      "x86_64-darwin to the app-bundle realizer":
+      "x86_64-darwin to the home archive realizer's application shapes":
     for name in Realizable:
       for arch in ["arm64", "x86_64"]:
         checkpoint name & " " & arch
@@ -133,8 +148,14 @@ suite "macOS application definitions":
         check resolution.selection.tarball.cpu in
           [(if arch == "arm64": "aarch64" else: "x86_64"), "any"]
         check resolution.archiveRoute == arInstaller
-        check resolution.archive.installMethod == imAppBundle
-        check resolution.archive.archiveFormat in {afDmg, afPkg, afZip}
+        if name in InstallerApplications:
+          check resolution.archive.installMethod == imInstallerSilent
+          check resolution.archive.installerApp.len > 0
+          check resolution.archive.archiveFormat in {afDmg, afZip}
+        else:
+          check resolution.archive.installMethod == imAppBundle
+          check resolution.archive.installerApp.len == 0
+          check resolution.archive.archiveFormat in {afDmg, afPkg, afZip}
         check resolution.archive.bundleId ==
           resolution.selection.tarball.detail.bundleId
         check resolution.archive.teamId.len == 10
