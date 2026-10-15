@@ -10,9 +10,8 @@
 ## the two CPUs carry different versions and bundle names. Both are
 ## notarized and signed by OpenAI (2DC432GLL2).
 ##
-## Note for the dotfiles migration: the Homebrew cask `codex` that
-## `modules/mac-casks.nix` labels "Codex Desktop" is the codex CLI; the desktop
-## app is the `codex-app` cask.
+## Not the Homebrew cask `codex`, which is the codex CLI (package `codex`);
+## the desktop app's cask is `codex-app`.
 ##
 ## Each record was read off the downloaded artifact on m1 (aarch64-darwin),
 ## 2026-10-14: `sha256` with `shasum -a 256`, the bundle identifier and
