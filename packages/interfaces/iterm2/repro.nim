@@ -1,10 +1,10 @@
 ## iterm2 — iTerm2, the terminal emulator (macOS application).
 ##
 ## Upstream's notarized universal zip; the file name carries the version
-## (`iTerm2-3_7_4.zip`).
+## (`iTerm2-3_7_6.zip`).
 ##
 ## Each record was read off the downloaded artifact on m1 (aarch64-darwin),
-## 2026-10-14: `sha256` with `shasum -a 256`, the bundle identifier and
+## 2026-10-16: `sha256` with `shasum -a 256`, the bundle identifier and
 ## version from its `Info.plist`, the team with `codesign -dv`. Every bundle
 ## passed `codesign --verify --deep --strict` and Gatekeeper assessed it as
 ## `source=Notarized Developer ID`:
@@ -20,12 +20,12 @@ import std/strutils
 import repro_project_dsl
 
 const
-  Iterm2Version = "3.7.4"
+  Iterm2Version = "3.7.6"
 
 package iterm2:
   provisioning:
     tarball url = "https://iterm2.com/downloads/stable/iTerm2-" & Iterm2Version.replace('.', '_') & ".zip",
-      sha256 = "4bf02ae616752600cd195ca504e55392afb21741cda7314199e375ed8a46f90c",
+      sha256 = "bb6102e9f57bbe41979ba7c7b1c25d4112e9a5c2142606eeccbe18dc7ee0706f",
       archiveType = "zip",
       installMethod = "app-bundle",
       appBundle = "iTerm.app",
@@ -37,4 +37,4 @@ package iterm2:
       cpu = "any",
       os = "macos",
       lockIdentity = "tarball:iterm2@" & Iterm2Version &
-        ":macos-any:sha256:4bf02ae616752600cd195ca504e55392afb21741cda7314199e375ed8a46f90c"
+        ":macos-any:sha256:bb6102e9f57bbe41979ba7c7b1c25d4112e9a5c2142606eeccbe18dc7ee0706f"
