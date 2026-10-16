@@ -1,15 +1,40 @@
-## ledger-wallet -- Ledger Wallet (formerly Ledger Live), the companion
-## application for Ledger hardware wallets.
+## ledger-wallet — Ledger Wallet (formerly Ledger Live), the companion
+## application for Ledger hardware wallets (macOS application).
 ##
-## The canonical identity of the application, so that profiles, data files and
-## provisioning contributions name it the same way everywhere. This definition
-## declares no realization yet: Reprobuild cannot install it, and a profile
-## naming it resolves to a missing realization. Hosts that install it through
-## Homebrew keep doing so; the Homebrew contribution catalog
-## (reprobuild-brew-packages) maps the cask `ledger-wallet` to this name as a
-## bridge record that Nix consumers read and Reprobuild never realizes.
+## Ledger's notarized universal disk image (arm64 + x86_64 in one bundle),
+## versioned by its file name (`ledger-live-desktop-<version>-mac.dmg`). The
+## bundle keeps the Ledger Live identifier `com.ledger.live`.
+##
+## Each record was read off the downloaded artifact on m1 (aarch64-darwin),
+## 2026-10-16: `sha256` with `shasum -a 256`, the bundle identifier and
+## version from its `Info.plist`, the team with `codesign -dv`. Every bundle
+## passed `codesign --verify --deep --strict` and Gatekeeper assessed it as
+## `source=Notarized Developer ID`:
+##
+## * any: Ledger Wallet.app, signed "Developer ID Application: Ledger SAS (X6LFS5BQKN)".
+##
+## The record shape is Store-And-Installation-Layout.md § macOS Application
+## Bundles (reprobuild-specs): `installMethod = "app-bundle"` places the
+## bundle in `~/Applications` after the trust checks pass.
 
 import repro_project_dsl
 
+const
+  LedgerWalletVersion = "4.24.0"
+
 package `ledger-wallet`:
-  discard
+  provisioning:
+    tarball url = "https://download.live.ledger.com/ledger-live-desktop-" & LedgerWalletVersion & "-mac.dmg",
+      sha256 = "a515c0a179b8e49baf54f9c9c87b796879fd6ee3b50c9a07e9a60d42a4ba0948",
+      archiveType = "dmg",
+      installMethod = "app-bundle",
+      appBundle = "Ledger Wallet.app",
+      bundleId = "com.ledger.live",
+      teamId = "X6LFS5BQKN",
+      version = LedgerWalletVersion,
+      executablePath = "Ledger Wallet.app/Contents/MacOS/Ledger Wallet",
+      packageId = "ledger-wallet@" & LedgerWalletVersion,
+      cpu = "any",
+      os = "macos",
+      lockIdentity = "tarball:ledger-wallet@" & LedgerWalletVersion &
+        ":macos-any:sha256:a515c0a179b8e49baf54f9c9c87b796879fd6ee3b50c9a07e9a60d42a4ba0948"

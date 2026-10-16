@@ -18,6 +18,11 @@
 ## The record shape is Store-And-Installation-Layout.md § macOS Application
 ## Bundles (reprobuild-specs): `installMethod = "app-bundle"` places the
 ## bundle in `~/Applications` after the trust checks pass.
+##
+## `code` and `code-tunnel` are declared with `extraExecutable`: the home
+## profile gets a launcher for each, running it from the placed bundle (§ macOS
+## Application Bundles, "Command line"). The paths were read off the
+## extracted bundles of every record on 2026-10-16.
 
 import repro_project_dsl
 
@@ -35,6 +40,8 @@ package vscode:
       teamId = "UBF8T346G9",
       version = VscodeVersion,
       executablePath = "Visual Studio Code.app/Contents/MacOS/Code",
+      extraExecutable = "Visual Studio Code.app/Contents/Resources/app/bin/code",
+      extraExecutable = "Visual Studio Code.app/Contents/Resources/app/bin/code-tunnel",
       packageId = "vscode@" & VscodeVersion,
       cpu = "aarch64",
       os = "macos",
@@ -50,6 +57,8 @@ package vscode:
       teamId = "UBF8T346G9",
       version = VscodeVersion,
       executablePath = "Visual Studio Code.app/Contents/MacOS/Code",
+      extraExecutable = "Visual Studio Code.app/Contents/Resources/app/bin/code",
+      extraExecutable = "Visual Studio Code.app/Contents/Resources/app/bin/code-tunnel",
       packageId = "vscode@" & VscodeVersion,
       cpu = "x86_64",
       os = "macos",

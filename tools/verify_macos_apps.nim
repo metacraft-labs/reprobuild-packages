@@ -29,7 +29,7 @@
 ## `e2e_dmg_app_bundle_install_and_rollback`; linking the apply pipeline here
 ## would pull the whole build engine into this tool.
 ##
-## It downloads every artifact it is given (about 2.5 GB for the full set),
+## It downloads every artifact it is given (about 4 GB for the full set),
 ## so it is a tool rather than a test: run it when an application definition
 ## is added or bumped (`just verify-macos-apps [names...]`). It never touches
 ## the real `~/Applications`. macOS only.
@@ -58,10 +58,20 @@ import ../packages/interfaces/turbovnc/repro as turbovncInterface
 import ../packages/interfaces/utm/repro as utmInterface
 import ../packages/interfaces/openwebstart/repro as openwebstartInterface
 import ../packages/interfaces/sqlitebrowser/repro as sqlitebrowserInterface
+import ../packages/interfaces/slack/repro as slackInterface
+import ../packages/interfaces/discord/repro as discordInterface
+import ../packages/interfaces/signal/repro as signalInterface
+import ../packages/interfaces/telegram/repro as telegramInterface
+import ../packages/interfaces/cursor/repro as cursorInterface
+import "../packages/interfaces/ledger-wallet/repro" as ledgerWalletInterface
+import "../packages/interfaces/google-antigravity/repro" as googleAntigravityInterface
+import "../packages/interfaces/google-antigravity-ide/repro" as googleAntigravityIdeInterface
 
 const Realizable = ["ghostty", "iterm2", "hammerspoon", "inkscape", "figma",
   "neovide", "vscode", "claude-desktop", "codex-desktop", "windows-app",
-  "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart"]
+  "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart",
+  "slack", "discord", "signal", "telegram", "cursor", "ledger-wallet",
+  "google-antigravity", "google-antigravity-ide"]
 
 proc bundlesIn(item: string): seq[string] =
   ## Every bundle in a placed item, at any depth, not inside another bundle

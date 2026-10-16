@@ -15,6 +15,11 @@
 ## The record shape is Store-And-Installation-Layout.md § macOS Application
 ## Bundles (reprobuild-specs): `installMethod = "app-bundle"` places the
 ## bundle in `~/Applications` after the trust checks pass.
+##
+## `utmctl` is declared with `extraExecutable`: the home profile gets a
+## launcher for it, running it from the placed bundle (§ macOS Application
+## Bundles, "Command line"). The path was read off the extracted bundle
+## of every record on 2026-10-16.
 
 import repro_project_dsl
 
@@ -32,6 +37,7 @@ package utm:
       teamId = "WDNLXAD4W8",
       version = UtmVersion,
       executablePath = "UTM.app/Contents/MacOS/UTM",
+      extraExecutable = "UTM.app/Contents/MacOS/utmctl",
       packageId = "utm@" & UtmVersion,
       cpu = "any",
       os = "macos",

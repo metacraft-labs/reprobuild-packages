@@ -1,4 +1,4 @@
-## The macOS application definitions: every one of the sixteen pins a real
+## The macOS application definitions: every one of the twenty-four pins a real
 ## vendor artifact and the identity of the bundle it delivers, and resolves
 ## the way a home profile resolves it.
 ##
@@ -50,13 +50,23 @@ import ../packages/interfaces/turbovnc/repro as turbovncInterface
 import ../packages/interfaces/utm/repro as utmInterface
 import ../packages/interfaces/openwebstart/repro as openwebstartInterface
 import ../packages/interfaces/sqlitebrowser/repro as sqlitebrowserInterface
+import ../packages/interfaces/slack/repro as slackInterface
+import ../packages/interfaces/discord/repro as discordInterface
+import ../packages/interfaces/signal/repro as signalInterface
+import ../packages/interfaces/telegram/repro as telegramInterface
+import ../packages/interfaces/cursor/repro as cursorInterface
+import "../packages/interfaces/ledger-wallet/repro" as ledgerWalletInterface
+import "../packages/interfaces/google-antigravity/repro" as googleAntigravityInterface
+import "../packages/interfaces/google-antigravity-ide/repro" as googleAntigravityIdeInterface
 
 const
   Realizable = ["ghostty", "iterm2", "hammerspoon", "inkscape", "figma",
     "neovide", "vscode", "claude-desktop", "codex-desktop", "windows-app",
-    "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart"]
-    ## Fifteen. OpenWebStart is an installer application; the rest are
-    ## app bundles.
+    "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart",
+    "slack", "discord", "signal", "telegram", "cursor", "ledger-wallet",
+    "google-antigravity", "google-antigravity-ide"]
+    ## Twenty-three. OpenWebStart is an installer application; the rest
+    ## are app bundles.
   InstallerApplications = ["openwebstart"]
   InstallerOnly = [
     ("karabiner-elements", MacosPkgInstallRefusal)]
@@ -97,9 +107,9 @@ proc macosTarget(arch: string): RealizationTarget =
 
 suite "macOS application definitions":
 
-  test "the sixteen applications are each defined exactly once":
-    check Realizable.len == 15
-    check allNames().len == 16
+  test "the twenty-four applications are each defined exactly once":
+    check Realizable.len == 23
+    check allNames().len == 24
     for name in allNames():
       discard definition(name)
 
@@ -162,6 +172,31 @@ suite "macOS application definitions":
         check resolution.archive.builtinVersion ==
           resolution.selection.version
         check resolution.archive.digestAlgorithm == "sha256"
+
+  test "the applications whose casks link commands declare them, inside " &
+      "the bundle, and resolution exports them":
+    # The commands the Homebrew casks link into /opt/homebrew/bin, declared
+    # with `extraExecutable` so the home profile exports them from the
+    # placed bundle (Store-And-Installation-Layout.md § macOS Application
+    # Bundles, "Command line"). The paths were read off the extracted
+    # bundles of every record on 2026-10-16.
+    const Commands = [
+      ("vscode", @["Visual Studio Code.app/Contents/Resources/app/bin/code",
+        "Visual Studio Code.app/Contents/Resources/app/bin/code-tunnel"]),
+      ("cursor", @["Cursor.app/Contents/Resources/app/bin/cursor"]),
+      ("utm", @["UTM.app/Contents/MacOS/utmctl"]),
+      ("hammerspoon", @["Hammerspoon.app/Contents/Frameworks/hs/hs"]),
+      ("google-antigravity-ide",
+        @["Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide"])]
+    for (name, commands) in Commands:
+      for record in definition(name).tarballProvisioning:
+        checkpoint name & ": " & record.url
+        check record.detail.extraExecutables == commands
+      for arch in ["arm64", "x86_64"]:
+        let resolution = resolveProfilePackage(name, macosTarget(arch),
+          @[rkTarball])
+        check resolution.archive.binRelpath ==
+          @[resolution.selection.tarball.executablePath] & commands
 
   test "installer-only applications select their record and are refused " &
       "naming the realizer they lack":

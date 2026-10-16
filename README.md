@@ -84,9 +84,9 @@ forbid gaps; it forbids unexamined ones.
 ## macOS applications
 
 `packages/interfaces/` also defines the macOS GUI applications a workstation
-installs (ghostty, iterm2, vscode, utm, ...). Each pins the vendor's own
-artifact -- a disk image, a zip or an installer package -- with
-`installMethod = "app-bundle"` and the bundle it delivers: `appBundle`,
+installs (ghostty, iterm2, vscode, utm, slack, signal, cursor, ...). Each pins
+the vendor's own artifact -- a disk image, a zip or an installer package --
+with `installMethod = "app-bundle"` and the bundle it delivers: `appBundle`,
 `bundleId`, `teamId` and `version`, read off the downloaded artifact. Realizing
 one copies the bundle out, refuses it unless its identifier, version,
 signature, Developer ID team and notarization check out, and places a copy in
@@ -103,6 +103,17 @@ installed, which is placed in `~/Applications` as a whole ("Installer
 applications" in the same spec). Karabiner-Elements ships only an installer
 package that must run as root, and its definition is refused at resolution
 until a system-scope realizer exists for that shape.
+
+Some application identities stay without a realization. `viber` has no
+versioned vendor artifact: its only macOS download is an unversioned online
+installer disk image, which a sha256 pin cannot hold. `google-antigravity-cli`
+ships a bare command-line binary, not an application bundle.
+
+An application puts one command on the home profile's `PATH`, named after the
+package, that runs its main executable. A command the bundle carries
+(`code`, `cursor`, `utmctl`, `hs`, `antigravity-ide`) is declared on the record
+with `extraExecutable`, a path inside the bundle; each becomes a launcher of
+its own, and every launcher runs the copy placed in `~/Applications`.
 
 ## Pinned dependency closures
 

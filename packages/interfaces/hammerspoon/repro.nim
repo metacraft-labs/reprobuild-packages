@@ -1,7 +1,8 @@
 ## hammerspoon — Hammerspoon, the Lua automation tool (macOS application).
 ##
 ## Upstream's notarized universal zip from its GitHub release (versioned
-## tag and file name).
+## tag and file name). `hs` is
+## `Hammerspoon.app/Contents/Frameworks/hs/hs`.
 ##
 ## Each record was read off the downloaded artifact on m1 (aarch64-darwin),
 ## 2026-10-14: `sha256` with `shasum -a 256`, the bundle identifier and
@@ -14,6 +15,11 @@
 ## The record shape is Store-And-Installation-Layout.md § macOS Application
 ## Bundles (reprobuild-specs): `installMethod = "app-bundle"` places the
 ## bundle in `~/Applications` after the trust checks pass.
+##
+## `hs` is declared with `extraExecutable`: the home profile gets a
+## launcher for it, running it from the placed bundle (§ macOS Application
+## Bundles, "Command line"). The path was read off the extracted bundle
+## of every record on 2026-10-16.
 
 import repro_project_dsl
 
@@ -31,6 +37,7 @@ package hammerspoon:
       teamId = "VQCYSNZB89",
       version = HammerspoonVersion,
       executablePath = "Hammerspoon.app/Contents/MacOS/Hammerspoon",
+      extraExecutable = "Hammerspoon.app/Contents/Frameworks/hs/hs",
       packageId = "hammerspoon@" & HammerspoonVersion,
       cpu = "any",
       os = "macos",
