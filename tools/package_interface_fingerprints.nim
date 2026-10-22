@@ -8,8 +8,9 @@ import repro_dsl_stdlib/packages/cmake as cmakeInterface
 import ../packages/interfaces/busybox/repro as busyboxInterface
 import ../packages/interfaces/llvm/repro as llvmInterface
 import ../packages/interfaces/patchelf/repro as patchelfInterface
+import ../packages/interfaces/pwsh/repro as pwshInterface
 
-const PublishedPackages = ["bash", "busybox", "cmake", "llvm", "patchelf"]
+const PublishedPackages = ["bash", "busybox", "cmake", "llvm", "patchelf", "pwsh"]
 
 let packages = registeredPackages()
 var selected = packages.filterIt(
