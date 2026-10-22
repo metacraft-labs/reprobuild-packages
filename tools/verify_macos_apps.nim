@@ -12,19 +12,24 @@
 ##    from its pinned URL, its sha256 checked, the bundle copied out (disk
 ##    image attached and detached, package expanded, zip expanded with
 ##    ditto) and refused unless its identifier, version, signature,
-##    Developer ID team and Gatekeeper notarization verdict check out;
+##    Developer ID team and Gatekeeper notarization verdict check out. An
+##    installer application (OpenWebStart) is instead copied out, verified,
+##    and RUN confined under `sandbox-exec` into the staging prefix, and the
+##    product it installed is verified (Store-And-Installation-Layout.md
+##    § Installer applications);
 ## 2. activation -- the `macos.appBundle` driver (`placeAppBundle`) copies the
-##    realized bundle into `<scratch>/home/Applications`, verifies the STAGED
-##    copy again (the same checks, plus the realized bundle's identity) and
-##    renames it into place; it is then read back, compared with the
-##    definition, and removed (`removeAppBundle`).
+##    realized bundle (or, for an installer application, the folder holding
+##    it) into `<scratch>/home/Applications`, verifies the STAGED copy again
+##    (the same checks, plus the realized item's identity) and renames it
+##    into place; it is then read back, compared with the definition, every
+##    bundle in it re-verified, and removed (`removeAppBundle`).
 ##
 ## The resource lifecycle around activation (recording, no-op detection,
 ## rollback) is covered by reprobuild's
 ## `e2e_dmg_app_bundle_install_and_rollback`; linking the apply pipeline here
 ## would pull the whole build engine into this tool.
 ##
-## It downloads every artifact it is given (about 2.5 GB for the full set),
+## It downloads every artifact it is given (about 4 GB for the full set),
 ## so it is a tool rather than a test: run it when an application definition
 ## is added or bumped (`just verify-macos-apps [names...]`). It never touches
 ## the real `~/Applications`. macOS only.
@@ -53,10 +58,30 @@ import ../packages/interfaces/turbovnc/repro as turbovncInterface
 import ../packages/interfaces/utm/repro as utmInterface
 import ../packages/interfaces/openwebstart/repro as openwebstartInterface
 import ../packages/interfaces/sqlitebrowser/repro as sqlitebrowserInterface
+import ../packages/interfaces/slack/repro as slackInterface
+import ../packages/interfaces/discord/repro as discordInterface
+import ../packages/interfaces/signal/repro as signalInterface
+import ../packages/interfaces/telegram/repro as telegramInterface
+import ../packages/interfaces/cursor/repro as cursorInterface
+import "../packages/interfaces/ledger-wallet/repro" as ledgerWalletInterface
+import "../packages/interfaces/google-antigravity/repro" as googleAntigravityInterface
+import "../packages/interfaces/google-antigravity-ide/repro" as googleAntigravityIdeInterface
 
 const Realizable = ["ghostty", "iterm2", "hammerspoon", "inkscape", "figma",
   "neovide", "vscode", "claude-desktop", "codex-desktop", "windows-app",
-  "tigervnc", "turbovnc", "utm", "sqlitebrowser"]
+  "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart",
+  "slack", "discord", "signal", "telegram", "cursor", "ledger-wallet",
+  "google-antigravity", "google-antigravity-ide"]
+
+proc bundlesIn(item: string): seq[string] =
+  ## Every bundle in a placed item, at any depth, not inside another bundle
+  ## (the item itself when it is a bundle).
+  if item.endsWith(".app"):
+    return @[item]
+  for kind, path in walkDir(item):
+    if kind != pcDir: continue
+    if path.endsWith(".app"): result.add(path)
+    else: result.add(bundlesIn(path))
 
 proc plist(app, key: string): string =
   let (output, code) = execCmdEx("/usr/bin/plutil -extract " &
@@ -91,25 +116,43 @@ when isMainModule:
       let resolution = resolveProfilePackage(name, target, @[rkTarball])
       let archive = resolution.archive
       let realized = realizeBuiltinPackage(store, archive)
+      let itemName = extractFilename(realized.appBundlePath)
       let placed = placeAppBundle(realized.appBundlePath, applications,
-        extractFilename(realized.appBundlePath),
-        appBundleExpectationOf(archive), {},
-        pinned = realized.appBundleIdentity)
-      let app = applications / extractFilename(realized.appBundlePath)
+        itemName, appBundleExpectationOf(archive), {},
+        pinned = realized.appBundleIdentity,
+        mainBundle = realized.appBundleMainPath)
+      let item = applications / itemName
+      let app =
+        if realized.appBundleMainPath.len > 0:
+          item / realized.appBundleMainPath
+        else: item
       let id = plist(app, "CFBundleIdentifier")
       let version = plist(app, "CFBundleShortVersionString")
-      let ok = dirExists(app) and id == archive.bundleId and
+      var ok = dirExists(app) and id == archive.bundleId and
         version == archive.builtinVersion and placed.teamId == archive.teamId
+      # Every bundle placed passes the strict trust checks against the team
+      # (for an installer application: the ones its installer produced).
+      for bundle in bundlesIn(item):
+        try:
+          discard verifyAppBundleTeam(bundle, archive.teamId, {})
+          echo "     ", name, " bundle verified: ",
+            bundle.relativePath(applications)
+        except EAppBundleRefused as err:
+          ok = false
+          echo "FAIL ", name, ": ", err.msg
       echo (if ok: "OK   " else: "FAIL "), name, " ", archive.builtinVersion,
-        " ", extractFilename(app), " archive=", archive.archiveFormat,
+        " ", itemName,
+        (if realized.appBundleMainPath.len > 0:
+           "/" & realized.appBundleMainPath else: ""),
+        " archive=", archive.archiveFormat,
         " id=", id, " team=", placed.teamId, " cdhash=", placed.cdhash,
         " url=", archive.urlUsed,
         " seconds=", formatFloat(epochTime() - started, ffDecimal, 1)
       if not ok:
         inc failures
-      removeAppBundle(app)
-      if dirExists(app):
-        echo "FAIL ", name, ": removal left ", app
+      removeAppBundle(item)
+      if dirExists(item):
+        echo "FAIL ", name, ": removal left ", item
         inc failures
     except CatchableError as err:
       inc failures

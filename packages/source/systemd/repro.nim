@@ -207,6 +207,16 @@ package systemdSource:
     ## The install-mirror action copies the completed install tree. Use
     ## the source-built cp so it shares the graph's glibc ABI.
     "coreutils"
+    ## src/meson.build looks up awk, diff, find and sh during setup
+    ## ("Program 'awk' not found or not executable" without them) and runs
+    ## getent; echo, env, ln, stat, id, date and realpath come from
+    ## coreutils. Declared so the action PATH, which carries only declared
+    ## tools, provides them on every host.
+    "gawk"
+    "diff"
+    "find"
+    "sh"
+    "getent"
 
   buildDeps:
     ## libcap supplies the POSIX capabilities library systemd consumes

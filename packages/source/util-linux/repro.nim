@@ -311,7 +311,19 @@ package utilLinuxSource:
         # consumes wtmpdb instead of lastlog on modern stacks.
         "--disable-liblastlog2",
       ]
-      let pkg = autotools_package(srcDir = "./src", configureOptions = opts)
+      # The build runs helpers from tools/ directly (tools/all_syscalls
+      # generates syscalls.h), and several start with `#!/bin/bash`, which
+      # NixOS hosts do not have. Resolve bash from the action PATH. Only
+      # those files are rewritten, and their mtimes are kept: a newer
+      # tools/Makemodule.am would make the generated Makefile rerun automake.
+      let pkg = autotools_package(srcDir = "./src", configureOptions = opts,
+        srcPatches = @[
+          "for f in src/tools/*; do " &
+            "if [ -f \"$f\" ] && [ \"$(head -n 1 \"$f\")\" = '#!/bin/bash' ]; then " &
+            "touch -r \"$f\" \"$f.mtime\" && " &
+            "sed -i '1s|^#!/bin/bash$|#!/usr/bin/env bash|' \"$f\" && " &
+            "touch -r \"$f.mtime\" \"$f\" && rm -f \"$f.mtime\"; fi; done",
+        ])
       discard pkg.executable("mount")
       discard pkg.executable("umount")
       discard pkg.executable("mkfsBin")

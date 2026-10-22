@@ -15,11 +15,11 @@ package qt6SpeechSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtspeech-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtspeech-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qtspeech.git"
 
   fetch:
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtspeech-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtspeech-everywhere-src-6.8.1.tar.xz"
     sha256: "b0c5fe36c157b0b0cceb89d0d6325e539652f33963f7424cc70300870ce1acdf"
     extractStrip: 1
 

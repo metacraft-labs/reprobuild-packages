@@ -118,7 +118,7 @@ package qt6WaylandSource:
     ## currently-canonical home as documented in the M9.R.15p.1 brief).
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtwayland-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtwayland-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://invent.kde.org/qt/qt/qtwayland"
 
   fetch:
@@ -127,7 +127,7 @@ package qt6WaylandSource:
     ## the local vendored copy hits the cache deterministically.
     ##
     ## sha256 computed over the vendored 1,134,428-byte tarball.
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtwayland-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtwayland-everywhere-src-6.8.1.tar.xz"
     sha256: "2226fbde4e2ddd12f8bf4b239c8f38fd706a54e789e63467dfddc77129eca203"
     extractStrip: 1
 

@@ -102,7 +102,7 @@ package qt6DeclarativeSource:
     ## qtdeclarative git repository.
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtdeclarative-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtdeclarative-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qtdeclarative.git"
 
   fetch:
@@ -113,7 +113,7 @@ package qt6DeclarativeSource:
     ## sha256 was computed over the vendored 36,463,572-byte tarball
     ## downloaded once from the upstream URL recorded in ``versions:``
     ## above.
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtdeclarative-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtdeclarative-everywhere-src-6.8.1.tar.xz"
     sha256: "95d15d5c1b6adcedb1df6485219ad13b8dc1bb5168b5151f2f1f7246a4c039fc"
     extractStrip: 1
 

@@ -89,11 +89,11 @@ package qt6SvgSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtsvg-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtsvg-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qtsvg.git"
 
   fetch:
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtsvg-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtsvg-everywhere-src-6.8.1.tar.xz"
     sha256: "3d0de73596e36b2daa7c48d77c4426bb091752856912fba720215f756c560dd0"
     extractStrip: 1
 

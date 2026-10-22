@@ -1,4 +1,4 @@
-## The macOS application definitions: every one of the sixteen pins a real
+## The macOS application definitions: every one of the twenty-four pins a real
 ## vendor artifact and the identity of the bundle it delivers, and resolves
 ## the way a home profile resolves it.
 ##
@@ -13,12 +13,15 @@
 ## * each package resolves for aarch64-darwin (and for x86_64-darwin, which
 ##   every one of them offers) through `resolveProfilePackage` -- the
 ##   selection a home profile makes, `selectRealization` with the
-##   `[tarball]` policy -- to the home archive realizer's `app-bundle` shape;
-## * the two packages upstream ships only as installers that must RUN
-##   (Karabiner-Elements' root package, OpenWebStart's installer
-##   application) select their record, and resolution then refuses them
-##   naming the realizer they lack, instead of
-##   pretending to install them.
+##   `[tarball]` policy -- to the home archive realizer: the `app-bundle`
+##   shape, or for OpenWebStart, which ships only an installer application,
+##   the installer-application shape (`installer-silent` with
+##   `installerApp`, run confined; Store-And-Installation-Layout.md
+##   § Installer applications);
+## * the one package upstream ships only as an installer package that must
+##   RUN as root (Karabiner-Elements) selects its record, and resolution
+##   then refuses it naming the realizer it lacks, instead of pretending to
+##   install it.
 ##
 ## The packages are linked into THIS process by importing their modules,
 ## which registers the same definitions a home profile reaches through the
@@ -47,14 +50,26 @@ import ../packages/interfaces/turbovnc/repro as turbovncInterface
 import ../packages/interfaces/utm/repro as utmInterface
 import ../packages/interfaces/openwebstart/repro as openwebstartInterface
 import ../packages/interfaces/sqlitebrowser/repro as sqlitebrowserInterface
+import ../packages/interfaces/slack/repro as slackInterface
+import ../packages/interfaces/discord/repro as discordInterface
+import ../packages/interfaces/signal/repro as signalInterface
+import ../packages/interfaces/telegram/repro as telegramInterface
+import ../packages/interfaces/cursor/repro as cursorInterface
+import "../packages/interfaces/ledger-wallet/repro" as ledgerWalletInterface
+import "../packages/interfaces/google-antigravity/repro" as googleAntigravityInterface
+import "../packages/interfaces/google-antigravity-ide/repro" as googleAntigravityIdeInterface
 
 const
   Realizable = ["ghostty", "iterm2", "hammerspoon", "inkscape", "figma",
     "neovide", "vscode", "claude-desktop", "codex-desktop", "windows-app",
-    "tigervnc", "turbovnc", "utm", "sqlitebrowser"]
+    "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart",
+    "slack", "discord", "signal", "telegram", "cursor", "ledger-wallet",
+    "google-antigravity", "google-antigravity-ide"]
+    ## Twenty-three. OpenWebStart is an installer application; the rest
+    ## are app bundles.
+  InstallerApplications = ["openwebstart"]
   InstallerOnly = [
-    ("karabiner-elements", MacosPkgInstallRefusal),
-    ("openwebstart", MacosInstallerAppRefusal)]
+    ("karabiner-elements", MacosPkgInstallRefusal)]
 
 proc definition(name: string): PackageDef =
   var hits = 0
@@ -92,8 +107,9 @@ proc macosTarget(arch: string): RealizationTarget =
 
 suite "macOS application definitions":
 
-  test "the sixteen applications are each defined exactly once":
-    check allNames().len == 16
+  test "the twenty-four applications are each defined exactly once":
+    check Realizable.len == 23
+    check allNames().len == 24
     for name in allNames():
       discard definition(name)
 
@@ -115,14 +131,23 @@ suite "macOS application definitions":
         check '.' in record.detail.bundleId
         check record.detail.version.len > 0
         check record.detail.appBundle.endsWith(".app")
-        let leaf = record.detail.appBundle.split('/')[^1]
-        check record.executablePath.startsWith(leaf & "/Contents/MacOS/")
+        if record.detail.installMethod == "installer-silent":
+          # An installer application: the installer's path in the archive,
+          # and the product bundle's path in the installed prefix.
+          check record.detail.installerApp.endsWith(".app")
+          check record.detail.installerArgs.len > 0
+          check record.executablePath.startsWith(record.detail.appBundle &
+            "/Contents/MacOS/")
+        else:
+          check record.detail.installerApp.len == 0
+          let leaf = record.detail.appBundle.split('/')[^1]
+          check record.executablePath.startsWith(leaf & "/Contents/MacOS/")
         check record.archiveType in ["dmg", "pkg", "zip"]
         check record.cpu in ["any", "aarch64", "x86_64"]
       check macRecords > 0
 
   test "each realizable application resolves for aarch64- and " &
-      "x86_64-darwin to the app-bundle realizer":
+      "x86_64-darwin to the home archive realizer's application shapes":
     for name in Realizable:
       for arch in ["arm64", "x86_64"]:
         checkpoint name & " " & arch
@@ -133,14 +158,45 @@ suite "macOS application definitions":
         check resolution.selection.tarball.cpu in
           [(if arch == "arm64": "aarch64" else: "x86_64"), "any"]
         check resolution.archiveRoute == arInstaller
-        check resolution.archive.installMethod == imAppBundle
-        check resolution.archive.archiveFormat in {afDmg, afPkg, afZip}
+        if name in InstallerApplications:
+          check resolution.archive.installMethod == imInstallerSilent
+          check resolution.archive.installerApp.len > 0
+          check resolution.archive.archiveFormat in {afDmg, afZip}
+        else:
+          check resolution.archive.installMethod == imAppBundle
+          check resolution.archive.installerApp.len == 0
+          check resolution.archive.archiveFormat in {afDmg, afPkg, afZip}
         check resolution.archive.bundleId ==
           resolution.selection.tarball.detail.bundleId
         check resolution.archive.teamId.len == 10
         check resolution.archive.builtinVersion ==
           resolution.selection.version
         check resolution.archive.digestAlgorithm == "sha256"
+
+  test "the applications whose casks link commands declare them, inside " &
+      "the bundle, and resolution exports them":
+    # The commands the Homebrew casks link into /opt/homebrew/bin, declared
+    # with `extraExecutable` so the home profile exports them from the
+    # placed bundle (Store-And-Installation-Layout.md § macOS Application
+    # Bundles, "Command line"). The paths were read off the extracted
+    # bundles of every record on 2026-10-16.
+    const Commands = [
+      ("vscode", @["Visual Studio Code.app/Contents/Resources/app/bin/code",
+        "Visual Studio Code.app/Contents/Resources/app/bin/code-tunnel"]),
+      ("cursor", @["Cursor.app/Contents/Resources/app/bin/cursor"]),
+      ("utm", @["UTM.app/Contents/MacOS/utmctl"]),
+      ("hammerspoon", @["Hammerspoon.app/Contents/Frameworks/hs/hs"]),
+      ("google-antigravity-ide",
+        @["Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide"])]
+    for (name, commands) in Commands:
+      for record in definition(name).tarballProvisioning:
+        checkpoint name & ": " & record.url
+        check record.detail.extraExecutables == commands
+      for arch in ["arm64", "x86_64"]:
+        let resolution = resolveProfilePackage(name, macosTarget(arch),
+          @[rkTarball])
+        check resolution.archive.binRelpath ==
+          @[resolution.selection.tarball.executablePath] & commands
 
   test "installer-only applications select their record and are refused " &
       "naming the realizer they lack":

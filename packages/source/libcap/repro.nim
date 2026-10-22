@@ -252,8 +252,17 @@ package libcapSource:
       # ``skipConfigure=true`` mode stamps a ``cp -aL src/. build/``
       # action in place of the configure step + threads the
       # ``configureOptions`` through as ``make VAR=VALUE`` overrides.
+      # progs/Makefile regenerates `capshdoc.c.cf` with `./mkcapshdoc.sh`
+      # only to diff it against the shipped `capshdoc.c`, which is what
+      # capsh compiles. The script's `#!/bin/bash` does not exist on every
+      # build host (NixOS has none), and its output depends on the host's
+      # text tools. Satisfy the maintainer check with the shipped file, made
+      # newer than its prerequisites, so the script never runs.
       let pkg = autotools_package(srcDir = "./src", configureOptions = opts,
-                                  skipConfigure = true)
+                                  skipConfigure = true, srcPatches = @[
+        "cp src/progs/capshdoc.c src/progs/capshdoc.c.cf",
+        "touch src/progs/capshdoc.c.cf",
+      ])
       discard pkg.library("libCap")
       discard pkg.executable("capsh")
       discard pkg.executable("getcap")

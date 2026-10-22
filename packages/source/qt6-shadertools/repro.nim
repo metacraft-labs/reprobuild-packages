@@ -83,14 +83,14 @@ package qt6ShaderToolsSource:
     ## qtshadertools git repository.
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtshadertools-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtshadertools-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qtshadertools.git"
 
   fetch:
     ## Vendored tarball. ``file://`` URL keeps the build deterministic.
     ##
     ## sha256 computed over the vendored 1,138,644-byte tarball.
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtshadertools-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtshadertools-everywhere-src-6.8.1.tar.xz"
     sha256: "55b70cd632473a8043c74ba89310f7ba9c5041d253bc60e7ae1fa789169c4846"
     extractStrip: 1
 

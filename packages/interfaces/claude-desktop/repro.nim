@@ -4,7 +4,7 @@
 ## build's commit (`releases/darwin/universal/<version>/Claude-<commit>.zip`).
 ##
 ## Each record was read off the downloaded artifact on m1 (aarch64-darwin),
-## 2026-10-14: `sha256` with `shasum -a 256`, the bundle identifier and
+## 2026-10-16: `sha256` with `shasum -a 256`, the bundle identifier and
 ## version from its `Info.plist`, the team with `codesign -dv`. Every bundle
 ## passed `codesign --verify --deep --strict` and Gatekeeper assessed it as
 ## `source=Notarized Developer ID`:
@@ -18,12 +18,12 @@
 import repro_project_dsl
 
 const
-  ClaudeDesktopVersion = "2.37337.1"
+  ClaudeDesktopVersion = "2.42304.0"
 
 package `claude-desktop`:
   provisioning:
-    tarball url = "https://downloads.claude.ai/releases/darwin/universal/" & ClaudeDesktopVersion & "/Claude-ba51ab579cc4029765083ec9f9f0bd23d37a32ee.zip",
-      sha256 = "06185e36552dad5fa80f6fbdddc0cc9784d8f82cc8d3ec94d31a8140fea990a4",
+    tarball url = "https://downloads.claude.ai/releases/darwin/universal/" & ClaudeDesktopVersion & "/Claude-e7f60e658f15cfece9efa384a78a39aec3c12845.zip",
+      sha256 = "3d63d7180ead976ab268529c693a584df72e06824d5770937c79d6d8bc100cb4",
       archiveType = "zip",
       installMethod = "app-bundle",
       appBundle = "Claude.app",
@@ -35,4 +35,4 @@ package `claude-desktop`:
       cpu = "any",
       os = "macos",
       lockIdentity = "tarball:claude-desktop@" & ClaudeDesktopVersion &
-        ":macos-any:sha256:06185e36552dad5fa80f6fbdddc0cc9784d8f82cc8d3ec94d31a8140fea990a4"
+        ":macos-any:sha256:3d63d7180ead976ab268529c693a584df72e06824d5770937c79d6d8bc100cb4"

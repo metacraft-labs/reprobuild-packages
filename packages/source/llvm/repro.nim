@@ -60,7 +60,12 @@ package llvmSource:
       let pkg = cmake_package(srcDir = "./src/llvm", generator = "Ninja",
         cacheVars = opts,
         extraEnv = @[("CMAKE_BUILD_PARALLEL_LEVEL", "8")],
-        allowSourceWrites = true)
+        allowSourceWrites = true,
+        # LLVM's build tools (tblgen and friends) find their libraries
+        # through CMake's build RPATH. Exporting every dependency's lib dir
+        # made ninja's /bin/sh load the source-built readline, which breaks
+        # a dynamically linked host bash (NixOS).
+        exportBuildLibraryPath = false)
       discard pkg.executable("llvm-config")
       discard pkg.library("libLLVM")
     finally:

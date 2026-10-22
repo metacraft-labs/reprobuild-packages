@@ -17,11 +17,11 @@ package qt6MultimediaSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtmultimedia-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtmultimedia-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qtmultimedia.git"
 
   fetch:
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtmultimedia-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtmultimedia-everywhere-src-6.8.1.tar.xz"
     sha256: "75fa87134f9afab7f0a62c55a4744799ac79519560d19c8e1d4c32bdd173f953"
     extractStrip: 1
 

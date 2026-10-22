@@ -92,11 +92,11 @@ package qt6PositioningSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtpositioning-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtpositioning-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qtpositioning.git"
 
   fetch:
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtpositioning-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtpositioning-everywhere-src-6.8.1.tar.xz"
     sha256: "e310e7232591d4beb1785bfff8ff3e77430bdf5e9a17f56694b732f5267df78d"
     extractStrip: 1
 

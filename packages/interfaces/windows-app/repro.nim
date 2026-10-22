@@ -17,7 +17,7 @@
 ## script runs. Universal (arm64 + x86_64).
 ##
 ## Each record was read off the downloaded artifact on m1 (aarch64-darwin),
-## 2026-10-14: `sha256` with `shasum -a 256`, the bundle identifier and
+## 2026-10-16: `sha256` with `shasum -a 256`, the bundle identifier and
 ## version from its `Info.plist`, the team with `codesign -dv`. Every bundle
 ## passed `codesign --verify --deep --strict` and Gatekeeper assessed it as
 ## `source=Notarized Developer ID`:
@@ -31,12 +31,12 @@
 import repro_project_dsl
 
 const
-  WindowsAppVersion = "11.4.3"
+  WindowsAppVersion = "11.4.4"
 
 package `windows-app`:
   provisioning:
     tarball url = "https://res.public.onecdn.static.microsoft/mro1cdnstorage/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/Windows_App_" & WindowsAppVersion & "_installer.pkg",
-      sha256 = "9dc0e5f4abecfe9dc02d45fafc9813881bd24ecb84125eabe522b01b11a039ca",
+      sha256 = "70041210ec1c40cbcc1913010fb9a7de7e2b0c8d9f336777775789ae65bc9cab",
       archiveType = "pkg",
       installMethod = "app-bundle",
       appBundle = "com.microsoft.rdc.macos.pkg/Payload/Windows App.app",
@@ -48,4 +48,4 @@ package `windows-app`:
       cpu = "any",
       os = "macos",
       lockIdentity = "tarball:windows-app@" & WindowsAppVersion &
-        ":macos-any:sha256:9dc0e5f4abecfe9dc02d45fafc9813881bd24ecb84125eabe522b01b11a039ca"
+        ":macos-any:sha256:70041210ec1c40cbcc1913010fb9a7de7e2b0c8d9f336777775789ae65bc9cab"
