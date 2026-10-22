@@ -23,7 +23,7 @@ package qt6Core5CompatSource:
   versions:
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qt5compat-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qt5compat-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qt5compat.git"
 
   fetch:

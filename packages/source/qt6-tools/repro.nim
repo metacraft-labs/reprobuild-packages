@@ -117,7 +117,7 @@ package qt6ToolsSource:
     ## git repository.
     "6.8.1":
       sourceRevision = "v6.8.1"
-      sourceUrl = "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qttools-everywhere-src-6.8.1.tar.xz"
+      sourceUrl = "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qttools-everywhere-src-6.8.1.tar.xz"
       sourceRepository = "https://code.qt.io/qt/qttools.git"
 
   fetch:
@@ -129,7 +129,7 @@ package qt6ToolsSource:
     ## sha256 was computed over the vendored 10,293,192-byte tarball
     ## downloaded once from the upstream URL recorded in ``versions:``
     ## above.
-    url: "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qttools-everywhere-src-6.8.1.tar.xz"
+    url: "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qttools-everywhere-src-6.8.1.tar.xz"
     sha256: "9d43d409be08b8681a0155a9c65114b69c9a3fc11aef6487bb7fdc5b283c432d"
     extractStrip: 1
 
