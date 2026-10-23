@@ -184,24 +184,19 @@ package hwdataSource:
     ## / ``$out/<name>``). The real consumer-facing publish is the
     ## install-tree mirror at
     ## ``recipes/packages/source/hwdata/.repro/output/install/``
-    ## that step 3 of the shell chain emits — see below. The
-    ## stage-copy is a sanity marker only; step 3 also plants a
+    ## that step 2 of the shell chain emits — see below. The
+    ## stage-copy is a sanity marker only; step 2 also plants a
     ## single-file copy at ``$out/share/hwdataFiles`` so the stage-
     ## copy resolves against the ``files`` candidate list.
     build:
-      # Step 1: configure. hwdata's minimal shell configure writes
-      # Makefile.inc alongside the Makefile, encoding the standard
-      # prefix / datadir / libdir expansions. Runs in-tree via the
-      # from-source-custom cd-into-$extracted preamble.
-      shell "sh configure --prefix=/usr --disable-blacklist"
-      # Step 2: install. The Makefile's ``install`` target copies
-      # the .ids / .txt data files to $(DESTDIR)$(datadir)/hwdata/
-      # and installs hwdata.pc under $(DESTDIR)$(datadir)/pkgconfig.
-      # ``all:`` is empty (data-only), so we can skip straight to
-      # ``install``. DESTDIR=$out puts everything under the
-      # per-package output root.
-      shell "make install DESTDIR=$out"
-      # Step 3: emit the install-tree mirror at ``${OUT_MIRROR}`` for
+      # Step 1: configure and install in one action. hwdata's shell
+      # configure writes Makefile.inc, which the Makefile includes; as
+      # separate actions, a cache hit on configure skipped writing it
+      # into a freshly extracted tree and ``make install`` failed.
+      # ``all:`` is empty (data-only), so ``install`` copies the .ids /
+      # .txt files and hwdata.pc under DESTDIR=$out.
+      shell "sh configure --prefix=/usr --disable-blacklist && make install DESTDIR=$out"
+      # Step 2: emit the install-tree mirror at ``${OUT_MIRROR}`` for
       # downstream sibling recipes' pkg-config search-path channels.
       # ``$OUT_MIRROR`` is populated per-shell-action by the M9.R.79.5
       # from_source_custom emitter — its value is the recipe's own
