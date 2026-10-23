@@ -30,6 +30,7 @@ package extraCmakeModulesSource:
 
   nativeBuildDeps:
     "cmake >=3.16"
+    "ninja >=1.10"
 
   buildDeps:
     discard

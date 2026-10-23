@@ -46,6 +46,7 @@ package plasmaWaylandProtocolsSource:
 
   nativeBuildDeps:
     "cmake >=3.16"
+    "ninja >=1.10"
 
   buildDeps:
     ## extra-cmake-modules supplies KDEInstallDirs the
