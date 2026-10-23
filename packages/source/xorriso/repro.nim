@@ -21,6 +21,10 @@ package xorrisoSource:
     "gcc >=11"
     "pkg-config"
     "patchelf"
+    ## configure and config.status run awk and diff; the action PATH
+    ## carries only declared tools.
+    "gawk"
+    "diff"
 
   buildDeps:
     "zlib"
