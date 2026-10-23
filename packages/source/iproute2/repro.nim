@@ -160,6 +160,8 @@ package iproute2Source:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## make is the build-system driver — iproute2's top-level Makefile
     ## is driven directly by ``make`` after the hand-rolled
     ## ``./configure`` wrapper writes ``config.mk``.

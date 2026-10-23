@@ -17,6 +17,8 @@ package dejavuFontsSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "make"
     "fontforge"
 

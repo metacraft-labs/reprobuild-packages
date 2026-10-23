@@ -13,6 +13,8 @@ package lcms2Source:
     sha256: "d11af569e42a1baa1650d20ad61d12e41af4fead4aa7964a01f93b08b53ab074"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "diff"
     "make"
     "gcc >=11"
     "pkg-config"

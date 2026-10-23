@@ -155,6 +155,8 @@ package alsaLibSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``. alsa-lib's
     ## release tarball pre-generates ``configure`` but the convention's

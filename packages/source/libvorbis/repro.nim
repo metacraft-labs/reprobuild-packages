@@ -69,6 +69,8 @@ package libvorbisSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

@@ -19,6 +19,8 @@ package libndpSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## The release archive includes generated autotools files, while
     ## these tools keep the recipe robust to regenerated inputs.
     "autoconf"

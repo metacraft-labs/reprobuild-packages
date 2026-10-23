@@ -191,6 +191,8 @@ package vimSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## autoconf is REQUIRED (not just a fallback): vim's GitHub archive
     ## ships ``src/configure.ac`` with a pre-generated ``src/configure``
     ## script but the top-level Makefile re-runs ``autoconf`` whenever

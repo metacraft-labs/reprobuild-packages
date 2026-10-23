@@ -23,6 +23,8 @@ package re2cSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "make"
     "gcc >=11"
     "python3 >=3.7"

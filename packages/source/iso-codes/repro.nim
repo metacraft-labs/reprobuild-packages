@@ -15,6 +15,8 @@ package isoCodesSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "sh"
     "make"
     "gettext"

@@ -20,6 +20,8 @@ package mozjs128Source:
     sha256: "0bd18968314afdcc341edd2a9178e305c9d454560a42193154a0f994047fecb8"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "diff"
     "gcc >=11"
     "make >=4.0"
     "pkg-config"

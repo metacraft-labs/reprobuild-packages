@@ -13,6 +13,8 @@ package nsprSource:
     sha256: "55dec317f1401cd2e5dba844d340b930ab7547f818179a4002bce62e6f1c6895"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "diff"
     "gcc >=11"
     "make"
   config:

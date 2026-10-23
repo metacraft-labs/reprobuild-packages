@@ -13,6 +13,8 @@ package libaioSource:
     sha256: "716c7059703247344eb066b54ecbc3ca2134f0103307192e6c2b7dab5f9528ab"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "diff"
     "make"
     "gcc >=11"
   config:

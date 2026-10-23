@@ -21,6 +21,8 @@ package muslSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "gcc >=11"
     "make >=4"
 

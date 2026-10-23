@@ -13,6 +13,8 @@ package libusbSource:
     sha256: "378b3709a405065f8f9fb9f35e82d666defde4d342c2a1b181a9ac134d23c6fe"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "diff"
     "autoconf"
     "automake"
     "libtool"

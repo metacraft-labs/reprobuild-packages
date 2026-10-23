@@ -199,6 +199,8 @@ package eudevSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     ## autoconf generates the upstream ``configure`` script when the
     ## release tarball ships a stale ``configure.ac``.
     "autoconf"

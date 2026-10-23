@@ -17,6 +17,8 @@ package busyboxSource:
     extractStrip: 1
 
   nativeBuildDeps:
+    "awk"
+    "diff"
     "gcc >=11"
     "make >=4"
     "musl"

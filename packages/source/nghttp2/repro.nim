@@ -13,6 +13,8 @@ package nghttp2Source:
     sha256: "88bb94c9e4fd1c499967f83dece36a78122af7d5fb40da2019c56b9ccc6eb9dd"
     extractStrip: 1
   nativeBuildDeps:
+    "awk"
+    "diff"
     "gcc >=11"
     "make"
     "pkg-config"
