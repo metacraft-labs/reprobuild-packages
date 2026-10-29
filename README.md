@@ -27,6 +27,14 @@ Set `REPROBUILD_SRC` when the sibling `reprobuild` checkout is not available at
 Run `nim c -r tools/package_interface_fingerprints.nim` to print the canonical
 interface pins used by external provisioning catalogs.
 
+## Additional provisioning contributions
+
+Import `packages/contributions/tree-sitter/repro` to add the official
+Tree-sitter CLI 0.27.0 Windows x86_64 and ARM64 ZIPs. This targets the existing
+standard-library interface; it does not replace its Nix realization. The
+adjacent generated `provisioning-contributions.json` publishes the same records
+for data-only consumers. Parser users must select the ABI their runtime supports.
+
 ## Consumers and how they reach the catalog
 
 A `uses:` name reprobuild's stdlib does not bundle is looked up here, as
