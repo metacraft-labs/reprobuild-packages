@@ -75,6 +75,9 @@ suite "rustup Windows manager contribution":
       require iface.toolUses.len == 1
       let scratch = createTempDir("rustup-manager-conformance-", "")
       defer: removeDir(scratch)
+      let originalDir = getCurrentDir()
+      setCurrentDir(scratch)
+      defer: setCurrentDir(originalDir)
       # Neither realization probes nor manager diagnostics may select the
       # operator's rustup state or install a toolchain into their home.
       var previous: seq[tuple[name, value: string, present: bool]] = @[]

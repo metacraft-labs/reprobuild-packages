@@ -245,7 +245,6 @@ package reprobuildPackages:
       cacheable = false)
     discard target("test-rustup-contribution", rustupTestRun)
 
-
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("test-consumer-audit", consumerAuditTests)
@@ -261,5 +260,5 @@ package reprobuildPackages:
     discard collect("test-source-integration", actions = integrationTests)
     discard collect("test", actions =
       @[catalogTests, inventoryTests, graphTestRun, tierTestRun,
-        coverageTestRun, lintInterfacesTestRun, macosAppsTestRun, treeSitterTestRun] &
+        coverageTestRun, lintInterfacesTestRun, macosAppsTestRun, treeSitterTestRun, rustupTestRun] &
         sourceTests)
