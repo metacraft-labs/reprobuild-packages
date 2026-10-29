@@ -1,0 +1,68 @@
+{
+  "format": "repro.provisioning-contributions",
+  "schemaVersion": 1,
+  "contributions": [
+    {
+      "targetPackage": "rustup",
+      "targetInterfaceFingerprint": "a5cadf5264dd8dc88afa6cb7b1cf8c9659ffeb19d3be9b91736b1a49b41746f4",
+      "contributor": "github:metacraft-labs/reprobuild-packages",
+      "developInterface": false,
+      "nixProvisioning": [],
+      "tarballProvisioning": [
+        {
+          "packageName": "rustup",
+          "contributor": "github:metacraft-labs/reprobuild-packages",
+          "url": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-pc-windows-msvc/rustup-init.exe",
+          "mirrors": [],
+          "sha256": "6f4bef66261261fcb43131be8720bab817d403a09edec7455c371974b90bdb7e",
+          "archiveType": "raw",
+          "executablePath": "bin/rustup.exe",
+          "executableAlias": "",
+          "prunePaths": [],
+          "nonRedistributable": false,
+          "launcher": "",
+          "closureManifest": "",
+          "detail": {
+            "version": "1.29.1",
+            "sha512": "",
+            "sha1": "",
+            "installMethod": "",
+            "extractPath": "",
+            "extraExecutables": [],
+            "installerArgs": [],
+            "pacmanPackages": [],
+            "bootstrapArgv": [],
+            "env": [],
+            "nested7z": false,
+            "msiAdminInstall": false,
+            "preInstall": [],
+            "preInstallUnrecognized": [],
+            "launcherEmit": [],
+            "cpuLevel": "",
+            "cpuFeatures": "",
+            "appBundle": "",
+            "bundleId": "",
+            "teamId": "",
+            "installerApp": ""
+          },
+          "stripComponents": 0,
+          "packageId": "rustup@1.29.1",
+          "lockIdentity": "tarball:rustup@1.29.1:windows-x86_64:sha256:6f4bef66261261fcb43131be8720bab817d403a09edec7455c371974b90bdb7e",
+          "cpu": "x86_64",
+          "os": "windows",
+          "location": {
+            "file": "repro.nim",
+            "line": 20
+          }
+        }
+      ],
+      "scoopProvisioning": [],
+      "homebrewProvisioning": [],
+      "location": {
+        "file": "repro.nim",
+        "line": 16
+      },
+      "imported": false
+    }
+  ]
+}

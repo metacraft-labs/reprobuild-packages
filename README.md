@@ -35,6 +35,16 @@ standard-library interface; it does not replace its Nix realization. The
 adjacent generated `provisioning-contributions.json` publishes the same records
 for data-only consumers. Parser users must select the ABI their runtime supports.
 
+Import `packages/contributions/rustup/repro` to select the official Rustup
+1.29.1 Windows x86_64 manager. Its pinned raw upstream binary is placed as
+`bin/rustup.exe`, selecting the upstream manager CLI rather than installer
+mode. Realization does not install a Rust toolchain, select a default, change
+global PATH or substitute Cargo for Rustup. The adjacent generated records are the
+data-only form of the same contribution. `test-rustup-contribution` checks
+registration and range selection everywhere; on Windows x86_64 it also
+realizes the genuine binary in a private store and requires manager
+`--version` and `--help`. A metadata-only run does not qualify native execution.
+
 ## Consumers and how they reach the catalog
 
 A `uses:` name reprobuild's stdlib does not bundle is looked up here, as

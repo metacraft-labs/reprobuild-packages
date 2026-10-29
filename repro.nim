@@ -231,6 +231,21 @@ package reprobuildPackages:
       cacheable = false)
     discard target("test-tree-sitter-contribution", treeSitterTestRun)
 
+    let rustupTest = buildNimUnittest.build(
+      source = "tests/test_rustup_contribution.nim",
+      binary = "build" / "test-bin" / ("build-rustup-contribution" & ExeExt),
+      actionId = "packages.build.rustup-contribution",
+      defines = @["reproProviderMode"],
+      extraInputs = @["config.nims"])
+    appendRegisteredActionToolIdentityRefs(rustupTest.action.id, ["gcc"])
+    let rustupTestRun = rustupTest.testBinary.run(
+      actionId = "packages.test-rustup-contribution",
+      after = @[rustupTest.action],
+      registerImplicitName = false,
+      cacheable = false)
+    discard target("test-rustup-contribution", rustupTestRun)
+
+
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("test-consumer-audit", consumerAuditTests)
