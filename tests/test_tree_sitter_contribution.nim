@@ -1,9 +1,12 @@
 ## Read the real registered interface and contribution together: a duplicate
 ## interface or stale fingerprint must fail before Windows provisioning.
+## Range controls use the production selector over the imported real records;
+## they neither download an archive nor mock tool resolution.
 import std/[os, sequtils, strutils, unittest]
 import repro_project_dsl
 import repro_interface_artifacts
 import repro_interface_artifacts/contribution_records
+import repro_tool_profiles/realization_selection
 import "../packages/contributions/tree-sitter/repro"
 
 suite "tree-sitter Windows archives":
@@ -34,6 +37,24 @@ suite "tree-sitter Windows archives":
       check archive.sha256.len == 64
       check archive.lockIdentity == "tarball:tree-sitter@0.27.0:windows-" &
         cpu & ":sha256:" & archive.sha256
+
+  test "both Windows targets satisfy only the offered realization version":
+    let root = currentSourcePath.parentDir.parentDir /
+      "packages/contributions/tree-sitter"
+    let artifact = artifactFromRegisteredDsl(root / "repro.nim")
+    let contributions = artifact.projectInterface.provisioningContributions
+    require contributions.len == 1
+    let records = contributions[0].tarballProvisioning
+    for target in [realizationTargetFor(pcX86_64, poWindows, mlX86_64_v1),
+                   realizationTargetFor(pcAArch64, poWindows)]:
+      let selected = selectTarballRecord(records, target,
+        versionRange = "==0.27.0")
+      check selected.status == kcSelected
+      require selected.index >= 0
+      check records[selected.index].detail.version == TreeSitterVersion
+      for incompatible in ["<0.27.0", ">=0.28.0", "==0.26.0"]:
+        check selectTarballRecord(records, target,
+          versionRange = incompatible).status == kcVersionNotOffered
 
   test "published records match the imported module":
     let root = currentSourcePath.parentDir.parentDir /

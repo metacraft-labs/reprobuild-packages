@@ -23,7 +23,7 @@
           "launcher": "",
           "closureManifest": "",
           "detail": {
-            "version": "",
+            "version": "0.27.0",
             "sha512": "",
             "sha1": "",
             "installMethod": "",
@@ -69,7 +69,7 @@
           "launcher": "",
           "closureManifest": "",
           "detail": {
-            "version": "",
+            "version": "0.27.0",
             "sha512": "",
             "sha1": "",
             "installMethod": "",
@@ -98,7 +98,7 @@
           "os": "windows",
           "location": {
             "file": "repro.nim",
-            "line": 27
+            "line": 28
           }
         }
       ],
