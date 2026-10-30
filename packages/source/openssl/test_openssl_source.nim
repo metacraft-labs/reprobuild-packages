@@ -26,13 +26,15 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest]
+import std/[unittest, strutils]
 
 import repro_project_dsl
 
 # Side-effect import: triggers the package macro which registers
 # fetch spec + configure flags + two library artifacts under
 # ``opensslSource`` at module init time.
+import repro_dsl_stdlib/adapters/cross_zig
+import repro_dsl_stdlib/adapters/native_cross_target
 import ./repro
 
 const ExpectedUrl =
@@ -130,3 +132,42 @@ suite "opensslSource — from-source recipe smoke test":
       "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz"
     check vs[0].sourceRepository ==
       "https://github.com/openssl/openssl"
+
+suite "opensslSource — target-parameterised (ReproOS-Add-On-Mode A15)":
+  const Triple = "armv7-unknown-linux-musleabihf"
+
+  test "a native target is the plan the recipe always had":
+    let plan = opensslBuildPlan(nativeCrossTarget())
+    check plan.configureOptions == ExpectedConfigureFlags
+    check plan.extraEnv.len == 0
+    check plan.postConfigureCommands.len == 0
+
+  test "a zig target configures for the family, static, with zig as the toolchain":
+    let plan = opensslBuildPlan(crossZigTarget(Triple), atomicStubDir = "/b/stub")
+    check plan.configureOptions[0] == "linux-armv4"
+    check "no-shared" in plan.configureOptions
+    check "shared" notin plan.configureOptions
+    check "--libdir=lib" in plan.configureOptions
+    var env: seq[string] = @[]
+    for (k, v) in plan.extraEnv: env.add(k & "=" & v)
+    check "CC=zig cc -target arm-linux-musleabihf -mcpu=generic+v7a+vfp3d16+thumb2" in env
+    check "AR=zig ar" in env
+    check "RANLIB=zig ranlib" in env
+    check "LDFLAGS=-L/b/stub" in env
+    check plan.postConfigureCommands.len == 1
+    check "zig ar rc" in plan.postConfigureCommands[0]
+    check "/b/stub/libatomic.a" in plan.postConfigureCommands[0]
+
+  test "a target no adapter claims is refused by name":
+    expect ValueError:
+      discard opensslBuildPlan(crossTargetFromTriple("mips-unknown-linux-gnu"))
+    try:
+      discard opensslBuildPlan(crossTargetFromTriple("mips-unknown-linux-gnu"))
+    except ValueError as e:
+      check "mips-unknown-linux-gnu" in e.msg
+
+  test "the cross C toolchain is a declared build dependency":
+    var zig = false
+    for dep in registeredNativeBuildDeps("opensslSource"):
+      if dep.startsWith("zig"): zig = true
+    check zig

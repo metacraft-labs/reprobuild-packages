@@ -1,4 +1,4 @@
-## `llm-api-proxy` from source, for `armv7-unknown-linux-musleabihf`.
+## `llm-api-proxy` from source, for whatever target the build names.
 ##
 ## Agent Harbor's LLM API proxy — the health-aware load balancer in front of
 ## the fleet's inference backends — as the fleet's Raspberry Pi add-on host
@@ -29,17 +29,28 @@
 ##
 ## ## Cross-compiling
 ##
-## `cargo_package(target = …, zigCross = true)`: zig is the target's C
-## compiler, archiver and linker (`repro_dsl_stdlib/adapters/cross_zig`),
-## which is what the four C-bearing crates in the closure need —
-## `openssl-sys` 0.9 (links the static OpenSSL this catalog builds for the
-## target, `OPENSSL_NO_VENDOR=1` as upstream's own Nix build sets it),
-## `aws-lc-sys` 0.41 (configures with cmake), `ring` 0.17 and
-## `libsqlite3-sys` 0.28 (bundled). The target's standard library is the
-## catalog's `rust-std` component for the triple, which `cargo_package`
-## merges into a copy of the host `rustc` prefix and drives through `RUSTC`
-## (reprobuild `adapters/rust_target_sysroot`); the recipe names nothing
-## for it. `package` / `installPath` select the one workspace member.
+## The recipe names no target. `repro build --target=<triple>` fills the
+## active build context's `crossTarget` slot and `cargo_package` reads it
+## (Reprobuild-Standard-Library.md §"CrossTarget"): both cargo steps carry
+## `--target`, zig is the target's C compiler, archiver and linker
+## (`repro_dsl_stdlib/adapters/cross_zig`), which is what the four
+## C-bearing crates in the closure need — `openssl-sys` 0.9, `aws-lc-sys`
+## 0.41 (configures with cmake), `ring` 0.17 and `libsqlite3-sys` 0.28
+## (bundled) — and the target's standard library is the catalog's `rust-std`
+## component, merged into a copy of the host `rustc` prefix and driven
+## through `RUSTC` (`adapters/rust_target_sysroot`). Without `--target` the
+## same recipe is a host build.
+##
+## The one thing the recipe says about the target is where `openssl-sys`
+## finds OpenSSL: `OPENSSL_NO_VENDOR=1` (as upstream's own Nix build sets
+## it) and the sibling `packages/source/openssl` recipe, named in
+## `buildDeps:` and built for the same target -- its install mirror is
+## keyed by the target, so `sourcePackageInstallPath` names the target
+## build (From-Source-Build-Recipes.md §"Package-level dependency
+## declarations"). `openssl-sys` reads the directory from
+## `<TRIPLE>_OPENSSL_DIR` on a cross build and `OPENSSL_DIR` on a host
+## build; the triple is spelled from the active target, never written
+## here. `package` / `installPath` select the one workspace member.
 ##
 ## ## What the build produces, measured
 ##
@@ -62,6 +73,8 @@
 import std/os
 
 import repro_project_dsl
+import repro_dsl_stdlib/active_context
+import repro_dsl_stdlib/adapters/cross_zig
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
@@ -84,7 +97,6 @@ const
     ## `git rev-parse <commit>^{tree}` is
     ## `AgentHarborTreeId` whatever git wrote the archive.
   AgentHarborTreeId* = "b2f983bd2b6b45cc4e68e61d5abd15e099c31ec2"
-  Triple* = "armv7-unknown-linux-musleabihf"
   LlmApiProxyBinarySha256* = ""
     ## sha256 of `bin/llm-api-proxy` as this recipe builds it, from ANY
     ## checkout: the cross adapter remaps the project root out of the
@@ -97,7 +109,23 @@ const
     ## (reprobuild-pm issue
     ## 2026-10-30-io-mon-shim-kills-upstream-rustc-1.94.0-on-crates-with-macro-rules);
     ## an empty constant makes the test skip and say so, never pass.
-  OpensslStatic = "openssl-static-" & Triple
+  OpensslRecipe = "openssl"
+    ## The sibling recipe `openssl-sys` links; built for the active target.
+
+proc opensslSysEnv*(ct: CrossTarget; opensslPrefix: string):
+    seq[(string, string)] =
+  ## The environment that points `openssl-sys` at `opensslPrefix` for `ct`:
+  ## the crate reads `<TRIPLE>_OPENSSL_DIR` / `<TRIPLE>_OPENSSL_STATIC`
+  ## when cargo builds for a target and `OPENSSL_DIR` otherwise. Pure, so
+  ## the recipe test checks both spellings without a build.
+  result = @[("OPENSSL_NO_VENDOR", "1")]
+  let triple = ct.tripleOrEmpty()
+  if triple.len > 0:
+    let key = cargoTripleEnvKey(triple)
+    result.add((key & "_OPENSSL_DIR", opensslPrefix))
+    result.add((key & "_OPENSSL_STATIC", "1"))
+  else:
+    result.add(("OPENSSL_DIR", opensslPrefix))
 
 package llmApiProxySource:
   versions:
@@ -117,7 +145,6 @@ package llmApiProxySource:
   nativeBuildDeps:
     "cargo >=1.94 <1.95"
     "rustc >=1.94 <1.95"
-    OpensslStatic
     # The target C toolchain, and what the `*-sys` build scripts run.
     "zig >=0.13 <0.14"
     "cmake >=3.20"
@@ -129,6 +156,15 @@ package llmApiProxySource:
     "gzip"
     "git"
 
+  buildDeps:
+    # What the produced binary LINKS: OpenSSL, built for the same target by
+    # the sibling recipe. A library the output links is a `buildDeps:`
+    # entry, not a `nativeBuildDeps:` one -- and only the former is
+    # resolved to a sibling source recipe's install mirror
+    # (From-Source-Build-Recipes.md §"Package-level dependency
+    # declarations").
+    "openssl >=3.0"
+
   config:
     discard
 
@@ -138,16 +174,11 @@ package llmApiProxySource:
   build:
     setCurrentOwningPackageOverride("llmApiProxySource")
     try:
-      let openssl = sourcePackageInstallPath(OpensslStatic, "usr")
+      let openssl = sourcePackageInstallPath(OpensslRecipe, "usr")
       let pkg = cargo_package(
-        target = Triple,
-        zigCross = true,
         package = "llm-api-proxy",
         installPath = "crates/llm-api-proxy",
-        extraEnv = @[
-          ("ARMV7_UNKNOWN_LINUX_MUSLEABIHF_OPENSSL_DIR", openssl),
-          ("ARMV7_UNKNOWN_LINUX_MUSLEABIHF_OPENSSL_STATIC", "1"),
-          ("OPENSSL_NO_VENDOR", "1")])
+        extraEnv = opensslSysEnv(activeCrossTarget(), openssl))
       discard pkg.executable("llm-api-proxy")
     finally:
       clearCurrentOwningPackageOverride()

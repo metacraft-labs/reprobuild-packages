@@ -133,9 +133,101 @@
 ## ``enable-fips`` for FedRAMP bundles, or a no-deprecated variant that
 ## adds ``no-deprecated`` to drop 1.x-era compatibility shims).
 
+import std/os
+
 import repro_project_dsl
+import repro_dsl_stdlib/active_context
+import repro_dsl_stdlib/adapters/cross_zig
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
+
+# ---------------------------------------------------------------------------
+# The target (ReproOS-Add-On-Mode A15)
+#
+# This recipe builds for whatever the build names: `repro build
+# --target=<triple>` fills the active build context's `crossTarget` slot
+# (Reprobuild-Standard-Library.md §"CrossTarget"), and `opensslBuildPlan`
+# turns the slot into OpenSSL's own vocabulary. A native build is the plan
+# the recipe always had. A zig target (`adapters/cross_zig`, the static-musl
+# appliance targets) is OpenSSL's target for the family (`linux-armv4` for
+# every 32-bit ARM), `no-shared` -- a static-musl consumer links `.a` files
+# and the zig musl target has no shared-object runtime to speak of -- with
+# zig as `CC`, `AR` and `RANLIB`: OpenSSL's `Configure` takes the toolchain
+# from those three, as whole strings `make` expands through the shell, so
+# `zig cc -target … -mcpu=…` needs no wrapper here. `AR` and `RANLIB` must
+# be zig's too, because a GNU `ranlib` on an LLVM-produced archive is not
+# guaranteed to agree with the linker that reads it.
+#
+# The `openssl` command is built for the target as well (the `executable`
+# this package declares has to exist in the staged tree). Its link line
+# asks for `-latomic`, which zig's musl target has no library for (atomics
+# are in compiler-rt), so the plan carries an EMPTY `libatomic.a` made with
+# `zig ar rc` after configure and `-L` to it in `LDFLAGS` -- the same
+# arrangement `cross_zig` makes for cargo's `openssl-sys` link.
+#
+# A target no adapter claims is refused by name: a `--target` for which the
+# catalog has no C toolchain must not produce a host build under a cross
+# build's identity.
+# ---------------------------------------------------------------------------
+
+type
+  OpensslBuildPlan* = object
+    configureOptions*: seq[string]
+    extraEnv*: seq[(string, string)]
+    postConfigureCommands*: seq[string]
+
+proc opensslHostTarget*(): string =
+  if hostOS == "macosx":
+    if hostCPU == "arm64": "darwin64-arm64-cc"
+    else: "darwin64-x86_64-cc"
+  else:
+    if hostCPU == "arm64" or hostCPU == "aarch64": "linux-aarch64"
+    else: "linux-x86_64"
+
+proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
+  ## The configure options, environment and post-configure commands for
+  ## `ct`. Pure, so the recipe test drives it with the adapters directly.
+  ## `atomicStubDir` is where the empty `libatomic.a` of a zig target is
+  ## written (the recipe passes its build directory).
+  if ct.isNative:
+    result.configureOptions = @[
+      opensslHostTarget(),
+      "shared",
+      "no-tests",
+      "no-docs",
+      "--release",
+    ]
+    return
+  if not isZigCrossTarget(ct):
+    raise newException(ValueError,
+      "openssl: no C toolchain is known for the target '" & ct.triple &
+      "' (the catalog builds OpenSSL for the zig targets of " &
+      "repro_dsl_stdlib/adapters/cross_zig); build natively or add the " &
+      "target to the adapter")
+  let t = zigCrossTarget(ct.triple)
+  result.configureOptions = @[
+    t.opensslTarget,
+    "no-shared",
+    "no-tests",
+    "no-docs",
+    "no-async",
+    "no-engine",
+    "no-dso",
+    # `lib`, never `lib64`: the consumer names `<prefix>/lib` through the
+    # install mirror and `openssl-sys` probes `lib` first.
+    "--libdir=lib",
+    "--release",
+  ]
+  result.extraEnv = @[
+    ("CC", zigCrossCc(t)),
+    ("AR", "zig ar"),
+    ("RANLIB", "zig ranlib"),
+  ]
+  if atomicStubDir.len > 0:
+    result.extraEnv.add(("LDFLAGS", "-L" & atomicStubDir))
+    result.postConfigureCommands = @[
+      "mkdir -p " & quoteShell(atomicStubDir) & " && zig ar rc " &
+        quoteShell(atomicStubDir / "libatomic.a")]
 
 # ---------------------------------------------------------------------------
 # Package declaration
@@ -193,6 +285,12 @@ package opensslSource:
     ## gcc is the host C toolchain — openssl is C99 with assembly
     ## fast-paths for SHA / AES / EC primitives.
     "gcc >=11"
+    ## zig is the C toolchain of a cross build (`opensslBuildPlan`): one
+    ## driver for every static-musl appliance target. Declared
+    ## unconditionally because dependency blocks resolve their `when`s at
+    ## compile time, not from the solved target; a native build has it on
+    ## PATH and never runs it.
+    "zig >=0.13 <0.14"
     ## perl is required by openssl's ``./Configure`` script (the
     ## Configure script IS a Perl script) plus a number of asm
     ## generators in the build that emit AT&T-syntax assembly for the
@@ -250,23 +348,14 @@ package opensslSource:
     ## tarball and trips the build with ``No such file or directory``).
     setCurrentOwningPackageOverride("opensslSource")
     try:
-      let target =
-        if hostOS == "macosx":
-          if hostCPU == "arm64": "darwin64-arm64-cc"
-          else: "darwin64-x86_64-cc"
-        else:
-          if hostCPU == "arm64" or hostCPU == "aarch64": "linux-aarch64"
-          else: "linux-x86_64"
-      let opts = @[
-        target,
-        "shared",
-        "no-tests",
-        "no-docs",
-        "--release",
-      ]
+      # The active target decides the plan (see the module header).
+      let plan = opensslBuildPlan(activeCrossTarget(),
+        atomicStubDir = activeProviderProjectRoot() / "build" / "zig-atomic-stub")
       let pkg = autotools_package(srcDir = "./src",
-                                  configureOptions = opts,
-                                  configureScriptName = "Configure")
+                                  configureOptions = plan.configureOptions,
+                                  configureScriptName = "Configure",
+                                  extraEnv = plan.extraEnv,
+                                  postConfigureCommands = plan.postConfigureCommands)
       discard pkg.executable("openssl")
       discard pkg.library("libCrypto")
       discard pkg.library("libSsl")

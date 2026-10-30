@@ -171,7 +171,6 @@ const sourceTestFiles* = [
   "packages/source/ninja/test_ninja_source.nim",
   "packages/source/nixfmt/test_nixfmt_source.nim",
   "packages/source/nspr/test_nspr_source.nim",
-  "packages/source/openssl-static-armv7-unknown-linux-musleabihf/test_openssl_static_armv7_source.nim",
   "packages/source/openssl/test_openssl_source.nim",
   "packages/source/pam/test_pam_source.nim",
   "packages/source/pango/test_pango_source.nim",

@@ -8,6 +8,8 @@ import repro_test_support/reasoned_skip
 
 import repro_project_dsl
 import repro_project_dsl/cargo_vendor
+import repro_dsl_stdlib/adapters/cross_zig
+import repro_dsl_stdlib/adapters/native_cross_target
 import ./repro
 
 suite "llm-api-proxy source recipe":
@@ -22,13 +24,19 @@ suite "llm-api-proxy source recipe":
     # The tree id is git-version independent; the archive hash is not.
     check AgentHarborTreeId.len == 40
 
-  test "declares the cross toolchain and the target-side OpenSSL":
+  test "declares the cross toolchain and the OpenSSL it links":
     let deps = registeredNativeBuildDeps("llmApiProxySource")
-    check "openssl-static-armv7-unknown-linux-musleabihf" in deps
-    # The target standard library is the catalog's `rust-std` component,
-    # merged by `cargo_package`: no sysroot recipe is named.
+    # The library the binary links is a buildDeps: entry, and it is the
+    # catalog's own openssl recipe: no target-suffixed package.
+    var openssl = false
+    for dep in registeredBuildDeps("llmApiProxySource"):
+      if dep.startsWith("openssl"):
+        openssl = true
+        check not dep.contains("armv7")
+    check openssl
     for dep in deps:
       check not dep.startsWith("rust-sysroot")
+      check not dep.startsWith("openssl")
     var zig, cmake = false
     for dep in deps:
       if dep.startsWith("zig"): zig = true
@@ -94,3 +102,24 @@ suite "llm-api-proxy build output is path-independent":
       let execution = uncontrolledExecCmdEx("sha256sum " & quoteShell(built))
       check execution.exitCode == 0
       check execution.output.split(' ')[0] == LlmApiProxyBinarySha256
+
+suite "llm-api-proxy names no target":
+  test "openssl-sys is pointed at the prefix in the target's spelling":
+    let cross = opensslSysEnv(
+      crossZigTarget("armv7-unknown-linux-musleabihf"), "/p/usr")
+    check ("ARMV7_UNKNOWN_LINUX_MUSLEABIHF_OPENSSL_DIR", "/p/usr") in cross
+    check ("ARMV7_UNKNOWN_LINUX_MUSLEABIHF_OPENSSL_STATIC", "1") in cross
+    check ("OPENSSL_NO_VENDOR", "1") in cross
+    let native = opensslSysEnv(nativeCrossTarget(), "/p/usr")
+    check ("OPENSSL_DIR", "/p/usr") in native
+    for (k, _) in native:
+      check not k.startsWith("ARMV7")
+
+  test "the recipe code spells no triple":
+    # Code only: the prose may name the Pi; the recipe must not.
+    var code = ""
+    for line in readFile(currentSourcePath.parentDir / "repro.nim").splitLines:
+      if not line.strip().startsWith("#"): code.add(line & "\n")
+    check "armv7" notin code
+    check "zigCross" notin code
+    check "target =" notin code
