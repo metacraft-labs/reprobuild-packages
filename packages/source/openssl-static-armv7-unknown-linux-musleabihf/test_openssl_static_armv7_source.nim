@@ -39,3 +39,18 @@ suite "openssl-static-armv7-unknown-linux-musleabihf":
         exe = a.artifactName == "openssl-static-armv7-unknown-linux-musleabihf"
       if a.kind == dakLibrary: lib = true
     check exe and lib
+
+  test "no checkout path reaches the archives: /usr prefix, DESTDIR, bare tool names":
+    ## The prefix and the compiler command line end up in `libcrypto.a` and
+    ## from there in each consumer's binary (11 strings of the producing
+    ## checkout in `llm-api-proxy` before this), so the two-checkout
+    ## reproducibility of every consumer rests on these.
+    let sh = libCryptoBuildShell()
+    check "./Configure linux-armv4" in sh
+    check "--prefix=/usr" in sh
+    check "--openssldir=/etc/ssl" in sh
+    check "make install_sw DESTDIR=\"$out.dest\"" in sh
+    check "export PATH=\"$W:$PATH\"; CC=cc AR=ar RANLIB=ranlib perl ./Configure" in sh
+    check "--prefix=\"$out\"" notin sh
+    check "CC=\"$W/cc\"" notin sh
+    check "-ffile-prefix-map" notin sh

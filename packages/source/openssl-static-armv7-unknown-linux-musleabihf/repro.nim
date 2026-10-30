@@ -22,6 +22,30 @@
 ## for (atomics are in compiler-rt; the cargo side carries an empty
 ## `libatomic.a` for the same reason).
 ##
+## Reproducible across checkouts: `Configure` compiles its prefix
+## (`OPENSSLDIR`, `MODULESDIR`, …) and its own compiler command line
+## (`buildinf.h`, what `OPENSSL_version(OPENSSL_CFLAGS)` reports) into
+## `libcrypto.a`, and a consumer links them into its binary. The prefix is
+## therefore the checkout-independent `/usr` (with `/etc/ssl` as the
+## OpenSSL directory, which is where the target's distribution keeps it),
+## installed through `DESTDIR` into `$out`; and the zig wrappers are named
+## by their bare names (`cc`, `ar`, `ranlib`) with their directory first on
+## PATH, so the recorded command line carries no path. OpenSSL compiles its
+## sources by relative path, so `__FILE__` needs no mapping (a
+## `-ffile-prefix-map` would itself put the build directory into that
+## command line). The build date is `SOURCE_DATE_EPOCH`, which the engine
+## sets. `test_openssl_static_armv7_source.nim` checks the spelling.
+##
+## What still names the checkout: zig's driver emits DWARF by default, and
+## each compile unit's `DW_AT_comp_dir` in `libcrypto.a` is the build
+## directory (978 occurrences). The archives are an intermediate — the
+## cargo side links them with `-C strip=debuginfo`, so no consumer binary
+## carries them (measured: two checkouts, one `llm-api-proxy`). `-g0`
+## would drop them, but it changes the recorded command line and so the
+## consumer's bytes, which would move `LlmApiProxyBinarySha256` and the
+## published digest; it is deferred to the next toolchain change that
+## moves them anyway.
+##
 ## Pinned at 3.5.4, the current LTS line; the hash is the upstream release
 ## tarball's.
 
@@ -53,6 +77,24 @@ proc writeWrappers(): string =
     result.add("printf '%s' " & q(zigCrossWrapperScript(role, t, "$W/lib")) &
       " > \"$W/" & role & "\"; chmod 755 \"$W/" & role & "\"; ")
 
+proc libCryptoBuildShell*(): string =
+  ## The library's build shell, exported so the recipe's test can hold the
+  ## checkout-independence settings to their spelling. OpenSSL's build
+  ## writes into the source tree, so it is built from a copy; `$out` holds
+  ## only the installed prefix.
+  "set -e; W=\"$out.wrappers\"; rm -rf \"$W\" \"$out.build\" \"$out.dest\"; mkdir -p \"$out\"; " &
+    "find \"$out\" -mindepth 1 -maxdepth 1 ! -name .stamps ! -name bin -exec rm -rf -- {} +; " &
+    writeWrappers() &
+    "cp -a \"$extracted\" \"$out.build\"; cd \"$out.build\"; " &
+    "export PATH=\"$W:$PATH\"; CC=cc AR=ar RANLIB=ranlib " &
+    "perl ./Configure linux-armv4 no-shared no-apps no-tests no-docs no-async " &
+    "no-engine no-dso --prefix=/usr --openssldir=/etc/ssl --libdir=lib >/dev/null; " &
+    "make -j4 >/dev/null; make install_sw DESTDIR=\"$out.dest\" >/dev/null; " &
+    "cp -a \"$out.dest/usr/.\" \"$out/\"; " &
+    "rm -rf \"$out.build\" \"$out.dest\" \"$W\"; " &
+    "test -f \"$out/lib/libcrypto.a\" && test -f \"$out/lib/libssl.a\" && " &
+    "test -f \"$out/include/openssl/ssl.h\""
+
 package opensslStaticArmv7MuslSource:
   versions:
     "3.5.4":
@@ -79,19 +121,7 @@ package opensslStaticArmv7MuslSource:
 
   library libCrypto:
     build:
-      # OpenSSL's build writes into the source tree, so it is built from a
-      # copy; `$out` holds only the installed prefix.
-      shell "set -e; W=\"$out.wrappers\"; rm -rf \"$W\" \"$out.build\"; mkdir -p \"$out\"; " &
-        "find \"$out\" -mindepth 1 -maxdepth 1 ! -name .stamps ! -name bin -exec rm -rf -- {} +; " &
-        writeWrappers() &
-        "cp -a \"$extracted\" \"$out.build\"; cd \"$out.build\"; " &
-        "CC=\"$W/cc\" AR=\"$W/ar\" RANLIB=\"$W/ranlib\" " &
-        "perl ./Configure linux-armv4 no-shared no-apps no-tests no-docs no-async " &
-        "no-engine no-dso --prefix=\"$out\" --libdir=lib >/dev/null; " &
-        "make -j4 >/dev/null; make install_sw >/dev/null; " &
-        "rm -rf \"$out.build\" \"$W\"; " &
-        "test -f \"$out/lib/libcrypto.a\" && test -f \"$out/lib/libssl.a\" && " &
-        "test -f \"$out/include/openssl/ssl.h\""
+      shell libCryptoBuildShell()
 
   runtimeDeps:
     discard

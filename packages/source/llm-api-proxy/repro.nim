@@ -52,8 +52,16 @@
 ## bytes, `d22a6333…7731`) differed in those strings and nothing else.
 ## With the cross adapter's `--remap-path-prefix=<project root>=/build`
 ## those strings read `/build/.repro/cargo-vendor/vendor/…` wherever the
-## checkout is, and `LlmApiProxyBinarySha256` below is the sha256 two
-## checkouts must both produce.
+## checkout is; the 11 that remained came from `libcrypto.a` (OpenSSL's
+## install prefix and its recorded compiler command line), and the openssl
+## recipe now keeps both path-free. Measured 2026-10-30 with reprobuild
+## `agents` `398afc67d` from two checkouts at different paths
+## (`…/rpi2-infra/reprobuild-packages-p5` and
+## `…/rpi2-infra-alt/reprobuild-packages-p6`): byte-identical
+## `bin/llm-api-proxy`, 16 836 776 bytes, no string of either checkout,
+## sha256 `LlmApiProxyBinarySha256` below. Published under the rpi2
+## profile's entry key as archive digest
+## `blake3:8d8e4bc9c4078dd76005b3226e503186dc06579a26d52d66a3cb6ba8768ec5b5`.
 ## On a Raspberry Pi 2 (Raspberry Pi OS trixie armhf) under
 ## `DynamicUser=yes ProtectSystem=strict` it answers `/v1/models` from the
 ## fleet backend at ~12 MB RSS; the proxy is static, so it resolves backend
@@ -85,18 +93,15 @@ const
     ## `AgentHarborTreeId` whatever git wrote the archive.
   AgentHarborTreeId* = "b2f983bd2b6b45cc4e68e61d5abd15e099c31ec2"
   Triple* = "armv7-unknown-linux-musleabihf"
-  LlmApiProxyBinarySha256* = ""
+  LlmApiProxyBinarySha256* =
+    "b4417814cc42b15afbc0a6f274efce8f5c403efce0c5fbb0ea464034962664ff"
     ## sha256 of `bin/llm-api-proxy` as this recipe builds it, from ANY
     ## checkout: the cross adapter remaps the project root out of the
-    ## binary (reprobuild `cross_zig`, `--remap-path-prefix=<root>=/build`),
-    ## so two builds must agree byte for byte. The test beside the recipe
-    ## checks a present build output against it, so a toolchain or closure
-    ## change that moves the bytes moves this constant with it, in review.
-    ## EMPTY until measured: the two-checkout build that fills it could not
-    ## run on 2026-10-30 because io-mon's shim kills the tarball rustc
-    ## (reprobuild-pm issue
-    ## 2026-10-30-io-mon-shim-kills-upstream-rustc-1.94.0-on-crates-with-macro-rules);
-    ## an empty constant makes the test skip and say so, never pass.
+    ## binary (reprobuild `cross_zig`, `--remap-path-prefix=<root>=/build`)
+    ## and the openssl recipe embeds no path, so two builds agree byte for
+    ## byte (measured, see above). The test beside the recipe checks a
+    ## present build output against it, so a toolchain or closure change
+    ## that moves the bytes moves this constant with it, in review.
   RustSysroot = "rust-sysroot-" & Triple
   OpensslStatic = "openssl-static-" & Triple
 

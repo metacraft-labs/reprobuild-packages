@@ -83,9 +83,8 @@ suite "llm-api-proxy build output is path-independent":
     # move in review. Without a build output there is nothing to check.
     let built = currentSourcePath.parentDir / ".repro" / "output" / "install" /
       "usr" / "bin" / "llm-api-proxy"
-    if LlmApiProxyBinarySha256.len == 0:
-      skip("no recorded sha256 yet: the two-checkout build is blocked on reprobuild-pm issue 2026-10-30-io-mon-shim-kills-upstream-rustc-1.94.0-on-crates-with-macro-rules")
-    elif not fileExists(built):
+    check LlmApiProxyBinarySha256.len == 64
+    if not fileExists(built):
       skip("no build output in this checkout; run `repro build packages/source/llm-api-proxy` first")
     else:
       let execution = uncontrolledExecCmdEx("sha256sum " & quoteShell(built))

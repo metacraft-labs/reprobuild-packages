@@ -59,8 +59,17 @@ package rustSysrootArmv7MuslSource:
   # compiler a consumer points `RUSTC` at.
   executable `rust-sysroot-armv7-unknown-linux-musleabihf`:
     build:
-      # The host prefix is the one whose `rustc` the engine put on PATH.
-      shell "set -e; HOST_RUSTC=$(command -v rustc); " &
+      # The host prefix is the one whose `rustc` the engine put on PATH —
+      # skipping any `rustc` under this package's own directory: that is
+      # this package's earlier output, which a consumer's PATH puts first,
+      # and copying it would make `bin/rustc` a link to itself. (`$out` is
+      # `<package dir>/.repro/build/…`, so the package directory is its
+      # prefix before `/.repro/`.)
+      shell "set -e; PKG=\"${out%/.repro/*}\"; HOST_RUSTC=; IFS=:; for d in $PATH; do " &
+        "[ -x \"$d/rustc\" ] || continue; " &
+        "case \"$d\" in \"$PKG\"/*) continue;; esac; " &
+        "HOST_RUSTC=\"$d/rustc\"; break; done; unset IFS; " &
+        "[ -n \"$HOST_RUSTC\" ] || { echo \"rust-sysroot: no host rustc on PATH\" >&2; exit 1; }; " &
         "HOST_PREFIX=$(CDPATH= cd -- \"$(dirname -- \"$HOST_RUSTC\")/..\" && pwd); " &
         "case \"$(\"$HOST_RUSTC\" --version)\" in \"rustc " & RustVersion & " \"*) ;; " &
         "*) echo \"rust-sysroot: host rustc is $(\"$HOST_RUSTC\" --version), the " &
