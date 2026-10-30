@@ -154,6 +154,11 @@ suite "opensslSource — target-parameterised (ReproOS-Add-On-Mode A15)":
     check "AR=zig ar" in env
     check "RANLIB=zig ranlib" in env
     check "LDFLAGS=-L/b/stub" in env
+    check "--openssldir=/etc/ssl" in plan.configureOptions
+    # Nothing in the plan names a directory of the machine: the compiler by
+    # bare name, the prefix the convention's `/usr`, the stub relative.
+    for opt in plan.configureOptions: check "/home/" notin opt
+    for (_, v) in plan.extraEnv: check "/home/" notin v
     check plan.postConfigureCommands.len == 1
     check "zig ar rc" in plan.postConfigureCommands[0]
     check "/b/stub/libatomic.a" in plan.postConfigureCommands[0]

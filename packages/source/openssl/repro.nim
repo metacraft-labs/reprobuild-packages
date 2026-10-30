@@ -216,6 +216,15 @@ proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
     # `lib`, never `lib64`: the consumer names `<prefix>/lib` through the
     # install mirror and `openssl-sys` probes `lib` first.
     "--libdir=lib",
+    # Reproducible across checkouts: `Configure` compiles its prefix
+    # (`OPENSSLDIR`, `MODULESDIR`, …) and its own compiler command line
+    # (`buildinf.h`) into `libcrypto.a`, and a consumer links them into
+    # its binary. The prefix is the convention's checkout-independent
+    # `/usr` (installed through DESTDIR), the OpenSSL directory is where
+    # the target's distribution keeps it, the compiler is spelled by bare
+    # name (`zig cc -target …`), and the atomic stub is reached by a path
+    # relative to the build directory -- so nothing records the checkout.
+    "--openssldir=/etc/ssl",
     "--release",
   ]
   result.extraEnv = @[
@@ -349,8 +358,11 @@ package opensslSource:
     setCurrentOwningPackageOverride("opensslSource")
     try:
       # The active target decides the plan (see the module header).
+      # The stub directory is RELATIVE to the build directory (where
+      # configure and make run): an absolute path here would be recorded
+      # in `libcrypto.a`'s command line and name the checkout.
       let plan = opensslBuildPlan(activeCrossTarget(),
-        atomicStubDir = activeProviderProjectRoot() / "build" / "zig-atomic-stub")
+        atomicStubDir = "zig-atomic-stub")
       let pkg = autotools_package(srcDir = "./src",
                                   configureOptions = plan.configureOptions,
                                   configureScriptName = "Configure",

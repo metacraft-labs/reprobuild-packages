@@ -97,18 +97,26 @@ const
     ## `git rev-parse <commit>^{tree}` is
     ## `AgentHarborTreeId` whatever git wrote the archive.
   AgentHarborTreeId* = "b2f983bd2b6b45cc4e68e61d5abd15e099c31ec2"
-  LlmApiProxyBinarySha256* = ""
+  LlmApiProxyBinarySha256* =
+    "b4417814cc42b15afbc0a6f274efce8f5c403efce0c5fbb0ea464034962664ff"
     ## sha256 of `bin/llm-api-proxy` as this recipe builds it, from ANY
     ## checkout: the cross adapter remaps the project root out of the
-    ## binary (reprobuild `cross_zig`, `--remap-path-prefix=<root>=/build`),
-    ## so two builds must agree byte for byte. The test beside the recipe
-    ## checks a present build output against it, so a toolchain or closure
-    ## change that moves the bytes moves this constant with it, in review.
-    ## EMPTY until measured: the two-checkout build that fills it could not
-    ## run on 2026-10-30 because io-mon's shim kills the tarball rustc
-    ## (reprobuild-pm issue
-    ## 2026-10-30-io-mon-shim-kills-upstream-rustc-1.94.0-on-crates-with-macro-rules);
-    ## an empty constant makes the test skip and say so, never pass.
+    ## binary (reprobuild `cross_zig`, `--remap-path-prefix=<root>=/build`)
+    ## and the openssl recipe embeds no path (`--prefix=/usr`,
+    ## `--openssldir=/etc/ssl`, a path-free compiler command line), so two
+    ## builds agree byte for byte. Measured 2026-10-30 with reprobuild
+    ## `agents` `398afc67d` from two checkouts at different paths, through
+    ## the interim target-suffixed recipes this recipe no longer names
+    ## (16 836 776 bytes; published under the rpi2 profile's entry key as
+    ## archive digest
+    ## `blake3:8d8e4bc9c4078dd76005b3226e503186dc06579a26d52d66a3cb6ba8768ec5b5`).
+    ## The catalog route (`buildDeps: openssl` built for the target) is
+    ## expected to reproduce it and has not yet been measured on a host
+    ## where the pinned rustc resolves (reprobuild-pm issue
+    ## 2026-10-30-path-mode-realizes-a-nix-rustc-outside-the-declared-version-range).
+    ## The test beside the recipe checks a present build output against it,
+    ## so a toolchain or closure change that moves the bytes moves this
+    ## constant with it, in review.
   OpensslRecipe = "openssl"
     ## The sibling recipe `openssl-sys` links; built for the active target.
 
