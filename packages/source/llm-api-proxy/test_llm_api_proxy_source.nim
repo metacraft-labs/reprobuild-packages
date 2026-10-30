@@ -24,8 +24,11 @@ suite "llm-api-proxy source recipe":
 
   test "declares the cross toolchain and the target-side OpenSSL":
     let deps = registeredNativeBuildDeps("llmApiProxySource")
-    check "rust-sysroot-armv7-unknown-linux-musleabihf" in deps
     check "openssl-static-armv7-unknown-linux-musleabihf" in deps
+    # The target standard library is the catalog's `rust-std` component,
+    # merged by `cargo_package`: no sysroot recipe is named.
+    for dep in deps:
+      check not dep.startsWith("rust-sysroot")
     var zig, cmake = false
     for dep in deps:
       if dep.startsWith("zig"): zig = true

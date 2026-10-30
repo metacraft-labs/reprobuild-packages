@@ -35,11 +35,11 @@
 ## `openssl-sys` 0.9 (links the static OpenSSL this catalog builds for the
 ## target, `OPENSSL_NO_VENDOR=1` as upstream's own Nix build sets it),
 ## `aws-lc-sys` 0.41 (configures with cmake), `ring` 0.17 and
-## `libsqlite3-sys` 0.28 (bundled). rustc is the catalog's host compiler with
-## the target's standard library merged in
-## (`packages/source/rust-sysroot-armv7-unknown-linux-musleabihf`), reached
-## through `RUSTC`. `package` / `installPath` select the one workspace
-## member.
+## `libsqlite3-sys` 0.28 (bundled). The target's standard library is the
+## catalog's `rust-std` component for the triple, which `cargo_package`
+## merges into a copy of the host `rustc` prefix and drives through `RUSTC`
+## (reprobuild `adapters/rust_target_sysroot`); the recipe names nothing
+## for it. `package` / `installPath` select the one workspace member.
 ##
 ## ## What the build produces, measured
 ##
@@ -97,7 +97,6 @@ const
     ## (reprobuild-pm issue
     ## 2026-10-30-io-mon-shim-kills-upstream-rustc-1.94.0-on-crates-with-macro-rules);
     ## an empty constant makes the test skip and say so, never pass.
-  RustSysroot = "rust-sysroot-" & Triple
   OpensslStatic = "openssl-static-" & Triple
 
 package llmApiProxySource:
@@ -118,7 +117,6 @@ package llmApiProxySource:
   nativeBuildDeps:
     "cargo >=1.94 <1.95"
     "rustc >=1.94 <1.95"
-    RustSysroot
     OpensslStatic
     # The target C toolchain, and what the `*-sys` build scripts run.
     "zig >=0.13 <0.14"
@@ -140,7 +138,6 @@ package llmApiProxySource:
   build:
     setCurrentOwningPackageOverride("llmApiProxySource")
     try:
-      let sysroot = sourcePackageInstallPath(RustSysroot, "usr")
       let openssl = sourcePackageInstallPath(OpensslStatic, "usr")
       let pkg = cargo_package(
         target = Triple,
@@ -148,7 +145,6 @@ package llmApiProxySource:
         package = "llm-api-proxy",
         installPath = "crates/llm-api-proxy",
         extraEnv = @[
-          ("RUSTC", sysroot / "bin" / "rustc"),
           ("ARMV7_UNKNOWN_LINUX_MUSLEABIHF_OPENSSL_DIR", openssl),
           ("ARMV7_UNKNOWN_LINUX_MUSLEABIHF_OPENSSL_STATIC", "1"),
           ("OPENSSL_NO_VENDOR", "1")])

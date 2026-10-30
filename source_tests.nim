@@ -210,7 +210,6 @@ const sourceTestFiles* = [
   "packages/source/qt6-wayland/test_qt6_wayland_source.nim",
   "packages/source/readline/test_readline_source.nim",
   "packages/source/rsync/test_rsync_source.nim",
-  "packages/source/rust-sysroot-armv7-unknown-linux-musleabihf/test_rust_sysroot_armv7_source.nim",
   "packages/source/sddm/test_sddm_source.nim",
   "packages/source/searxng/test_searxng_source.nim",
   "packages/source/sed/test_sed_source.nim",
