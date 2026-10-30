@@ -35,6 +35,24 @@ standard-library interface; it does not replace its Nix realization. The
 adjacent generated `provisioning-contributions.json` publishes the same records
 for data-only consumers. Parser users must select the ABI their runtime supports.
 
+The separate `tree-sitter-runtime` interface describes the C library, not the
+generator. Its source recipe at `packages/source/tree-sitter-runtime` builds
+upstream 0.25.10 through the upstream CMake library project. The normal install
+mirror exports `lib/libtree-sitter.a` and `include/tree_sitter/api.h` through
+the library and header search channels. It does not add a command-line tool.
+
+For a Linux source-build control using Nix-provisioned build tools:
+
+```console
+repro build packages/source/tree-sitter-runtime --tool-provisioning=nix --daemon=off
+python3 packages/source/tree-sitter-runtime/tests/verify_runtime.py
+```
+
+The C control uses the build's recorded compiler and exact produced inputs,
+executes parser allocation/deletion, and requires missing-header and
+missing-archive refusals. Linux controls do not establish native Windows
+execution; platform coverage is not upgraded by the recipe declaration.
+
 Import `packages/contributions/rustup/repro` to select the official Rustup
 1.29.1 Windows x86_64 manager. Its pinned raw upstream binary is placed as
 `bin/rustup.exe`, selecting the upstream manager CLI rather than installer

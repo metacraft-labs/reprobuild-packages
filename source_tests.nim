@@ -221,6 +221,7 @@ const sourceTestFiles* = [
   "packages/source/tar/test_tar_source.nim",
   "packages/source/test_autotools_configure_tools.nim",
   "packages/source/test_source_recipe_paths.nim",
+  "packages/source/tree-sitter-runtime/test_tree_sitter_runtime_source.nim",
   "packages/source/util-linux/test_util_linux_source.nim",
   "packages/source/util-macros/test_util_macros_source.nim",
   "packages/source/vim/test_vim_source.nim",
