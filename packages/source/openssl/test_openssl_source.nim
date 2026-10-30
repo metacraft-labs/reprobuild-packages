@@ -150,10 +150,13 @@ suite "opensslSource — target-parameterised (ReproOS-Add-On-Mode A15)":
     check "--libdir=lib" in plan.configureOptions
     var env: seq[string] = @[]
     for (k, v) in plan.extraEnv: env.add(k & "=" & v)
-    check "CC=zig cc -target arm-linux-musleabihf -mcpu=generic+v7a+vfp3d16+thumb2" in env
+    # `-g0`: without it every compile unit records the build directory as
+    # its DWARF `comp_dir`, and a consumer that keeps debug information
+    # carries the checkout's path.
+    check "CC=zig cc -target arm-linux-musleabihf -mcpu=generic+v7a+vfp3d16+thumb2 -g0" in env
     check "AR=zig ar" in env
     check "RANLIB=zig ranlib" in env
-    check "LDFLAGS=-L/b/stub" in env
+    check "LDFLAGS=-L/b/stub -Wl,--strip-debug" in env
     check "--openssldir=/etc/ssl" in plan.configureOptions
     # Nothing in the plan names a directory of the machine: the compiler by
     # bare name, the prefix the convention's `/usr`, the stub relative.

@@ -223,17 +223,29 @@ proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
     # `/usr` (installed through DESTDIR), the OpenSSL directory is where
     # the target's distribution keeps it, the compiler is spelled by bare
     # name (`zig cc -target …`), and the atomic stub is reached by a path
-    # relative to the build directory -- so nothing records the checkout.
+    # relative to the build directory. The last thing that names the
+    # checkout is debug information: zig's driver emits DWARF by default,
+    # and each compile unit's `DW_AT_comp_dir` is the build directory (932
+    # in `libcrypto.a`, measured at 8d4f448). `CC` therefore carries `-g0`.
+    # The interim armv7 recipe deferred it because it moved a published
+    # digest; this recipe is the change that moves that digest anyway.
     "--openssldir=/etc/ssl",
     "--release",
   ]
   result.extraEnv = @[
-    ("CC", zigCrossCc(t)),
+    ("CC", zigCrossCc(t) & " -g0"),
     ("AR", "zig ar"),
     ("RANLIB", "zig ranlib"),
   ]
+  # The `openssl` command links zig's own libc and compiler-rt objects,
+  # which zig compiles at link time with DWARF whatever `CC` says, so their
+  # `comp_dir` (the build directory) reaches the binary. The libraries are
+  # archives and never pass through this link.
+  var ldflags = "-Wl,--strip-debug"
   if atomicStubDir.len > 0:
-    result.extraEnv.add(("LDFLAGS", "-L" & atomicStubDir))
+    ldflags = "-L" & atomicStubDir & " " & ldflags
+  result.extraEnv.add(("LDFLAGS", ldflags))
+  if atomicStubDir.len > 0:
     result.postConfigureCommands = @[
       "mkdir -p " & quoteShell(atomicStubDir) & " && zig ar rc " &
         quoteShell(atomicStubDir / "libatomic.a")]
