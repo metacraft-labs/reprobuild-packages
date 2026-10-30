@@ -8,14 +8,33 @@ import repro_interface_artifacts
 import repro_interface_artifacts/contribution_records
 import repro_tool_profiles/realization_selection
 import "../packages/contributions/tree-sitter/repro"
+import tree_sitter_contribution_support
 
 suite "tree-sitter Windows archives":
   test "targets the canonical interface without redefining it":
     let packages = registeredPackages()
     let targets = packages.filterIt(it.packageName == "tree-sitter")
     require targets.len == 1
-    check canonicalPackageInterfaceFingerprint(targets[0], packages) ==
-      TreeSitterInterfaceFingerprint
+    let actualFingerprint = canonicalPackageInterfaceFingerprint(targets[0], packages)
+    check actualFingerprint == ExpectedSourceTreeSitterFingerprint
+    check TreeSitterInterfaceFingerprint == LegacyTreeSitterFingerprint
+    echo "canonical source tree-sitter fingerprint: ", actualFingerprint
+    let root = currentSourcePath.parentDir.parentDir /
+      "packages/contributions/tree-sitter"
+    if actualFingerprint == TreeSitterInterfaceFingerprint:
+      let artifact = artifactFromRegisteredDsl(root / "repro.nim")
+      require artifact.projectInterface.provisioningContributions.len == 1
+      check artifact.projectInterface.provisioningContributions[0].targetInterfaceFingerprint ==
+        actualFingerprint
+    else:
+      var refusal = ""
+      try:
+        discard artifactFromRegisteredDsl(root / "repro.nim")
+      except ValueError as error:
+        refusal = error.msg
+      check "interface mismatch" in refusal
+      check TreeSitterInterfaceFingerprint in refusal
+      check actualFingerprint in refusal
     let contributions = registeredProvisioningContributions()
     require contributions.len == 1
     let contribution = contributions[0]
@@ -39,10 +58,7 @@ suite "tree-sitter Windows archives":
         cpu & ":sha256:" & archive.sha256
 
   test "both Windows targets satisfy only the offered realization version":
-    let root = currentSourcePath.parentDir.parentDir /
-      "packages/contributions/tree-sitter"
-    let artifact = artifactFromRegisteredDsl(root / "repro.nim")
-    let contributions = artifact.projectInterface.provisioningContributions
+    let contributions = thinTreeSitterContributions()
     require contributions.len == 1
     let records = contributions[0].tarballProvisioning
     for target in [realizationTargetFor(pcX86_64, poWindows, mlX86_64_v1),
@@ -59,9 +75,7 @@ suite "tree-sitter Windows archives":
   test "published records match the imported module":
     let root = currentSourcePath.parentDir.parentDir /
       "packages/contributions/tree-sitter"
-    let artifact = artifactFromRegisteredDsl(root / "repro.nim")
-    let fresh = renderContributionRecords(
-      artifact.projectInterface.provisioningContributions, root)
+    let fresh = renderContributionRecords(thinTreeSitterContributions(), root)
     if getEnv("REPRO_UPDATE_CONTRIBUTION_RECORDS") == "1":
       writeFile(root / "provisioning-contributions.json", fresh)
     check readFile(root / "provisioning-contributions.json") == fresh

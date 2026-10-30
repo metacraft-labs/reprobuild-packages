@@ -231,6 +231,21 @@ package reprobuildPackages:
       cacheable = false)
     discard target("test-tree-sitter-contribution", treeSitterTestRun)
 
+    let treeSitterGenerationTest = buildNimUnittest.build(
+      source = "tests/test_tree_sitter_generation_contribution.nim",
+      binary = "build" / "test-bin" /
+        ("build-tree-sitter-generation-contribution" & ExeExt),
+      actionId = "packages.build.tree-sitter-generation-contribution",
+      defines = @["reproProviderMode"],
+      extraInputs = @["config.nims"])
+    appendRegisteredActionToolIdentityRefs(treeSitterGenerationTest.action.id, ["gcc"])
+    let treeSitterGenerationTestRun = treeSitterGenerationTest.testBinary.run(
+      actionId = "packages.test-tree-sitter-generation-contribution",
+      after = @[treeSitterGenerationTest.action],
+      registerImplicitName = false,
+      cacheable = false)
+    discard target("test-tree-sitter-generation-contribution", treeSitterGenerationTestRun)
+
     let rustupTest = buildNimUnittest.build(
       source = "tests/test_rustup_contribution.nim",
       binary = "build" / "test-bin" / ("build-rustup-contribution" & ExeExt),
@@ -260,5 +275,5 @@ package reprobuildPackages:
     discard collect("test-source-integration", actions = integrationTests)
     discard collect("test", actions =
       @[catalogTests, inventoryTests, graphTestRun, tierTestRun,
-        coverageTestRun, lintInterfacesTestRun, macosAppsTestRun, treeSitterTestRun, rustupTestRun] &
+        coverageTestRun, lintInterfacesTestRun, macosAppsTestRun, treeSitterTestRun, treeSitterGenerationTestRun, rustupTestRun] &
         sourceTests)

@@ -33,7 +33,16 @@ Import `packages/contributions/tree-sitter/repro` to add the official
 Tree-sitter CLI 0.27.0 Windows x86_64 and ARM64 ZIPs. This targets the existing
 standard-library interface; it does not replace its Nix realization. The
 adjacent generated `provisioning-contributions.json` publishes the same records
-for data-only consumers. Parser users must select the ABI their runtime supports.
+for data-only consumers. This legacy contribution remains pinned to interface
+`615a1cf7519f1779f345957e62b58621bd89d931f5877010f49293815d977f11`.
+
+For the standard-library interface with the typed `tree_sitter.generate`
+operation, import `packages/contributions/tree-sitter-generation/repro` instead.
+It targets interface `882b1e92da51ab840f15eb1d9b334b8738094cf4086fd2cebfea4664e065525e`
+and offers the same verified official 0.27.0 archives. Import the contribution
+that matches the selected standard-library interface; canonical extraction
+rejects cross-interface use. Neither contribution redefines the interface.
+Parser users must select the ABI their runtime supports.
 
 The separate `tree-sitter-runtime` interface describes the C library, not the
 generator. Its source recipe at `packages/source/tree-sitter-runtime` builds
