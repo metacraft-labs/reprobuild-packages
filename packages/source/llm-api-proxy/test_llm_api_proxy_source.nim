@@ -3,6 +3,9 @@
 
 import std/[os, strutils, unittest]
 
+import repro_core/ambient_execution
+import repro_test_support/reasoned_skip
+
 import repro_project_dsl
 import repro_project_dsl/cargo_vendor
 import ./repro
@@ -16,6 +19,8 @@ suite "llm-api-proxy source recipe":
       "f36aacc95d23cd8cd8205ed200901aec82e730c1a552d74d1b6d8961f1a5fdb1"
     # A git archive has no top-level directory to strip.
     check spec.extractStrip == 0
+    # The tree id is git-version independent; the archive hash is not.
+    check AgentHarborTreeId.len == 40
 
   test "declares the cross toolchain and the target-side OpenSSL":
     let deps = registeredNativeBuildDeps("llmApiProxySource")
@@ -67,3 +72,22 @@ suite "llm-api-proxy vendored closure":
       check entry.name != "llm-api-proxy"
       check entry.directoryName notin seen
       seen.add(entry.directoryName)
+
+suite "llm-api-proxy build output is path-independent":
+  test "a present build output has the recorded sha256":
+    # The recipe's output must not depend on the checkout path: the cross
+    # adapter remaps the project root out of the binary. This checks the
+    # output of `repro build packages/source/llm-api-proxy` in THIS
+    # checkout against the sha256 recorded from another; a divergence means
+    # a path (or a toolchain change) reached the bytes and the constant must
+    # move in review. Without a build output there is nothing to check.
+    let built = currentSourcePath.parentDir / ".repro" / "output" / "install" /
+      "usr" / "bin" / "llm-api-proxy"
+    if LlmApiProxyBinarySha256.len == 0:
+      skip("no recorded sha256 yet: the two-checkout build is blocked on reprobuild-pm issue 2026-10-30-io-mon-shim-kills-upstream-rustc-1.94.0-on-crates-with-macro-rules")
+    elif not fileExists(built):
+      skip("no build output in this checkout; run `repro build packages/source/llm-api-proxy` first")
+    else:
+      let execution = uncontrolledExecCmdEx("sha256sum " & quoteShell(built))
+      check execution.exitCode == 0
+      check execution.output.split(' ')[0] == LlmApiProxyBinarySha256

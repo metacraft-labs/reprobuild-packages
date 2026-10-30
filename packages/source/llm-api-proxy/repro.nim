@@ -43,17 +43,19 @@
 ##
 ## ## What the build produces, measured
 ##
-## 2026-10-30, reprobuild `agents` `dfe55de54`, nixos-ci-bare-003 (x86-64):
-## `bin/llm-api-proxy`, 16 943 392 bytes, static ARM EABI5, sha256
-## `ce53902b86c88d5176bece3c0acb615eaed0357095d1af1a2c8be0c975f20ab9`. The
-## hand-driven build this recipe replaced (same sources, toolchain and
-## flags, recorded in reprobuild-pm issue
-## 2026-10-30-cargo-package-cannot-cross-compile-a-workspace-member-for-armv7)
-## was 16 931 060 bytes, sha256 `d22a6333…7731`; the two differ only in the
-## 130 panic-location strings that embed the vendored crates' path
-## (`.repro/cargo-vendor/vendor/...` here), which `--remap-path-prefix`
-## would remove. On a Raspberry Pi 2 (Raspberry Pi OS trixie armhf) under
-## `DynamicUser=yes ProtectSystem=strict` both answer `/v1/models` from the
+## 2026-10-30, reprobuild `agents` `dfe55de54`, nixos-ci-bare-003 (x86-64),
+## before the path remap: `bin/llm-api-proxy`, 16 943 392 bytes, static ARM
+## EABI5, sha256 `ce53902b86c88d5176bece3c0acb615eaed0357095d1af1a2c8be0c975f20ab9`,
+## carrying 742 absolute strings of this checkout's
+## `.repro/cargo-vendor/vendor/<crate>/src/…` and the openssl recipe's path
+## (rustc's panic locations); the hand-driven build it replaced (16 931 060
+## bytes, `d22a6333…7731`) differed in those strings and nothing else.
+## With the cross adapter's `--remap-path-prefix=<project root>=/build`
+## those strings read `/build/.repro/cargo-vendor/vendor/…` wherever the
+## checkout is, and `LlmApiProxyBinarySha256` below is the sha256 two
+## checkouts must both produce.
+## On a Raspberry Pi 2 (Raspberry Pi OS trixie armhf) under
+## `DynamicUser=yes ProtectSystem=strict` it answers `/v1/models` from the
 ## fleet backend at ~12 MB RSS; the proxy is static, so it resolves backend
 ## names through `/etc/hosts` only.
 
@@ -75,8 +77,26 @@ const
     ## ssh agent is what authorises it.
   AgentHarborArchiveSha256* =
     "f36aacc95d23cd8cd8205ed200901aec82e730c1a552d74d1b6d8961f1a5fdb1"
-    ## `git archive --format=tar <commit> | sha256sum`.
+    ## `git archive --format=tar <commit> | sha256sum`, taken with git
+    ## 2.54.0 (and reproduced by the fetch edge's git 2.53.0). The stream's
+    ## bytes depend on git's tar writer as well as on the tree, so a
+    ## mismatch after a git upgrade is checked against the tree first:
+    ## `git rev-parse <commit>^{tree}` is
+    ## `AgentHarborTreeId` whatever git wrote the archive.
+  AgentHarborTreeId* = "b2f983bd2b6b45cc4e68e61d5abd15e099c31ec2"
   Triple* = "armv7-unknown-linux-musleabihf"
+  LlmApiProxyBinarySha256* = ""
+    ## sha256 of `bin/llm-api-proxy` as this recipe builds it, from ANY
+    ## checkout: the cross adapter remaps the project root out of the
+    ## binary (reprobuild `cross_zig`, `--remap-path-prefix=<root>=/build`),
+    ## so two builds must agree byte for byte. The test beside the recipe
+    ## checks a present build output against it, so a toolchain or closure
+    ## change that moves the bytes moves this constant with it, in review.
+    ## EMPTY until measured: the two-checkout build that fills it could not
+    ## run on 2026-10-30 because io-mon's shim kills the tarball rustc
+    ## (reprobuild-pm issue
+    ## 2026-10-30-io-mon-shim-kills-upstream-rustc-1.94.0-on-crates-with-macro-rules);
+    ## an empty constant makes the test skip and say so, never pass.
   RustSysroot = "rust-sysroot-" & Triple
   OpensslStatic = "openssl-static-" & Triple
 
