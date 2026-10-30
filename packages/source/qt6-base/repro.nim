@@ -217,11 +217,11 @@ package qt6BaseSource:
     ## wayland / freetype / fontconfig / harfbuzz / libdbus / sqlite /
     ## libssl / zlib dependencies.
     "pkg-config"
-
-  buildDeps:
     ## python is invoked by qt6-base's QML compiler driver + a handful
     ## of code-generation helpers in the build.
     "python3 >=3.8"
+
+  buildDeps:
     ## glib2 is consumed transitively via QtGui's wayland-client glue
     ## (qtwayland would be the proper consumer but qt6-base's QPA
     ## abstraction probes for the wayland-protocols pkgconfig at build

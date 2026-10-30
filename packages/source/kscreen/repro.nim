@@ -31,6 +31,7 @@ package kscreenSource:
     "cmake >=3.16"
     "ninja >=1.10"
     "gcc >=11"
+    "wayland-scanner"
 
   buildDeps:
     "extra-cmake-modules >=6.0"
@@ -38,7 +39,6 @@ package kscreenSource:
     "qt6-tools >=6.6"
     "qt6-wayland >=6.6"
     "wayland"
-    "wayland-scanner"
     "wayland-protocols"
     "plasma-wayland-protocols >=1.14"
     "libxkbcommon"

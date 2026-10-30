@@ -35,9 +35,6 @@ package grubSource:
     sha256: "f3c97391f7c4eaa677a78e090c7e97e6dc47b16f655f04683ebd37bef7fe0faa"
     extractStrip: 1
 
-  uses:
-    "sh"
-
   nativeBuildDeps:
     "awk"
     "cmp"
@@ -51,6 +48,7 @@ package grubSource:
     "gettext"
     "pkg-config"
     "python3"
+    "sh"
 
   buildDeps:
     "freetype >=2.10"

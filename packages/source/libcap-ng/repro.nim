@@ -174,12 +174,10 @@ package libcapNgSource:
     ## gcc is the host C toolchain — libcap-ng is plain C99 with a
     ## small Linux-specific kernel-header dependency surface.
     "gcc >=11"
-
-  buildDeps:
     ## swig is invoked by the autotools build for the bindings layer
     ## (we ``--without-python`` + ``--without-python3`` so swig is
     ## elided in practice, but autoconf still probes for it; the
-    ## ``uses:`` entry pins the probe-time availability).
+    ## ``nativeBuildDeps:`` entry pins the probe-time availability).
     "swig"
 
   config:

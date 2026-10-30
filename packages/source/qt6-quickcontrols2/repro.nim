@@ -90,7 +90,7 @@ package qt6QuickControls2Source:
       sourceUrl = "in-tree-shim:from-qt6-declarative"
       sourceRepository = "https://code.qt.io/qt/qtdeclarative.git"
 
-  uses:
+  nativeBuildDeps:
     "sh"
 
   buildDeps:

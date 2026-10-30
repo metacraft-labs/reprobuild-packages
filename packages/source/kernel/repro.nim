@@ -392,8 +392,6 @@ package kernelSource:
     ## lint, optional) and a handful of code-generation scripts in
     ## ``scripts/`` that emit C source files consumed by the build.
     "perl >=5.32"
-
-  buildDeps:
     ## libelf is consumed by kbuild's ``objtool`` (in tools/objtool);
     ## kbuild's own configure probe wants it present even though the
     ## ``build:`` block disables ``STACK_VALIDATION``.

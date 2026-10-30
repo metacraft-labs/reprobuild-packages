@@ -27,6 +27,7 @@ package kscreenlockerSource:
     "cmake >=3.16"
     "ninja >=1.10"
     "gcc >=11"
+    "wayland-scanner"
 
   buildDeps:
     "extra-cmake-modules >=6.0"
@@ -55,7 +56,6 @@ package kscreenlockerSource:
     "layer-shell-qt >=6.0"
     ## Wayland.
     "wayland"
-    "wayland-scanner"
     "wayland-protocols"
     "libxkbcommon"
     ## X11 + XCB transitives (Plasma's lock screen probes XCB + XTEST).

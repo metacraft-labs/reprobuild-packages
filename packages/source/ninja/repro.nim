@@ -161,17 +161,15 @@ package ninjaSource:
   nativeBuildDeps:
     ## gcc is the host C++ toolchain used to compile ninja's C++14 sources.
     "gcc >=11"
+    ## python3 drives the ``configure.py --bootstrap`` step that
+    ## compiles ninja's C++ sources into the self-hosting binary.
+    "python3 >=3.8"
 
   runtimeDeps:
     ## The installed ninja binary dynamically links the C++ runtime produced
     ## by the declared GCC package. The install mirror embeds this dependency
     ## so build systems can probe ninja in a clean action environment.
     "gcc >=11"
-
-  buildDeps:
-    ## python3 drives the ``configure.py --bootstrap`` step that
-    ## compiles ninja's C++ sources into the self-hosting binary.
-    "python3 >=3.8"
 
   executable ninja:
     ## ``$PREFIX/bin/ninja`` — the build-driver binary the meson /

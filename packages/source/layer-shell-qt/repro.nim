@@ -26,6 +26,7 @@ package layerShellQtSource:
     "cmake >=3.16"
     "ninja >=1.10"
     "gcc >=11"
+    "wayland-scanner"
 
   buildDeps:
     "extra-cmake-modules >=6.0"
@@ -35,7 +36,6 @@ package layerShellQtSource:
     "qt6-wayland >=6.6"
     ## Wayland scanner + client + protocol XMLs.
     "wayland"
-    "wayland-scanner"
     "wayland-protocols"
     "libxkbcommon"
 

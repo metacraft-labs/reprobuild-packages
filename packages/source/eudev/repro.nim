@@ -223,14 +223,14 @@ package eudevSource:
     ## modules-load builtin consumes) and gperf (the hwdb compiler
     ## driver).
     "pkg-config"
+    ## gperf is used to generate perfect hash tables for the hwdb
+    ## binary (when ``--enable-hwdb`` is passed).
+    "gperf >=3.1"
 
   buildDeps:
     ## kmod supplies the kernel-module loader library eudev's
     ## modules-load builtin consumes.
     "kmod >=29"
-    ## gperf is used to generate perfect hash tables for the hwdb
-    ## binary (when ``--enable-hwdb`` is passed).
-    "gperf >=3.1"
 
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
