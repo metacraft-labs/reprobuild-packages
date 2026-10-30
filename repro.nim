@@ -27,6 +27,10 @@ package reprobuildPackages:
     "sha256sum"
     "tar"
     "xz"
+    # The `.crate` tarballs a cargo recipe's vendor step unpacks are gzip
+    # (`tar -xzf`), and tar execs `gzip` from the edge's PATH; without it
+    # the from-source Rust recipes cannot vendor under the PATH profile.
+    "gzip"
     "sed"
     "mkdir"
     "cp"

@@ -1,5 +1,6 @@
-## The `searxng` recipe: upstream's tree at the commit the fleet's NixOS
-## hosts run, assembled with the three requirements no distribution ships.
+## The `searxng` recipe: upstream's tree at the commit infra's nixpkgs
+## resolves for high-mem-server (measured, see the recipe header), assembled
+## with the three requirements no distribution ships.
 
 import std/[strutils, unittest]
 
@@ -7,7 +8,7 @@ import repro_project_dsl
 import ./repro
 
 suite "searxng source recipe":
-  test "pins the commit nixpkgs pins":
+  test "pins the commit infra resolves for high-mem-server":
     let spec = registeredFetchSpec("searxngSource")
     check spec.url == "https://github.com/searxng/searxng/archive/dce3bb69bb45519bde01c610e09e45cd42fd896c.tar.gz"
     check spec.hashHex ==

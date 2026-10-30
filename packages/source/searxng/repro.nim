@@ -25,9 +25,11 @@
 ##
 ## ## What the version pins
 ##
-## Upstream has no releases; nixpkgs pins commit `dce3bb69` (2026-05-16),
-## which is what the fleet's NixOS hosts run, so the add-on host runs the
-## same code. The build writes `searx/version_frozen.py` with the strings
+## Upstream has no releases. The commit is the one infra's nixpkgs
+## resolves for high-mem-server (`pkgs.searxng.src.rev` = `dce3bb69`,
+## 2026-05-16, measured at infra `b468867f`; its running unit's store path
+## is `searxng-0-unstable-2026-05-16`), so the add-on host runs the same
+## code as the NixOS host it takes the service over from. The build writes `searx/version_frozen.py` with the strings
 ## nixpkgs writes, because `searx.version` otherwise shells out to `git` at
 ## import time and this is a tarball. Bump the commit, the date and the
 ## tarball hash together.
@@ -85,4 +87,10 @@ package searxngSource:
       shell "chmod +x $out/bin/searxng"
 
   runtimeDeps:
+    # The runtime is the HOST's: CPython 3.13 and the C-extension packages
+    # listed in the header come from the consuming unit's `package(apt)`
+    # closure (Debian trixie), not from this catalog, and the prefix is
+    # for CPython 3.13 on armv7l only (msgspec's `.so`). Nothing here can
+    # name that closure, so the requirement is stated in the header and
+    # enforced by the unit that binds the closure (ReproOS-Add-On-Mode §8.3).
     discard
