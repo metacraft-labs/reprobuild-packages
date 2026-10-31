@@ -110,10 +110,14 @@ const
     ## (16 836 776 bytes; published under the rpi2 profile's entry key as
     ## archive digest
     ## `blake3:8d8e4bc9c4078dd76005b3226e503186dc06579a26d52d66a3cb6ba8768ec5b5`).
-    ## The catalog route (`buildDeps: openssl` built for the target) is
-    ## expected to reproduce it and has not yet been measured on a host
-    ## where the pinned rustc resolves (reprobuild-pm issue
-    ## 2026-10-30-path-mode-realizes-a-nix-rustc-outside-the-declared-version-range).
+    ## The catalog route (`buildDeps: openssl` built for the target) does
+    ## NOT reproduce it, measured 2026-10-31: it is reproducible on its own
+    ## (two checkouts at different paths both give `a0e669f2…`, 16 539 264
+    ## bytes, with rustc 1.94.0 on PATH), and the difference from this pin
+    ## is OpenSSL -- 3.5.4 here (the interim recipe), 3.4.0 in
+    ## `packages/source/openssl`. The pin is kept: taking the catalog bytes
+    ## would downgrade the fleet's OpenSSL (reprobuild-pm issue
+    ## 2026-10-31-catalog-openssl-is-older-than-the-fleets-llm-api-proxy-pin).
     ## The test beside the recipe checks a present build output against it,
     ## so a toolchain or closure change that moves the bytes moves this
     ## constant with it, in review.
