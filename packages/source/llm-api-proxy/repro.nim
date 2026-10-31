@@ -163,6 +163,10 @@ package llmApiProxySource:
     "tar"
     "gzip"
     "git"
+    # git fetches the private source over ssh with the build host's agent;
+    # the rust-std sysroot merge checks `rustc --print sysroot` with grep.
+    "ssh"
+    "grep"
 
   buildDeps:
     # What the produced binary LINKS: OpenSSL, built for the same target by
