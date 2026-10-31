@@ -92,11 +92,14 @@ suite "llm-api-proxy build output is path-independent":
     # checkout against the sha256 recorded from another; a divergence means
     # a path (or a toolchain change) reached the bytes and the constant must
     # move in review. Without a build output there is nothing to check.
-    let built = currentSourcePath.parentDir / ".repro" / "output" / "install" /
-      "usr" / "bin" / "llm-api-proxy"
+    # The pin is of the armv7 build, which mirrors to the target-keyed
+    # `install@<triple>` (a native build's `install/` holds other bytes).
+    let built = currentSourcePath.parentDir / ".repro" / "output" /
+      "install@armv7-unknown-linux-musleabihf" / "usr" / "bin" /
+      "llm-api-proxy"
     check LlmApiProxyBinarySha256.len == 64
     if not fileExists(built):
-      skip("no build output in this checkout; run `repro build packages/source/llm-api-proxy` first")
+      skip("no build output in this checkout; run `repro build --target=armv7-unknown-linux-musleabihf packages/source/llm-api-proxy` first")
     else:
       let execution = uncontrolledExecCmdEx("sha256sum " & quoteShell(built))
       check execution.exitCode == 0

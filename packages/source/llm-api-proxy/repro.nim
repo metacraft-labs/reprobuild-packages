@@ -98,29 +98,29 @@ const
     ## `AgentHarborTreeId` whatever git wrote the archive.
   AgentHarborTreeId* = "b2f983bd2b6b45cc4e68e61d5abd15e099c31ec2"
   LlmApiProxyBinarySha256* =
-    "b4417814cc42b15afbc0a6f274efce8f5c403efce0c5fbb0ea464034962664ff"
-    ## sha256 of `bin/llm-api-proxy` as this recipe builds it, from ANY
-    ## checkout: the cross adapter remaps the project root out of the
-    ## binary (reprobuild `cross_zig`, `--remap-path-prefix=<root>=/build`)
-    ## and the openssl recipe embeds no path (`--prefix=/usr`,
-    ## `--openssldir=/etc/ssl`, a path-free compiler command line), so two
-    ## builds agree byte for byte. Measured 2026-10-30 with reprobuild
-    ## `agents` `398afc67d` from two checkouts at different paths, through
-    ## the interim target-suffixed recipes this recipe no longer names
-    ## (16 836 776 bytes; published under the rpi2 profile's entry key as
-    ## archive digest
-    ## `blake3:8d8e4bc9c4078dd76005b3226e503186dc06579a26d52d66a3cb6ba8768ec5b5`).
-    ## The catalog route (`buildDeps: openssl` built for the target) does
-    ## NOT reproduce it, measured 2026-10-31: it is reproducible on its own
-    ## (two checkouts at different paths both give `a0e669f2…`, 16 539 264
-    ## bytes, with rustc 1.94.0 on PATH), and the difference from this pin
-    ## is OpenSSL -- 3.5.4 here (the interim recipe), 3.4.0 in
-    ## `packages/source/openssl`. The pin is kept: taking the catalog bytes
-    ## would downgrade the fleet's OpenSSL (reprobuild-pm issue
-    ## 2026-10-31-catalog-openssl-is-older-than-the-fleets-llm-api-proxy-pin).
-    ## The test beside the recipe checks a present build output against it,
-    ## so a toolchain or closure change that moves the bytes moves this
-    ## constant with it, in review.
+    "7d4f68e6e3a2b14c976054d7d846846cf5c57a43daa80bd456e0f49467884923"
+    ## sha256 of `bin/llm-api-proxy` as this recipe builds it for
+    ## `armv7-unknown-linux-musleabihf`, from ANY checkout: the cross
+    ## adapter remaps the project root out of the binary (reprobuild
+    ## `cross_zig`, `--remap-path-prefix=<root>=/build`) and the openssl
+    ## recipe embeds no path (`--prefix=/usr`, `--openssldir=/etc/ssl`, a
+    ## path-free compiler command line), so two builds agree byte for byte.
+    ## Measured 2026-10-31 on high-mem-server: two clean builds of
+    ## zlib -> openssl 3.5.9 -> this recipe from two checkouts at different
+    ## paths, engine reprobuild `74b948485` plus the A15 glibc-row and
+    ## `--publish` changes, rustc 1.94.0 on PATH, both gave this sha256
+    ## (16 857 400 bytes).
+    ##
+    ## It replaces `b4417814…`, which the interim target-suffixed recipes
+    ## built against OpenSSL 3.5.4 with that recipe's build options
+    ## (measured 2026-10-30 at reprobuild `398afc67d`). The catalog route
+    ## builds OpenSSL 3.5.9 with this catalog's options, so its bytes
+    ## differ; the catalog's openssl had been 3.4.0, which is why the pin
+    ## was not moved earlier (reprobuild-pm issue
+    ## 2026-10-31-catalog-openssl-is-older-than-the-fleets-llm-api-proxy-pin,
+    ## closed by the move to 3.5.9). The test beside the recipe checks a
+    ## present target build output against it, so a toolchain or closure
+    ## change that moves the bytes moves this constant with it, in review.
   OpensslRecipe = "openssl"
     ## The sibling recipe `openssl-sys` links; built for the active target.
 
