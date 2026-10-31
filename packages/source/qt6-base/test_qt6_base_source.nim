@@ -47,7 +47,7 @@ const ExpectedUrl =
   # The vendored copy under ``vendor/`` is fingerprinted by the same
   # sha256 so a downstream cache hit is identical regardless of which
   # URL the fetch action serialises.
-  "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtbase-everywhere-src-6.8.1.tar.xz"
+  "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtbase-everywhere-src-6.8.1.tar.xz"
 
 const ExpectedHash =
   "40b14562ef3bd779bc0e0418ea2ae08fa28235f8ea6e8c0cb3bce1d6ad58dcaf"
@@ -166,6 +166,6 @@ suite "qt6BaseSource — from-source recipe smoke test":
     check vs[0].version == "6.8.1"
     check vs[0].sourceRevision == "v6.8.1"
     check vs[0].sourceUrl ==
-      "https://download.qt.io/official_releases/qt/6.8/6.8.1/submodules/qtbase-everywhere-src-6.8.1.tar.xz"
+      "https://download.qt.io/archive/qt/6.8/6.8.1/submodules/qtbase-everywhere-src-6.8.1.tar.xz"
     check vs[0].sourceRepository ==
       "https://code.qt.io/qt/qtbase.git"
