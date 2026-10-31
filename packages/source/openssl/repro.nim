@@ -29,27 +29,26 @@
 ## helpers for systemd-resolved DNS-over-TLS and systemd-networkd
 ## wireguard glue).
 ##
-## ## sha256 strategy
+## ## Source and sha256
 ##
-## We vendor the upstream 3.4.0 .tar.gz at
-## ``recipes/packages/source/openssl/vendor/openssl-3.4.0.tar.gz`` and
-## reference it via a ``file://`` URL. The github.com release URL is
-## recorded as ``sourceUrl`` in the ``versions:`` block for
-## documentation and future-bump purposes, but the live ``fetch:``
-## block points at the vendored copy so the convention layer's emitted
-## fetch action is offline-reproducible.
+## The upstream release tarball, fetched from the GitHub release the
+## ``versions:`` block names. Its sha256 was verified on 2026-10-31 two
+## ways: it equals the release's published ``.sha256``, and the release's
+## detached ``.asc`` signature verifies (GOODSIG/VALIDSIG) by a subkey of the
+## OpenSSL signing certificate whose primary fingerprint
+## ``B146 647E 45A7 B339 47AB 226B 2A2C 87D1 6169 2D40`` openssl-library.org
+## publishes as the trust anchor for release artifacts
+## (https://openssl-library.org/source/).
 ##
-## ## Version choice — 3.4.0 (current upstream stable)
+## ## Version choice -- 3.5.9 (the 3.5 LTS line)
 ##
-## openssl releases are cut on GitHub under tags of the form
-## ``openssl-<X>.<Y>.<Z>``. 3.4.0 is the current stable in the 3.x line
-## as of mid-2026 and the ABI is stable across 3.0 -> 3.1 -> 3.2 -> 3.3
-## -> 3.4 — anything ``>=3.0`` covers every consumer's pinning.
+## 3.5 is OpenSSL's current long-term-support line; 3.5.9 is its patch
+## release of 2026-09-29. The previous pin, 3.4.0, left support on
+## 2026-10-22. The ABI is stable across 3.x, so ``>=3.0`` consumers are
+## unaffected by the bump.
 ##
-## sha256 = e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf
-##  (computed locally over the vendored ``openssl-3.4.0.tar.gz``,
-##  18,320,899 bytes; downloaded once from the upstream URL recorded
-##  in ``versions:`` above).
+## sha256 = 603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a
+##  (53 279 637 bytes).
 ##
 ## ## Build shape
 ##
@@ -280,23 +279,17 @@ package opensslSource:
     ##
     ## ``sourceRepository`` points at the canonical GitHub project
     ## that hosts the openssl source tree.
-    "3.4.0":
-      sourceRevision = "openssl-3.4.0"
-      sourceUrl = "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz"
+    "3.5.9":
+      sourceRevision = "openssl-3.5.9"
+      sourceUrl = "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz"
       sourceRepository = "https://github.com/openssl/openssl"
 
   fetch:
-    ## Vendored tarball (option 1 per the M9.K acceptance plan).
-    ## ``file://`` URL keeps the build deterministic when the network
-    ## is unavailable; the convention layer's argv carries this URL
-    ## verbatim so the engine's content-addressed cache fingerprint
-    ## stays stable across rebuilds.
-    ##
-    ## sha256 was computed over the vendored 18,320,899-byte tarball
-    ## downloaded once from the upstream URL recorded in
-    ## ``versions:`` above.
-    url: "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz"
-    sha256: "e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf"
+    ## The upstream release tarball; its sha256 is verified against the
+    ## release's published checksum and OpenSSL's signature (see the
+    ## header).
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz"
+    sha256: "603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a"
     extractStrip: 1
 
   nativeBuildDeps:

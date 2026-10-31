@@ -38,10 +38,10 @@ import repro_dsl_stdlib/adapters/native_cross_target
 import ./repro
 
 const ExpectedUrl =
-  "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz"
+  "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz"
 
 const ExpectedHash =
-  "e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf"
+  "603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a"
 
 const ExpectedConfigureFlags = @[
   "linux-x86_64",
@@ -126,10 +126,10 @@ suite "opensslSource — from-source recipe smoke test":
     # tree.
     let vs = registeredVersions("opensslSource")
     check vs.len == 1
-    check vs[0].version == "3.4.0"
-    check vs[0].sourceRevision == "openssl-3.4.0"
+    check vs[0].version == "3.5.9"
+    check vs[0].sourceRevision == "openssl-3.5.9"
     check vs[0].sourceUrl ==
-      "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz"
+      "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz"
     check vs[0].sourceRepository ==
       "https://github.com/openssl/openssl"
 
