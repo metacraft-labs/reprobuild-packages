@@ -40,14 +40,16 @@
 ## vendoring is safe (kernel-style upstream-URL fallback would only be
 ## warranted above ~90 MB). The download.qt.io release URL is recorded
 ## as ``sourceUrl`` in the ``versions:`` block for documentation and
-## future-bump purposes, but the live ``fetch:`` block points at the
-## vendored copy so the convention layer's emitted fetch action is
-## offline-reproducible.
+## future-bump purposes. The live ``fetch:`` block names that URL too
+## (since 1f91120); the vendored copy is no longer read.
 ##
 ## ## Version choice — 6.8.1 (current upstream LTS-leading)
 ##
 ## download.qt.io publishes Qt6 modular submodule sources at
 ## ``https://download.qt.io/official_releases/qt/<major.minor>/<version>/submodules/``
+## while a release is current, and moves them to
+## ``https://download.qt.io/archive/qt/<major.minor>/<version>/submodules/``
+## afterwards; 6.8.1 is fetched from the archive (1f91120).
 ## and 6.8.1 is the current stable in the 6.8.x line as of mid-2026.
 ## The 6.x ABI compatibility is maintained across 6.6 -> 6.7 -> 6.8 so
 ## the ``qt6-base >=6.6`` floor in the KF6 / kwin / kcoreaddons recipes
