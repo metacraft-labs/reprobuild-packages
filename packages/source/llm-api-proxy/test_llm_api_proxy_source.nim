@@ -85,22 +85,36 @@ suite "llm-api-proxy vendored closure":
       seen.add(entry.directoryName)
 
 suite "llm-api-proxy build output is path-independent":
-  test "a present build output has the recorded sha256":
+  test "the current build output has the recorded sha256":
     # The recipe's output must not depend on the checkout path: the cross
-    # adapter remaps the project root out of the binary. This checks the
-    # output of `repro build packages/source/llm-api-proxy` in THIS
-    # checkout against the sha256 recorded from another; a divergence means
-    # a path (or a toolchain change) reached the bytes and the constant must
-    # move in review. Without a build output there is nothing to check.
-    # The pin is of the armv7 build, which mirrors to the target-keyed
-    # `install@<triple>` (a native build's `install/` holds other bytes).
-    let built = currentSourcePath.parentDir / ".repro" / "output" /
-      "install@armv7-unknown-linux-musleabihf" / "usr" / "bin" /
-      "llm-api-proxy"
+    # adapter remaps the project root out of the binary. This checks THIS
+    # checkout's armv7 build against the sha256 recorded from another; a
+    # divergence means a path (or a toolchain change) reached the bytes and
+    # the constant must move in review.
+    #
+    # A mirror left on disk proves nothing about the sources now checked
+    # out, so the test builds first and checks what that build wrote:
+    # `REPRO_PACKAGE_TESTS_BUILD=1` runs `repro build --target=...` here
+    # (incremental, so an up-to-date tree costs little) with the `repro` on
+    # PATH. Without it the case is skipped with that reason, never checked
+    # against whatever an earlier build left behind.
     check LlmApiProxyBinarySha256.len == 64
-    if not fileExists(built):
-      skip("no build output in this checkout; run `repro build --target=armv7-unknown-linux-musleabihf packages/source/llm-api-proxy` first")
+    const Triple = "armv7-unknown-linux-musleabihf"
+    let recipeDir = currentSourcePath.parentDir
+    let built = recipeDir / ".repro" / "output" / ("install@" & Triple) /
+      "usr" / "bin" / "llm-api-proxy"
+    if getEnv("REPRO_PACKAGE_TESTS_BUILD") != "1":
+      skip("set REPRO_PACKAGE_TESTS_BUILD=1 to build llm-api-proxy for " &
+        Triple & " and check its sha256 (needs `repro`, zig and rustc " &
+        "1.94 on PATH, and its zlib and openssl siblings built for the " &
+        "target)")
     else:
+      let build = uncontrolledExecCmdEx("cd " & quoteShell(recipeDir) &
+        " && repro build --daemon=off --progress=quiet " &
+        "--tool-provisioning=path --target=" & Triple)
+      checkpoint(build.output)
+      require build.exitCode == 0
+      require fileExists(built)
       let execution = uncontrolledExecCmdEx("sha256sum " & quoteShell(built))
       check execution.exitCode == 0
       check execution.output.split(' ')[0] == LlmApiProxyBinarySha256
