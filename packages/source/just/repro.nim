@@ -67,6 +67,10 @@ package justSource:
     # packages, so this recipe does not pin a toolchain of its own.
     "cargo >=1.92"
     "rustc >=1.92"
+    # rustc links a native executable through `cc` from PATH (upstream's
+    # default linker on linux-gnu, and the pinned nixpkgs' rustc's too), and
+    # an action's PATH holds only what the recipe declares (decision 35).
+    "gcc >=11"
 
   config:
     discard

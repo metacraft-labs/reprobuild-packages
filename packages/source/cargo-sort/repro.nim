@@ -44,10 +44,15 @@ package cargoSortSource:
     extractStrip: 1
 
   nativeBuildDeps:
-    # The whole toolchain this package needs. Its closure is pure Rust —
-    # verified by building it — so no C compiler appears here.
+    # The whole toolchain this package needs. Its crate closure is pure
+    # Rust, so no C library is compiled; the executable is still linked by
+    # a C compiler driver (below).
     "cargo >=1.92"
     "rustc >=1.92"
+    # rustc links a native executable through `cc` from PATH (upstream's
+    # default linker on linux-gnu, and the pinned nixpkgs' rustc's too), and
+    # an action's PATH holds only what the recipe declares (decision 35).
+    "gcc >=11"
 
   config:
     discard
