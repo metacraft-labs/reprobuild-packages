@@ -27,6 +27,13 @@ package clingoSource:
     "bison >=3.0"
     # Clingo 5.8.0's vendored grammars require re2c's pre-4.3 behavior.
     "re2c >=3.0"
+    ## zig is the C/C++ toolchain of a cross build: `cmake_package` threads a
+    ## zig `--target` through a toolchain file naming its wrappers (the
+    ## appliance's `repro` needs libclingo for armv7-unknown-linux-gnueabihf,
+    ## and trixie armhf ships no libclingo package). Declared unconditionally,
+    ## because dependency blocks are resolved at compile time; a native build
+    ## never runs it.
+    "zig >=0.13 <0.14"
     "sh"
     "rm"
     "mkdir"
