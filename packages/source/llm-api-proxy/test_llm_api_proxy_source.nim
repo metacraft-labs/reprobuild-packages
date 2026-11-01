@@ -93,24 +93,36 @@ suite "llm-api-proxy build output is path-independent":
     # the constant must move in review.
     #
     # A mirror left on disk proves nothing about the sources now checked
-    # out, so the test builds first and checks what that build wrote:
-    # `REPRO_PACKAGE_TESTS_BUILD=1` runs `repro build --target=...` here
-    # (incremental, so an up-to-date tree costs little) with the `repro` on
-    # PATH. Without it the case is skipped with that reason, never checked
-    # against whatever an earlier build left behind.
+    # out, so the test builds first and checks what that build wrote. It
+    # runs only when asked, with an engine NAMED rather than whatever
+    # `repro` is on PATH: `REPRO_PACKAGE_TESTS_REPRO=<path to repro>` (an
+    # engine that carries A15's cross support; the workspace pin does not
+    # yet) runs `repro build --target=...` here, and the case prints the
+    # engine and rustc it used beside the result.
+    #
+    # Why no gate runs it yet: the catalog's own test edges (`repro.nim`)
+    # run under the pinned `repro`, which predates `--target` for cargo, and
+    # the catalog's rustc 1.94 arm is not runnable on a NixOS builder in nix
+    # mode (reprobuild-pm issue 2026-10-30-path-mode-realizes-a-nix-rustc-
+    # outside-the-declared-version-range). Until the pin moves, the pin's
+    # measurements are recorded with their commits beside the constant.
     check LlmApiProxyBinarySha256.len == 64
     const Triple = "armv7-unknown-linux-musleabihf"
     let recipeDir = currentSourcePath.parentDir
     let built = recipeDir / ".repro" / "output" / ("install@" & Triple) /
       "usr" / "bin" / "llm-api-proxy"
-    if getEnv("REPRO_PACKAGE_TESTS_BUILD") != "1":
-      skip("set REPRO_PACKAGE_TESTS_BUILD=1 to build llm-api-proxy for " &
-        Triple & " and check its sha256 (needs `repro`, zig and rustc " &
-        "1.94 on PATH, and its zlib and openssl siblings built for the " &
-        "target)")
+    let repro = getEnv("REPRO_PACKAGE_TESTS_REPRO")
+    if repro.len == 0:
+      skip("set REPRO_PACKAGE_TESTS_REPRO to a repro engine with A15's " &
+        "cross support to build llm-api-proxy for " & Triple & " and check " &
+        "its sha256 (needs zig 0.13 and rustc 1.94 on PATH, and its zlib " &
+        "and openssl siblings built for the target)")
     else:
+      require fileExists(repro)
+      let rustc = uncontrolledExecCmdEx("rustc --version")
+      echo "    engine: ", repro, "; ", rustc.output.strip()
       let build = uncontrolledExecCmdEx("cd " & quoteShell(recipeDir) &
-        " && repro build --daemon=off --progress=quiet " &
+        " && " & quoteShell(repro) & " build --daemon=off --progress=quiet " &
         "--tool-provisioning=path --target=" & Triple)
       checkpoint(build.output)
       require build.exitCode == 0
