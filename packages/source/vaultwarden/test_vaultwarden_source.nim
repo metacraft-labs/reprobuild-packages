@@ -3,6 +3,9 @@
 
 import std/[os, strutils, unittest]
 
+import repro_core/ambient_execution
+import repro_test_support/reasoned_skip
+
 import repro_project_dsl
 import repro_project_dsl/cargo_vendor
 import repro_dsl_stdlib/adapters/cross_zig
@@ -78,3 +81,22 @@ suite "vaultwarden vendored closure":
       # The workspace's own members are not vendored.
       check entry.name != "vaultwarden"
       check entry.name != "macros"
+
+suite "vaultwarden build output":
+  test "a present build output is static and has the recorded sha256":
+    # The bytes must not depend on the checkout path or on the day: two
+    # checkouts produced `VaultwardenBinarySha256`. Without a build output
+    # there is nothing to check.
+    let built = currentSourcePath.parentDir / ".repro" / "output" /
+      "install@x86_64-unknown-linux-musl" / "usr" / "bin" / "vaultwarden"
+    check VaultwardenBinarySha256.len == 64
+    if not fileExists(built):
+      skip("no build output in this checkout; run `repro build " &
+        "packages/source/vaultwarden --target=x86_64-unknown-linux-musl` first")
+    else:
+      let sum = uncontrolledExecCmdEx("sha256sum " & quoteShell(built))
+      check sum.exitCode == 0
+      check sum.output.split(' ')[0] == VaultwardenBinarySha256
+      let kind = uncontrolledExecCmdEx("file -b " & quoteShell(built))
+      check kind.exitCode == 0
+      check "statically linked" in kind.output

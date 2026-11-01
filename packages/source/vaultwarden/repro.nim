@@ -55,27 +55,15 @@
 ## would be a second OpenSSL build, driven by a crate's build script, whose
 ## reproducibility nothing here has measured.
 ##
-## ## Not yet built: the toolchain gap
+## ## The recorded digest
 ##
-## This recipe has not been built. On an x86-64 NixOS host without nix-ld,
-## measured 2026-10-31 with reprobuild `agents` `f509c61743`, no Rust 1.94
-## toolchain can build for the musl target:
-##
-## * the catalog's `rustc`/`cargo` 1.94 tarball arm is the generic-Linux
-##   release build, which needs `/lib64/ld-linux-x86-64.so.2`; reprobuild
-##   refuses it on such a host (`TarballHostLoaderMissing`);
-## * the `nixPackage` arm is the pinned nixpkgs' rustc 1.91, outside the
-##   `>=1.94 <1.95` range below;
-## * a nixpkgs rustc 1.94.0 put on PATH instead cannot load the catalog's
-##   official `rust-std` 1.94.0 for `x86_64-unknown-linux-musl` ("found
-##   crate `core` compiled by an incompatible version of rustc"): a
-##   from-source nixpkgs rustc and rust-lang's prebuilt standard library do
-##   not mix.
-##
-## So no binary digest is recorded here. Build it where the release
-## toolchain runs (a host with a glibc loader or nix-ld), and record the
-## executable's sha256 from two checkouts at different paths, as
-## `packages/source/llm-api-proxy` does.
+## `VaultwardenBinarySha256` is what two builds from two checkouts at
+## different paths both produced; see its comment. The Rust toolchain is
+## the catalog's `rustc`/`cargo` 1.94.0, rust-lang's own release build, so
+## that it can load rust-lang's prebuilt `rust-std` for the target. On a
+## NixOS host without nix-ld reprobuild realizes that release through its
+## Nix channel, with the ELF loader pointed at the pinned glibc, because
+## the generic-Linux archive cannot start there.
 
 import repro_project_dsl
 import repro_dsl_stdlib/active_context
@@ -89,6 +77,20 @@ const
   VaultwardenVersion* = "1.36.0"
   VaultwardenSourceSha256* =
     "8d506379fa19f21323c401b525ab5c6ca74de71509df81a9591ad5d5a4da2737"
+  VaultwardenBinarySha256* =
+    "08005cef7e04eef31cd5a917287294e978bc47131bff41d15afae167f896549e"
+    ## sha256 of `usr/bin/vaultwarden` as this recipe builds it with
+    ## `--target=x86_64-unknown-linux-musl`, from ANY checkout. Measured
+    ## 2026-11-01 on x86-64 NixOS without nix-ld with an engine built from
+    ## reprobuild `ff76c98ad0` (landed on `agents` rebased, unchanged, as
+    ## `adf363bcf2`), `--tool-provisioning=path`, rustc/cargo 1.94.0
+    ## through the catalog's Nix channel, from two checkouts of this
+    ## repository at different paths: the two executables were
+    ## byte-identical (36 MB,
+    ## static, no absolute path of either checkout or of the Nix store in
+    ## them), and `vaultwarden --version` answers `Vaultwarden 1.36.0`.
+    ## The test beside the recipe holds a present build output to this
+    ## value.
   VaultwardenFeatures* = @["sqlite"]
   OpensslRecipe = "openssl"
     ## The sibling recipe `openssl-sys` links; built for the active target.
