@@ -166,6 +166,11 @@ package sqliteSource:
     ## unit amalgamation source.
     "gcc >=11"
 
+    ## zig is the C toolchain of a cross build: `autotools_package` threads a
+    ## zig `--target` with CC/AR/RANLIB naming its wrappers. Declared
+    ## unconditionally, because dependency blocks are resolved at compile
+    ## time; a native build never runs it.
+    "zig >=0.13 <0.14"
   config:
     ## No prefix lifted from `configureFlags:`; flags inlined in the `build:` block.
     discard
