@@ -13,6 +13,7 @@ const
   ZlibNativeBuildDeps* = [
     "make",
     "gcc >=11",
+    "zig >=0.13 <0.14",
   ]
   ZlibWindowsMakeOptions* = [
     "-f",

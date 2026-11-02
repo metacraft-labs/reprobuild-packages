@@ -26,8 +26,11 @@ suite "zlib source recipe":
     check versions[0].sourceRepository == "https://github.com/madler/zlib"
 
   test "declares the complete build-tool contract":
+    # The DSL adds `sh` and `install-file` to a recipe that declares zig:
+    # the zig wrapper edge runs both (reprobuild repro_project_dsl,
+    # macros_a.nim, the pass that follows a declared zig).
     check registeredAuthoredNativeBuildDeps("zlibSource") ==
-      @ZlibNativeBuildDeps
+      @ZlibNativeBuildDeps & @["sh", "install-file"]
 
   test "exports the compression library interface":
     let artifacts = registeredArtifacts("zlibSource")
