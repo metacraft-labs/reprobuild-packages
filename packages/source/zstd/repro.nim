@@ -15,6 +15,12 @@ package zstdSource:
   nativeBuildDeps:
     "make"
     "gcc >=11"
+    ## zig is the C toolchain of a cross build: `autotools_package` threads a
+    ## zig `--target` with CC/AR/RANLIB naming its wrappers. Declared
+    ## unconditionally, because dependency blocks are resolved at compile
+    ## time; a native build never runs it. The Nim fork links this library
+    ## when it is built for a target (the `nim-fork` recipe).
+    "zig >=0.13 <0.14"
   buildDeps:
     "zlib"
   config:

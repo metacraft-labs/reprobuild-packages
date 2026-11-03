@@ -178,6 +178,7 @@ const sourceTestFiles* = [
   "packages/source/pango/test_pango_source.nim",
   "packages/source/parted/test_parted_source.nim",
   "packages/source/patchelf/test_patchelf_source.nim",
+  "packages/source/pcre/test_pcre_source.nim",
   "packages/source/pcre2/test_pcre2_source.nim",
   "packages/source/perl/test_perl_source.nim",
   "packages/source/pipewire/test_pipewire_source.nim",
