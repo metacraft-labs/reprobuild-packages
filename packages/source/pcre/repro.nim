@@ -40,6 +40,13 @@ package pcreSource:
     sha256: PcreSourceHash
     extractStrip: 1
   nativeBuildDeps:
+    ## What PCRE's generated `configure` and `config.status` run, declared
+    ## as every autoconf recipe here declares them
+    ## (`test_autotools_configure_tools.nim`): without them a build whose
+    ## PATH holds only declared tools fails with `awk: command not found`.
+    "awk"
+    "cmp"
+    "diff"
     "make"
     "gcc >=11"
     ## zig is the C toolchain of a cross build: `autotools_package` threads a

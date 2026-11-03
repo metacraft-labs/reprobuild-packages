@@ -170,6 +170,7 @@ const sourceTestFiles* = [
   "packages/source/ncurses/test_ncurses_source.nim",
   "packages/source/nettle/test_nettle_source.nim",
   "packages/source/networkmanager/test_networkmanager_source.nim",
+  "packages/source/nim-fork/test_nim_fork_source.nim",
   "packages/source/ninja/test_ninja_source.nim",
   "packages/source/nixfmt/test_nixfmt_source.nim",
   "packages/source/nspr/test_nspr_source.nim",

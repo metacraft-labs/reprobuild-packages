@@ -14,5 +14,5 @@ suite "pcreSource dependency contract":
     check versions.len == 1
     check versions[0].version == PcreVersion
     let nativeDeps = registeredNativeBuildDeps("pcreSource")
-    for tool in ["make", "gcc >=11", "zig >=0.13 <0.14"]:
+    for tool in ["awk", "cmp", "diff", "make", "gcc >=11", "zig >=0.13 <0.14"]:
       check tool in nativeDeps
