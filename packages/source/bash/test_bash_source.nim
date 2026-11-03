@@ -77,7 +77,7 @@ suite "bashSource — from-source recipe smoke test":
     buildBashSourcePackage()
     let argv = configureAction().argValues("argv")
     check argv[2].endsWith("../src/configure --prefix=/usr " &
-      ExpectedConfigureFlags.join(" "))
+      ExpectedConfigureFlags.join(" ") & " && : > .repro-configure.stamp")
 
   test "declares utilities for configure and generated headers":
     for tool in ["awk", "cmp"]:

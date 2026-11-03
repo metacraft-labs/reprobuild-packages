@@ -47,7 +47,7 @@ suite "PCRE2 source configure tools":
     buildPcre2SourcePackage()
     check configureAction().argValues("argv")[2].endsWith(
       "../src/configure --prefix=/usr --disable-static --enable-pcre2-8 " &
-      "--disable-pcre2-16 --disable-pcre2-32")
+      "--disable-pcre2-16 --disable-pcre2-32 && : > .repro-configure.stamp")
 
   test "keeps the verified upstream release":
     let spec = registeredFetchSpec("pcre2Source")
