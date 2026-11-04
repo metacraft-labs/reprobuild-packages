@@ -14,3 +14,8 @@ suite "clingoSource dependency contract":
       "cp", "chmod", "ls", "sort", "head", "ln", "patchelf",
     ]:
       check tool in nativeDeps
+
+  test "links with the install RPATH, so no build-path padding remains":
+    # CMake's RPATH rewrite padding is sized by the build directory's path.
+    check "CMAKE_BUILD_WITH_INSTALL_RPATH=ON" in ClingoCacheVars
+    check "CLINGO_MANAGE_RPATH=OFF" in ClingoCacheVars

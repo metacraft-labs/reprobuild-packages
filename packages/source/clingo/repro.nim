@@ -8,6 +8,27 @@ import repro_project_dsl
 import repro_dsl_stdlib/constructors
 import repro_dsl_stdlib/types/package_result
 
+const ClingoCacheVars* = [
+  "CMAKE_BUILD_TYPE=Release",
+  "CMAKE_INSTALL_LIBDIR=lib",
+  # Link with the install RPATH from the start. Otherwise CMake links a
+  # build-tree RPATH and pads the library so the install step can rewrite
+  # it, and the padding, a run of `X`s as long as the build tree's library
+  # directories, stays behind the installed RUNPATH: two checkouts at
+  # different paths gave two libclingo.so (48 and 62 `X`s, measured
+  # 2026-11-04; CMAKE_SKIP_BUILD_RPATH=ON left the same run). Nothing here
+  # runs from the build tree: tests, examples and apps are off. Clingo's
+  # own CLINGO_MANAGE_RPATH forces both back to FALSE, so it is off too.
+  "CLINGO_MANAGE_RPATH=OFF",
+  "CMAKE_BUILD_WITH_INSTALL_RPATH=ON",
+  "CLINGO_BUILD_TESTS=OFF",
+  "CLINGO_BUILD_EXAMPLES=OFF",
+  "CLINGO_BUILD_APPS=OFF",
+  "CLINGO_BUILD_SHARED=ON",
+  "CLINGO_BUILD_WITH_PYTHON=OFF",
+  "CLINGO_BUILD_WITH_LUA=OFF",
+]
+
 package clingoSource:
   versions:
     "5.8.0":
@@ -66,16 +87,7 @@ package clingoSource:
     setCurrentOwningPackageOverride("clingoSource")
     try:
       let providerRoot = activeProviderProjectRoot()
-      var opts = @[
-        "CMAKE_BUILD_TYPE=Release",
-        "CMAKE_INSTALL_LIBDIR=lib",
-        "CLINGO_BUILD_TESTS=OFF",
-        "CLINGO_BUILD_EXAMPLES=OFF",
-        "CLINGO_BUILD_APPS=OFF",
-        "CLINGO_BUILD_SHARED=ON",
-        "CLINGO_BUILD_WITH_PYTHON=OFF",
-        "CLINGO_BUILD_WITH_LUA=OFF",
-      ]
+      var opts = @ClingoCacheVars
       var patches: seq[string] = @[]
       if providerRoot.len > 0:
         let re2cWrapper = providerRoot / "src" / "repro-re2c"
