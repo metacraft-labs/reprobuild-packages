@@ -40,3 +40,10 @@ suite "nimForkSource":
       check ("/b/tree/dist/" & dir) in script
     check "/b/destdir/usr/nim/" & NimForkRevisionFile in script
     check NimForkRevision in script
+
+  test "the compiler's type hashes do not depend on where it is built":
+    # The fork hashes a type by the absolute path of its defining file
+    # (9a49ee3c), so the compiler built in two checkouts differed; the build
+    # tree hashes as `/nim/` (`--typeHashPathMap`).
+    let script = nimForkBuildScript("/b", "/s", "/b/nimcache", @[], "")
+    check "'--typeHashPathMap:/b/tree/=/nim/'" in script

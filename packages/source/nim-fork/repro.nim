@@ -105,7 +105,12 @@ proc nimForkBuildScript*(buildDir, sourcesDir, nimcache: string;
   var nimArgs = @["nim", "c", "-d:release", "-d:nimKochBootstrap",
     "--skipUserCfg", "--skipParentCfg", "--noNimblePath",
     "--warning:BareExcept:off", "--warning:UnusedImport:off",
-    "--hints:off", "--nimcache:" & nimcache]
+    "--hints:off", "--nimcache:" & nimcache,
+    # The fork hashes a type by the absolute path of its defining file
+    # (metacraft-labs/nim 9a49ee3c): the build tree hashes as `/nim/`, so
+    # the compiler is the same bytes from any checkout (measured different
+    # from two paths, 2026-11-04).
+    "--typeHashPathMap:" & tree & "/=/nim/"]
   nimArgs.add(crossArgs)
   if zstdPrefix.len > 0:
     nimArgs.add("--passC:-I" & zstdPrefix / "include")
