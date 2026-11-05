@@ -1,5 +1,9 @@
 .repro/
 build/
+# A recipe built for a target keeps its build tree beside the native one,
+# keyed by the triple (`build@armv7-unknown-linux-gnueabihf/`); without this
+# every target build left the catalog checkout reporting untracked trees.
+build@*/
 result
 result-*
 packages/source/*/src/
