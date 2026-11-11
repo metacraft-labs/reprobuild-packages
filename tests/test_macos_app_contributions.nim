@@ -1,4 +1,4 @@
-## The macOS application definitions: every one of the twenty-four pins a real
+## The macOS application definitions: every one of the twenty-five pins a real
 ## vendor artifact and the identity of the bundle it delivers, and resolves
 ## the way a home profile resolves it.
 ##
@@ -58,14 +58,15 @@ import ../packages/interfaces/cursor/repro as cursorInterface
 import "../packages/interfaces/ledger-wallet/repro" as ledgerWalletInterface
 import "../packages/interfaces/google-antigravity/repro" as googleAntigravityInterface
 import "../packages/interfaces/google-antigravity-ide/repro" as googleAntigravityIdeInterface
+import ../packages/interfaces/maccy/repro as maccyInterface
 
 const
   Realizable = ["ghostty", "iterm2", "hammerspoon", "inkscape", "figma",
     "neovide", "vscode", "claude-desktop", "codex-desktop", "windows-app",
     "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart",
     "slack", "discord", "signal", "telegram", "cursor", "ledger-wallet",
-    "google-antigravity", "google-antigravity-ide"]
-    ## Twenty-three. OpenWebStart is an installer application; the rest
+    "google-antigravity", "google-antigravity-ide", "maccy"]
+    ## Twenty-four. OpenWebStart is an installer application; the rest
     ## are app bundles.
   InstallerApplications = ["openwebstart"]
   InstallerOnly = [
@@ -107,9 +108,9 @@ proc macosTarget(arch: string): RealizationTarget =
 
 suite "macOS application definitions":
 
-  test "the twenty-four applications are each defined exactly once":
-    check Realizable.len == 23
-    check allNames().len == 24
+  test "the twenty-five applications are each defined exactly once":
+    check Realizable.len == 24
+    check allNames().len == 25
     for name in allNames():
       discard definition(name)
 

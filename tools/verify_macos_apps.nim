@@ -66,12 +66,13 @@ import ../packages/interfaces/cursor/repro as cursorInterface
 import "../packages/interfaces/ledger-wallet/repro" as ledgerWalletInterface
 import "../packages/interfaces/google-antigravity/repro" as googleAntigravityInterface
 import "../packages/interfaces/google-antigravity-ide/repro" as googleAntigravityIdeInterface
+import ../packages/interfaces/maccy/repro as maccyInterface
 
 const Realizable = ["ghostty", "iterm2", "hammerspoon", "inkscape", "figma",
   "neovide", "vscode", "claude-desktop", "codex-desktop", "windows-app",
   "tigervnc", "turbovnc", "utm", "sqlitebrowser", "openwebstart",
   "slack", "discord", "signal", "telegram", "cursor", "ledger-wallet",
-  "google-antigravity", "google-antigravity-ide"]
+  "google-antigravity", "google-antigravity-ide", "maccy"]
 
 proc bundlesIn(item: string): seq[string] =
   ## Every bundle in a placed item, at any depth, not inside another bundle
