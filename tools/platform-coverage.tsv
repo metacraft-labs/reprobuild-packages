@@ -23,7 +23,6 @@ mingw-gcc	x86_64	linux	upstream-none	This package IS the WinLibs Windows-hosted 
 mingw-gcc	aarch64	linux	upstream-none	Same as linux-x86_64: WinLibs hosts on Windows only.
 mingw-gcc	x86_64	macos	upstream-none	Same as linux-x86_64: WinLibs hosts on Windows only.
 mingw-gcc	aarch64	macos	upstream-none	Same as linux-x86_64: WinLibs hosts on Windows only.
-go	aarch64	windows	not-pinned	go1.25.11.windows-arm64.zip exists on go.dev/dl alongside the windows-amd64 zip this catalog pins.
 postgresql	aarch64	windows	upstream-none	EnterpriseDB publishes the Windows binaries for x86-64 only; there is no arm64 Windows build of the installer payload this package realizes.
 ergo	aarch64	windows	upstream-none	ergochat/ergo v2.18.0 publishes ergo-2.18.0-windows-x86_64.zip and no arm64 Windows asset.
 windows-terminal	x86_64	linux	upstream-none	Windows Terminal is a Windows application; there is no Linux build and there will not be one.
@@ -55,3 +54,4 @@ msys2-ncurses	aarch64	macos	upstream-none	Same as linux-x86_64: MSYS2 is a Windo
 shellcheck	aarch64	windows	upstream-none	koalaman/shellcheck v0.11.0 publishes one Windows asset, shellcheck-v0.11.0.zip, which holds an x86_64 shellcheck.exe; there is no arm64 Windows build (conda-forge's shellcheck has win-64 only, too).
 typos	aarch64	windows	upstream-none	crate-ci/typos v1.45.0 publishes x86_64-pc-windows-msvc and no arm64 Windows asset. conda-forge builds typos for win-arm64 from 1.47.2, but not at 1.45.0, and it is not upstream.
 nixfmt	aarch64	windows	upstream-none	No Windows build of nixfmt is published anywhere, and the from-source realization (packages/source/nixfmt) needs GHC, which publishes no Windows arm64 bindist: downloads.haskell.org carries x86_64-unknown-mingw32 only, for 9.12.1, 9.12.2 and 9.14.1 (checked 2026-10-02).
+lychee	aarch64	windows	upstream-none	lycheeverse/lychee lychee-v0.23.0 publishes lychee-x86_64-windows.exe and no arm64 Windows asset; its release workflow builds Windows on an x86_64 runner only.

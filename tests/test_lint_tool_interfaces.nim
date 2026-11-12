@@ -12,7 +12,7 @@
 ## shape. They say nothing about whether a digest is RIGHT -- each module's
 ## header records how its digests were checked against the downloaded bytes.
 
-import std/[os, sequtils, sets, strutils, unittest]
+import std/[json, os, sequtils, sets, strutils, unittest]
 
 import repro_project_dsl
 import repro_dsl_stdlib/nixpkgs_pin
@@ -24,6 +24,8 @@ import ../packages/interfaces/prek/repro as prekInterface
 import ../packages/interfaces/nixfmt/repro as nixfmtInterface
 import ../packages/interfaces/repomix/repro as repomixInterface
 import ../packages/interfaces/actionlint/repro as actionlintInterface
+import ../packages/interfaces/lychee/repro as lycheeInterface
+import "../packages/interfaces/markdownlint-cli2/repro" as markdownlintCli2Interface
 
 const Interfaces = [
   ("shellcheck", "0.11.0", "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/"),
@@ -32,6 +34,7 @@ const Interfaces = [
   ("prek", "0.3.2", "https://github.com/j178/prek/releases/download/v0.3.2/"),
   ("nixfmt", "1.2.0", "https://github.com/NixOS/nixfmt/releases/download/v1.2.0/"),
   ("actionlint", "1.7.9", "https://github.com/rhysd/actionlint/releases/download/v1.7.9/"),
+  ("lychee", "0.23.0", "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.23.0/"),
 ]
 
 proc interfaceNamed(name: string): PackageDef =
@@ -138,3 +141,58 @@ suite "repomix's npm realization":
     # Two of them nest a second version under their dependent, where npm
     # puts a version that conflicts with the hoisted one.
     check "node_modules/body-parser/node_modules/content-type" in paths
+
+suite "markdownlint-cli2's npm realization":
+  # Like repomix: the npm registry tarball, run by `node`, with its runtime
+  # closure from `closures/markdownlint-cli2.manifest`. Upstream commits no
+  # lock, so the lock that closure was generated from is committed beside it.
+  let pkg = interfaceNamed("markdownlint-cli2")
+  let closures = currentSourcePath.parentDir.parentDir / "packages" /
+    "interfaces" / "markdownlint-cli2" / "closures"
+
+  test "one platform-neutral slice, launched by node":
+    check pkg.tarballProvisioning.len == 1
+    let slice = pkg.tarballProvisioning[0]
+    check slice.cpu == ""
+    check slice.os == ""
+    check slice.url ==
+      "https://registry.npmjs.org/markdownlint-cli2/-/markdownlint-cli2-0.21.0.tgz"
+    check slice.packageId == "markdownlint-cli2@0.21.0"
+    check slice.lockIdentity ==
+      "tarball:markdownlint-cli2@0.21.0:sha256:" & slice.sha256
+    check slice.stripComponents == 1
+    check slice.executablePath == "markdownlint-cli2-bin.mjs"
+    check slice.executableAlias == "markdownlint-cli2"
+    check slice.launcher == "node"
+    check slice.closureManifest == "closures/markdownlint-cli2.manifest"
+    check pkg.nixProvisioning.len == 1
+    check pkg.nixProvisioning[0].selector == "nixpkgs#markdownlint-cli2"
+    check pkg.nixProvisioning[0].executablePath == "bin/markdownlint-cli2"
+
+  test "the closure is the committed lock's runtime tree, pinned":
+    var paths = initHashSet[string]()
+    for line in readFile(closures / "markdownlint-cli2.manifest").splitLines():
+      if line.len == 0 or line.startsWith("#"):
+        continue
+      let fields = line.splitWhitespace()
+      checkpoint(line)
+      check fields.len == 3
+      check fields[0].startsWith("node_modules/")
+      check ".." notin fields[0]
+      check fields[0] notin paths
+      paths.incl(fields[0])
+      check fields[1].len == 64
+      check fields[1].allIt(it in {'0' .. '9', 'a' .. 'f'})
+      check fields[2].startsWith("https://registry.npmjs.org/")
+    # The lock has no dev dependencies (they were removed before locking),
+    # so every package it records is in the closure, and nothing else is.
+    let lock = parseJson(readFile(closures / "markdownlint-cli2.package-lock.json"))
+    check lock["packages"][""]["name"].getStr == "markdownlint-cli2"
+    check lock["packages"][""]["version"].getStr == "0.21.0"
+    var locked = initHashSet[string]()
+    for key, _ in lock["packages"]:
+      if key.len > 0:
+        locked.incl(key)
+    check paths == locked
+    check paths.len == 84
+    check "node_modules/markdownlint" in paths

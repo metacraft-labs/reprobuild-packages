@@ -93,8 +93,13 @@ import ../packages/interfaces/typos/repro as typosInterface
 import ../packages/interfaces/nixfmt/repro as nixfmtInterface
 import ../packages/interfaces/repomix/repro as repomixInterface
 
+# reprobuild-pm's Markdown and link lint gate.
+import "../packages/interfaces/markdownlint-cli2/repro" as markdownlintCli2Interface
+import ../packages/interfaces/lychee/repro as lycheeInterface
+
 const
-  ## The tools Agent Harbor's and RunQuota's `repro.nim` name and this
+  ## The tools Agent Harbor's, RunQuota's and reprobuild-pm's `repro.nim`
+  ## name and this
   ## catalog owns. Kept
   ## as data beside the imports so a package that is imported but not
   ## declared, or declared but not imported, shows up as a diff rather than
@@ -109,6 +114,7 @@ const
     "taplo", "cargo-sort", "wix",
     "tmux", "msys2-libevent", "msys2-ncurses",
     "shellcheck", "typos", "nixfmt", "repomix",
+    "markdownlint-cli2", "lychee",
   ]
 
   ## Tools a dev environment declares on SOME operating systems only, and
