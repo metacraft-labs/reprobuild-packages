@@ -159,6 +159,12 @@ package llmApiProxySource:
     "rustc >=1.94 <1.95"
     # The target C toolchain, and what the `*-sys` build scripts run.
     "zig >=0.13 <0.14"
+    # The HOST C compiler. rustc links every crate's build script for the
+    # host triple through a bare `cc`, which `--target` does not redirect to
+    # zig, and under `--tool-provisioning=nix` the action inherits no `PATH`.
+    # It builds only the build scripts; the target's objects and link come
+    # from zig.
+    "gcc >=11"
     "cmake >=3.20"
     "perl >=5.32"
     "make"

@@ -37,14 +37,15 @@ suite "llm-api-proxy source recipe":
     for dep in deps:
       check not dep.startsWith("rust-sysroot")
       check not dep.startsWith("openssl")
-    var zig, cmake = false
+    var zig, cmake, hostCc = false
     for dep in deps:
       if dep.startsWith("zig"): zig = true
       if dep.startsWith("cmake"): cmake = true
-      # zig is the target C toolchain; a host gcc here would be the wrong
-      # compiler for every `*-sys` crate.
-      check not dep.startsWith("gcc")
-    check zig and cmake
+      # zig is the target C toolchain of the `*-sys` crates; gcc is only the
+      # host `cc` rustc links the build scripts with, which a nix-provisioned
+      # action has no other way to find.
+      if dep.startsWith("gcc"): hostCc = true
+    check zig and cmake and hostCc
 
   test "publishes the single command":
     let artifacts = registeredArtifacts("llmApiProxySource")
