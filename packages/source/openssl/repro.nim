@@ -235,6 +235,14 @@ proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
     ("CC", zigCrossCc(t) & " -g0"),
     ("AR", "zig ar"),
     ("RANLIB", "zig ranlib"),
+    # `util/mkbuildinf.pl` writes `built on: <gmtime>` into `buildinf.h`
+    # (`OpenSSL_version(OPENSSL_BUILT_ON)`), taking the time of the build
+    # unless `SOURCE_DATE_EPOCH` is set, "even if it's zero"
+    # (https://reproducible-builds.org/specs/source-date-epoch/). Every
+    # build of this library, and of each binary that links it (vaultwarden's
+    # digest), would otherwise differ by the minute it ran. Zero names the
+    # epoch, a date no build ran on, so the string says nothing false.
+    ("SOURCE_DATE_EPOCH", "0"),
   ]
   # The `openssl` command links zig's own libc and compiler-rt objects,
   # which zig compiles at link time with DWARF whatever `CC` says, so their

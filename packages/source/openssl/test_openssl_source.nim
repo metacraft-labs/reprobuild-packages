@@ -156,6 +156,9 @@ suite "opensslSource — target-parameterised (ReproOS-Add-On-Mode A15)":
     check "CC=zig cc -target arm-linux-musleabihf -mcpu=generic+v7a+vfp3d16+thumb2 -g0" in env
     check "AR=zig ar" in env
     check "RANLIB=zig ranlib" in env
+    # `buildinf.h` stamps the time of the build into libcrypto.a (and into
+    # every executable linking it) unless this is set.
+    check "SOURCE_DATE_EPOCH=0" in env
     check "LDFLAGS=-L/b/stub -Wl,--strip-debug" in env
     check "--openssldir=/etc/ssl" in plan.configureOptions
     # Nothing in the plan names a directory of the machine: the compiler by

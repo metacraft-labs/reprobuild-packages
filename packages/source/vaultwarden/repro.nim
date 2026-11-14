@@ -78,19 +78,23 @@ const
   VaultwardenSourceSha256* =
     "8d506379fa19f21323c401b525ab5c6ca74de71509df81a9591ad5d5a4da2737"
   VaultwardenBinarySha256* =
-    "08005cef7e04eef31cd5a917287294e978bc47131bff41d15afae167f896549e"
+    "9a8ef6466032479199297ed017c0fc13a6fe9f1ed52b35df6281b7eb77e5245d"
     ## sha256 of `usr/bin/vaultwarden` as this recipe builds it with
     ## `--target=x86_64-unknown-linux-musl`, from ANY checkout. Measured
-    ## 2026-11-01 on x86-64 NixOS without nix-ld with an engine built from
-    ## reprobuild `ff76c98ad0` (landed on `agents` rebased, unchanged, as
-    ## `adf363bcf2`), `--tool-provisioning=path`, rustc/cargo 1.94.0
-    ## through the catalog's Nix channel, from two checkouts of this
-    ## repository at different paths: the two executables were
-    ## byte-identical (36 MB,
-    ## static, no absolute path of either checkout or of the Nix store in
-    ## them), and `vaultwarden --version` answers `Vaultwarden 1.36.0`.
-    ## The test beside the recipe holds a present build output to this
-    ## value.
+    ## 2026-11-14 on x86-64 NixOS without nix-ld with the engine of
+    ## reprobuild 0.2.23, `--tool-provisioning=path`, rustc/cargo 1.94.0
+    ## through the catalog's Nix channel: two builds from checkouts at
+    ## different paths, with different host C compilers on `PATH` (gcc 15.3
+    ## and gcc 13) and an empty action cache each, were byte-identical (36
+    ## MB, static, no absolute path of either checkout or of the Nix store
+    ## in them), and `vaultwarden --version` answers `Vaultwarden 1.36.0`.
+    ## The previous value, measured 2026-11-01, held only for builds made
+    ## within one minute of each other: the OpenSSL this links stamped the
+    ## time of its build (`built on: ...`) into the executable, until the
+    ## openssl recipe set `SOURCE_DATE_EPOCH`. Three builds on 2026-11-14
+    ## gave three digests that differed by that string and the string pool
+    ## laid out around it. The test beside the recipe holds a present build
+    ## output to this value.
   VaultwardenFeatures* = @["sqlite"]
   OpensslRecipe = "openssl"
     ## The sibling recipe `openssl-sys` links; built for the active target.
