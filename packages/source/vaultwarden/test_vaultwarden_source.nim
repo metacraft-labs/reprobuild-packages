@@ -38,16 +38,20 @@ suite "vaultwarden source recipe":
     check "vendored_openssl" notin code
     check "target =" notin code
 
-  test "links the sibling OpenSSL and builds with zig":
+  test "links the sibling OpenSSL, builds with zig, and provisions a host cc":
     var openssl = false
     for dep in registeredBuildDeps("vaultwardenSource"):
       if dep.startsWith("openssl"): openssl = true
     check openssl
     var zig = false
+    var hostCc = false
     for dep in registeredNativeBuildDeps("vaultwardenSource"):
       if dep.startsWith("zig"): zig = true
-      check not dep.startsWith("gcc")
+      # rustc links the host-triple build scripts through `cc`; without a
+      # declared C compiler the nix-provisioned action has none.
+      if dep.startsWith("gcc"): hostCc = true
     check zig
+    check hostCc
 
   test "publishes the single command":
     let artifacts = registeredArtifacts("vaultwardenSource")
