@@ -42,13 +42,13 @@ import repro_dsl_stdlib/types/package_result
 import ../source_recipe_paths
 
 const
-  NimForkRevision* = "8384ff3fecfdbd8772d46c79054967769915d6fd"
+  NimForkRevision* = "bb0e894367a94b6bcf4ce0b2ee666a4d9cbe1654"
     ## reprobuild `flake.lock`, input `nim-fork-src`.
   NimForkVersion* = "2.3.1"
   NimForkSource* = PinnedArchive(name: "nim",
     url: "https://github.com/metacraft-labs/nim/archive/" & NimForkRevision &
       ".tar.gz",
-    sha256: "c42b59b3bff8dfa3c56218362360c0b48074dfc9cc669fb46b16e6ed0fc26dd8",
+    sha256: "4222645eaaf6a86a36b87b1fe3efc6fec25a1f5042398bb0ee44544470abce8d",
     kind: pakTarball, stripComponents: 1)
   NimForkDist* = [
     ## `(dist/<directory>, archive)`: the trees the fork compiler imports,
