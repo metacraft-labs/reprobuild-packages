@@ -264,6 +264,28 @@ package reprobuildPackages:
       cacheable = false)
     discard target("test-rustup-contribution", rustupTestRun)
 
+    ## `config.nims` alone must resolve the reprobuild DSL and what it
+    ## imports: the Justfile recipes run a bare `nim`, which gets no other
+    ## search path. The test execs the real `nim` on a probe module at run
+    ## time, so the run edge carries the `nim` tool and both files as inputs.
+    let configNimsTest = buildNimUnittest.build(
+      source = "tests/test_config_nims_resolves_dsl.nim",
+      binary = "build" / "test-bin" /
+        ("build-test-config-nims-resolves-dsl" & ExeExt),
+      actionId = "packages.build.config-nims-resolves-dsl",
+      defines = @["reproProviderMode"],
+      extraInputs = @["config.nims"])
+    appendRegisteredActionToolIdentityRefs(configNimsTest.action.id, ["gcc"])
+    let configNimsTestRun = configNimsTest.testBinary.run(
+      actionId = "packages.test-config-nims-resolves-dsl",
+      after = @[configNimsTest.action],
+      extraInputs = @["config.nims",
+                      "tests/config_nims_probe/dsl_import_probe.nim"],
+      registerImplicitName = false,
+      cacheable = false)
+    appendRegisteredActionToolIdentityRefs(configNimsTestRun.id, ["nim"])
+    discard target("test-config-nims-resolves-dsl", configNimsTestRun)
+
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("test-consumer-audit", consumerAuditTests)
@@ -279,5 +301,6 @@ package reprobuildPackages:
     discard collect("test-source-integration", actions = integrationTests)
     discard collect("test", actions =
       @[catalogTests, inventoryTests, graphTestRun, tierTestRun,
-        coverageTestRun, lintInterfacesTestRun, macosAppsTestRun, treeSitterTestRun, treeSitterGenerationTestRun, rustupTestRun] &
+        coverageTestRun, lintInterfacesTestRun, macosAppsTestRun, treeSitterTestRun, treeSitterGenerationTestRun, rustupTestRun,
+        configNimsTestRun] &
         sourceTests)

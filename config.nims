@@ -26,6 +26,13 @@ addDependencyPath("SHM_QUEUE_SRC", "nim-shm-queue")
 addDependencyPath("SHM_GSET_SRC", "nim-shm-gset")
 addDependencyPath("STACKABLE_HOOKS_SRC", "nim-stackable-hooks")
 addDependencyPath("REPRO_TEST_ADAPTERS_SRC", "reprobuild-test-adapters")
+# reprobuild's DSL imports `clispec/[model, dsl]`, so every recipe needs
+# nim-cli-spec. confutils (`confutils/clispec_config`) is imported by
+# reprobuild's `repro_cli_support`, which this file already puts on the path
+# with the rest of `libs/*/src`. Same variables and siblings as reprobuild's
+# own config.nims; confutils is rooted at its checkout, with no `src/`.
+addDependencyPath("CLI_SPEC_SRC", "nim-cli-spec")
+addDependencyPath("CONFUTILS_SRC", "nim-confutils")
 
 let nimcryptoRoot = libsRoot / "nimcrypto"
 if fileExists(nimcryptoRoot / "nimcrypto" / "hash.nim"):

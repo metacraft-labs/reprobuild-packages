@@ -70,3 +70,9 @@ suite "source recipe test graph":
   test "lint does not compile or execute source recipe tests":
     check targetDef("lint").actions ==
       @["packages.check-catalog", "packages.check-source-tests"]
+
+  test "the config.nims test runs `nim` and is part of `test`":
+    let executed = action("packages.test-config-nims-resolves-dsl")
+    check "nim" in executed.toolIdentityRefs
+    check targetDef("test-config-nims-resolves-dsl").actions == @[executed.id]
+    check executed.id in targetDef("test").actions
