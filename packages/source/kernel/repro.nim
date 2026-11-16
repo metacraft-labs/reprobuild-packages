@@ -153,18 +153,34 @@ import repro_dsl_stdlib/types/package_result
 
 const KernelConfigDisabled*: seq[string] = @[
   # Symbols forced off. Debug info and BTF are dropped because they
-  # dominate build time and image size for a boot kernel; module signing
-  # and the trusted/revocation keyrings are dropped because the recipe
-  # has no signing key; ORC unwinding is traded for frame pointers so the
-  # build does not need objtool's stack validation.
+  # dominate build time and image size for a boot kernel; the
+  # trusted/revocation key lists and automatic module signing are dropped
+  # because the recipe has no signing key (see ``KernelConfigStrings``);
+  # ORC unwinding is traded for frame pointers so the build does not need
+  # objtool's stack validation.
+  #
+  # ``MODULE_SIG`` itself is NOT here: the lockdown LSM below ``select``s
+  # it, so ``olddefconfig`` turns it back on whatever this list says, and
+  # listing it would be a request the resolved configuration silently
+  # ignores.
   "DEBUG_INFO",
   "DEBUG_INFO_BTF",
   "DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT",
-  "MODULE_SIG",
+  "MODULE_SIG_ALL",
   "SYSTEM_TRUSTED_KEYS",
   "SYSTEM_REVOCATION_KEYS",
   "STACK_VALIDATION",
   "UNWINDER_ORC",
+  # No kexec. A kexec image replaces the running kernel while the launch
+  # measurement (the SNP/TDX report, TPM PCR 11) still names the one that
+  # was booted, so a kernel that can kexec lets root run an unmeasured
+  # kernel under a measured identity. ``kexec_load`` is refused under
+  # lockdown, but ``kexec_file_load`` is checked only when ``KEXEC_SIG``
+  # is configured, and this recipe has no signing key; so neither syscall
+  # is built. ReproOS boots through firmware on every layout and has no
+  # use for either.
+  "KEXEC",
+  "KEXEC_FILE",
 ]
 
 const KernelConfigEnabled*: seq[string] = @[
@@ -270,6 +286,22 @@ const KernelConfigEnabled*: seq[string] = @[
   "X86_X2APIC",
   "INTEL_TDX_GUEST",
   "TDX_GUEST_DRIVER",
+  #
+  # Kernel lockdown. The attested image's measured command line carries
+  # ``lockdown=integrity``, which stops root from modifying the running
+  # kernel: no writes through ``/dev/mem``/``/dev/kmem``/``/dev/port``,
+  # no MSR writes, no resume from a hibernation image on the writable
+  # swap, no unsigned kexec, and no unsigned module -- which, because
+  # this kernel signs none (``KernelConfigStrings``), is no module at
+  # all. Without the LSM built in the kernel ignores
+  # the argument and boots unlocked. ``_EARLY`` initialises it before
+  # every other LSM and independently of the ``lsm=`` list, so nothing on
+  # the command line can leave it out. Lockdown is deliberately NOT
+  # forced here (``LOCK_DOWN_KERNEL_FORCE_*``): the writable-root layout
+  # boots this same kernel and does not ask for it.
+  "SECURITY",
+  "SECURITY_LOCKDOWN_LSM",
+  "SECURITY_LOCKDOWN_LSM_EARLY",
 ]
 
 const KernelAttestationSymbols*: seq[string] = @[
@@ -297,6 +329,25 @@ const KernelAttestationSymbols*: seq[string] = @[
   "SEV_GUEST",
   "INTEL_TDX_GUEST",
   "TDX_GUEST_DRIVER",
+  "SECURITY",
+  "SECURITY_LOCKDOWN_LSM",
+  "SECURITY_LOCKDOWN_LSM_EARLY",
+]
+
+const KernelConfigStrings*: seq[(string, string)] = @[
+  # String symbols set verbatim.
+  #
+  # ``MODULE_SIG_KEY`` empty: no module-signing key. Its default,
+  # ``certs/signing_key.pem``, makes kbuild GENERATE a fresh private key
+  # on every build and embed its certificate in the kernel, so two builds
+  # of the same inputs would differ in the bzImage bytes and therefore in
+  # every launch measurement over it. ``MODULE_SIG`` is on only because
+  # the lockdown LSM selects it; with no key the built-in keyring is
+  # empty, modules are installed unsigned (``MODULE_SIG_ALL`` off), the
+  # writable-root layout loads them as before (tainted, since nothing
+  # enforces signatures there), and a kernel booted with
+  # ``lockdown=integrity`` refuses every one of them.
+  ("MODULE_SIG_KEY", ""),
 ]
 
 func kernelConfigCommand*(configScript, configFile: string): string =
@@ -310,6 +361,12 @@ func kernelConfigCommand*(configScript, configFile: string): string =
   for symbol in KernelConfigEnabled:
     parts.add("--enable")
     parts.add(symbol)
+  for (symbol, value) in KernelConfigStrings:
+    parts.add("--set-str")
+    parts.add(symbol)
+    # Single-quoted for the shell the build runs this line in; the values
+    # declared above contain no single quote.
+    parts.add("'" & value & "'")
   parts.join(" ")
 
 # ---------------------------------------------------------------------------

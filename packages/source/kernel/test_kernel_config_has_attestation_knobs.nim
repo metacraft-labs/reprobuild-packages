@@ -258,6 +258,67 @@ suite "kernel configuration carries the attestation knobs":
         echo "[diag] not built in: ", m
     check missing.len == 0
 
+  test "root cannot replace the measured kernel or turn lockdown into a no-op":
+    # The attack this protects against: an attested image is measured
+    # once, at launch. Root on the running machine that can kexec another
+    # kernel, or load code into this one, keeps the original launch
+    # measurement while running something else. The attested command line
+    # asks for ``lockdown=integrity``, and the attested initramfs closes
+    # module loading and kexec before handing off — but both of those are
+    # only as good as the kernel underneath:
+    #
+    #   * without ``SECURITY_LOCKDOWN_LSM`` the kernel ignores
+    #     ``lockdown=`` entirely, and without ``SECURITY_LOCKDOWN_LSM_EARLY``
+    #     it is honoured only if the LSM happens to be on the ``lsm=`` list;
+    #   * with ``KEXEC`` or ``KEXEC_FILE`` the kernel carries a syscall that
+    #     boots a different kernel under the same measurement. Lockdown
+    #     refuses ``kexec_load``, but ``kexec_file_load`` without
+    #     ``KEXEC_SIG`` is not covered by it, so the syscalls are not built.
+    #
+    # The lists are spelled out HERE rather than read from the recipe, so
+    # that removing a symbol from the recipe cannot quietly remove it from
+    # the gate too.
+    const mustBeBuiltIn = ["SECURITY", "SECURITYFS", "SECURITY_LOCKDOWN_LSM",
+                           "SECURITY_LOCKDOWN_LSM_EARLY"]
+    const mustBeAbsent = ["KEXEC", "KEXEC_FILE"]
+    var wrong: seq[string]
+    for symbol in mustBeBuiltIn:
+      if resolved.getOrDefault(symbol, "") != "y":
+        wrong.add("required y, got " & describe(resolved, symbol))
+    for symbol in mustBeAbsent:
+      if resolved.getOrDefault(symbol, "n") != "n":
+        wrong.add("required off, got " & describe(resolved, symbol))
+    # Lockdown is REQUESTED on the attested command line, not forced at
+    # build time, so the writable-root layout that boots the same kernel
+    # keeps its unsigned-module and /dev/mem behaviour.
+    for forced in ["LOCK_DOWN_KERNEL_FORCE_INTEGRITY",
+                   "LOCK_DOWN_KERNEL_FORCE_CONFIDENTIALITY"]:
+      if resolved.getOrDefault(forced, "n") == "y":
+        wrong.add("lockdown must be asked for per image, got " &
+                  describe(resolved, forced))
+    for w in wrong:
+      echo "[diag] runtime-integrity symbol: ", w
+    check wrong.len == 0
+    # The recipe's own lists must say the same, so the build and the
+    # packaged-config check below cannot drift from this one.
+    for symbol in mustBeBuiltIn:
+      check symbol in KernelAttestationSymbols
+    for symbol in mustBeAbsent:
+      check symbol in KernelConfigDisabled
+
+  test "the lockdown LSM does not bring a build-time signing key with it":
+    # ``SECURITY_LOCKDOWN_LSM`` selects ``MODULE_SIG``, and
+    # ``MODULE_SIG_KEY``'s default makes kbuild generate a fresh private
+    # key on every build and embed its certificate in the kernel. That
+    # would make two builds of the same inputs differ in the bzImage, and
+    # so in every launch measurement over it. The recipe must leave the
+    # key empty and sign nothing.
+    check resolved.getOrDefault("MODULE_SIG", "") == "y"
+    check resolved.getOrDefault("MODULE_SIG_KEY", "<absent>") == "\"\""
+    check resolved.getOrDefault("MODULE_SIG_ALL", "n") == "n"
+    check resolved.getOrDefault("MODULE_SIG_FORCE", "n") == "n"
+    check ("MODULE_SIG_KEY", "") in KernelConfigStrings
+
   test "the verdict was taken from the resolved config, not the requested one":
     # ``TCG_TIS_CORE`` and ``DM_BUFIO`` are never asked for: Kconfig
     # ``select``s them while resolving ``TCG_TIS`` and ``DM_VERITY``.
@@ -330,6 +391,8 @@ suite "kernel configuration carries the attestation knobs":
     for symbol in KernelConfigEnabled:
       check rendered.contains(" --enable " & symbol & " ") or
             rendered.endsWith(" --enable " & symbol)
+    for (symbol, value) in KernelConfigStrings:
+      check rendered.contains(" --set-str " & symbol & " '" & value & "'")
 
   test "TSM_REPORTS is handled honestly for the pinned kernel version":
     # ``TSM_REPORTS`` (the unified configfs attestation-report ABI) is a
