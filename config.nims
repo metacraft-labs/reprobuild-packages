@@ -47,6 +47,12 @@ if fileExists(blake3Headers / "blake3.h") and
   switch("passC", "-I" & blake3Headers)
   switch("passC", "-I" & xxhashHeaders)
 
+# Reprobuild's project DSL compiles its thin mode unless a mode is defined
+# (repro_project_dsl/mode). This repository's tests and tools evaluate
+# recipes in process, so they need the full DSL. The engine's provider and
+# interface compiles define their own mode, which takes precedence.
+switch("define", "reproEvalMode")
+
 ## Worktree-local nimcache: every Nim compile inside this checkout keeps its
 ## intermediate files (its nimcache) INSIDE this checkout.
 ##
