@@ -286,6 +286,34 @@ package reprobuildPackages:
     appendRegisteredActionToolIdentityRefs(configNimsTestRun.id, ["nim"])
     discard target("test-config-nims-resolves-dsl", configNimsTestRun)
 
+    ## The closure-manifest generators of the gem-closure step: the gem
+    ## manifest from a Nix Ruby-with-gems closure, and an MSYS root's
+    ## closure from an MSYS2 package database. Both run on recorded inputs
+    ## (each test's header says why), so neither needs Nix or the network.
+    var generatorTestRuns: seq[BuildActionDef] = @[]
+    for (source, name) in [
+        ("tests/test_gem_closure_manifest.nim", "gem-closure-manifest"),
+        ("tests/test_msys2_root_closure_manifest.nim",
+         "msys2-root-closure-manifest")]:
+      let generatorTest = buildNimUnittest.build(
+        source = source,
+        binary = "build" / "test-bin" / ("build-test-" & name & ExeExt),
+        actionId = "packages.build." & name,
+        defines = @["reproProviderMode"],
+        extraInputs = @["config.nims"])
+      appendRegisteredActionToolIdentityRefs(generatorTest.action.id, ["gcc"])
+      let generatorTestRun = generatorTest.testBinary.run(
+        actionId = "packages.test-" & name,
+        after = @[generatorTest.action],
+        extraInputs =
+          if name == "gem-closure-manifest":
+            @["tests/fixtures/gem-closure-pinned-nixpkgs.json"]
+          else: @[],
+        registerImplicitName = false,
+        cacheable = false)
+      discard target("test-" & name, generatorTestRun)
+      generatorTestRuns.add(generatorTestRun)
+
     discard target("check-catalog", catalog)
     discard target("test-catalog", catalogTests)
     discard target("test-consumer-audit", consumerAuditTests)
@@ -302,5 +330,5 @@ package reprobuildPackages:
     discard collect("test", actions =
       @[catalogTests, inventoryTests, graphTestRun, tierTestRun,
         coverageTestRun, lintInterfacesTestRun, macosAppsTestRun, treeSitterTestRun, treeSitterGenerationTestRun, rustupTestRun,
-        configNimsTestRun] &
+        configNimsTestRun] & generatorTestRuns &
         sourceTests)
