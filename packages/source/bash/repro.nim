@@ -213,6 +213,14 @@ package bashSource:
       ]
       let pkg = autotools_package(srcDir = "./src",
                                   configureOptions = opts,
+                                  # bash 5.2 declares functions K&R-style (`void file_error ();`):
+                                  # no prototype before C23, "no arguments" in C23, which GCC 15+
+                                  # selects by default ("too many arguments to function
+                                  # 'xmalloc'"). Pin the last pre-C23 dialect. It goes in the
+                                  # environment, not `configureOptions`: a space-bearing
+                                  # `CFLAGS=...` option is split into separate arguments and
+                                  # configure rejects `-std=gnu17`.
+                                  extraEnv = @[("CFLAGS", "-O2 -std=gnu17")],
                                   installTarget = "install-sh-alias",
                                   srcPatches = patches)
       discard pkg.executable("bash")
