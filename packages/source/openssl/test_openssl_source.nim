@@ -26,7 +26,7 @@
 ##   * ``versions:`` block round-trip (M2) — upstream tag + URL +
 ##     repository for ``repro update-source``.
 
-import std/[unittest, strutils]
+import std/[os, unittest, strutils]
 
 import repro_project_dsl
 
@@ -35,6 +35,7 @@ import repro_project_dsl
 # ``opensslSource`` at module init time.
 import repro_dsl_stdlib/adapters/cross_zig
 import repro_dsl_stdlib/adapters/native_cross_target
+import repro_dsl_stdlib/operations/zig_c
 import ./repro
 
 const ExpectedUrl =
@@ -143,7 +144,8 @@ suite "opensslSource — target-parameterised (ReproOS-Add-On-Mode A15)":
     check plan.postConfigureCommands.len == 0
 
   test "a zig target configures for the family, static, with zig as the toolchain":
-    let plan = opensslBuildPlan(crossZigTarget(Triple), atomicStubDir = "/b/stub")
+    let plan = opensslBuildPlan(crossZigTarget(Triple), atomicStubDir = "/b/stub",
+      wrapperDir = "../w")
     check plan.configureOptions[0] == "linux-armv4"
     check "no-shared" in plan.configureOptions
     check "shared" notin plan.configureOptions
@@ -153,7 +155,11 @@ suite "opensslSource — target-parameterised (ReproOS-Add-On-Mode A15)":
     # `-g0`: without it every compile unit records the build directory as
     # its DWARF `comp_dir`, and a consumer that keeps debug information
     # carries the checkout's path.
-    check "CC=zig cc -target arm-linux-musleabihf -mcpu=generic+v7a+vfp3d16+thumb2 -g0" in env
+    # `CC` is the adapter's `cc` wrapper (`zigCrossCc`), never `zig cc` and
+    # the driver arguments: only the wrapper keeps zig's compiler-rt out of
+    # a 32-bit ARM `-shared` link's exports.
+    check "CC=../w/cc -g0" in env
+    check "CC=" & zigCrossCc("../w") & " -g0" in env
     check "AR=zig ar" in env
     check "RANLIB=zig ranlib" in env
     # `buildinf.h` stamps the time of the build into libcrypto.a (and into
@@ -168,6 +174,35 @@ suite "opensslSource — target-parameterised (ReproOS-Add-On-Mode A15)":
     check plan.postConfigureCommands.len == 1
     check "zig ar rc" in plan.postConfigureCommands[0]
     check "/b/stub/libatomic.a" in plan.postConfigureCommands[0]
+
+  test "the wrappers are named relative to the build directory":
+    # OpenSSL records its `CC` in `libcrypto.a`, so the wrapper's path must
+    # not name the checkout: it is relative to the target's build directory,
+    # under the same project root.
+    let rel = opensslZigWrapperDir("/home/u/checkout", Triple)
+    check not rel.isAbsolute
+    check "/home/" notin rel
+    check normalizedPath("/home/u/checkout" / OpensslBuildDir / rel) ==
+      zigCrossWrapperDir("/home/u/checkout", Triple)
+    # Under `--target` the build directory is keyed by the target
+    # (`build@<triple>`, the directory `autotools_package` configures and
+    # makes in), and the path is relative to that one.
+    let saved = getEnv("REPRO_VARIANTS")
+    putEnv("REPRO_VARIANTS", "targetTriple=" & Triple)
+    try:
+      let keyed = targetKeyedDir(OpensslBuildDir)
+      check keyed != OpensslBuildDir
+      check Triple in keyed
+      let keyedRel = opensslZigWrapperDir("/home/u/checkout", Triple)
+      check not keyedRel.isAbsolute
+      check normalizedPath("/home/u/checkout" / keyed / keyedRel) ==
+        zigCrossWrapperDir("/home/u/checkout", Triple)
+    finally:
+      if saved.len > 0: putEnv("REPRO_VARIANTS", saved)
+      else: delEnv("REPRO_VARIANTS")
+    # A zig target with no wrapper directory is refused by name.
+    expect ValueError:
+      discard opensslBuildPlan(crossZigTarget(Triple))
 
   test "a target no adapter claims is refused by name":
     expect ValueError:

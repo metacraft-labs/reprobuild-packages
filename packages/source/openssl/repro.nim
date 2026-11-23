@@ -138,6 +138,7 @@ import repro_project_dsl
 import repro_dsl_stdlib/active_context
 import repro_dsl_stdlib/adapters/cross_zig
 import repro_dsl_stdlib/constructors
+import repro_dsl_stdlib/operations/zig_c
 import repro_dsl_stdlib/types/package_result
 
 # ---------------------------------------------------------------------------
@@ -152,8 +153,15 @@ import repro_dsl_stdlib/types/package_result
 # every 32-bit ARM), `no-shared` -- a static-musl consumer links `.a` files
 # and the zig musl target has no shared-object runtime to speak of -- with
 # zig as `CC`, `AR` and `RANLIB`: OpenSSL's `Configure` takes the toolchain
-# from those three, as whole strings `make` expands through the shell, so
-# `zig cc -target … -mcpu=…` needs no wrapper here. `AR` and `RANLIB` must
+# from those three, as whole strings `make` expands through the shell. `CC`
+# is `zigCrossCc`, the adapter's `cc` wrapper, which every `CC` handed to a
+# configure script must be: on a 32-bit ARM row only the wrapper keeps zig's
+# compiler-rt out of a `-shared` link's exports (a library that exports it
+# hands its consumers zig's helpers, and they then fail to load against a
+# target system's build of that library, which exports none of them).
+# It is named by a path relative to the build directory, because OpenSSL
+# records its `CC` in `libcrypto.a` (`buildinf.h`) and an absolute path
+# would name the checkout. `AR` and `RANLIB` must
 # be zig's too, because a GNU `ranlib` on an LLVM-produced archive is not
 # guaranteed to agree with the linker that reads it.
 #
@@ -183,11 +191,25 @@ proc opensslHostTarget*(): string =
     if hostCPU == "arm64" or hostCPU == "aarch64": "linux-aarch64"
     else: "linux-x86_64"
 
-proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
+const OpensslBuildDir* = "build"
+  ## The build directory `autotools_package` configures and makes in,
+  ## relative to the project root (keyed by the target, `targetKeyedDir`).
+
+proc opensslZigWrapperDir*(projectRoot, rustTriple: string): string =
+  ## The `cross_zig` wrapper directory for `rustTriple`, relative to the
+  ## build directory of the active target: the path `Configure` and `make`
+  ## reach the `cc` wrapper by, and that `libcrypto.a` records.
+  relativePath(zigCrossWrapperDir(projectRoot, rustTriple),
+    projectRoot / targetKeyedDir(OpensslBuildDir))
+
+proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = "";
+                        wrapperDir = ""): OpensslBuildPlan =
   ## The configure options, environment and post-configure commands for
   ## `ct`. Pure, so the recipe test drives it with the adapters directly.
   ## `atomicStubDir` is where the empty `libatomic.a` of a zig target is
-  ## written (the recipe passes its build directory).
+  ## written (the recipe passes its build directory). `wrapperDir` is the
+  ## directory of the `cross_zig` wrappers for a zig target, relative to the
+  ## build directory (`opensslZigWrapperDir`); a zig target requires it.
   if ct.isNative:
     result.configureOptions = @[
       opensslHostTarget(),
@@ -203,6 +225,10 @@ proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
       "' (the catalog builds OpenSSL for the zig targets of " &
       "repro_dsl_stdlib/adapters/cross_zig); build natively or add the " &
       "target to the adapter")
+  if wrapperDir.len == 0:
+    raise newException(ValueError, "openssl: a zig target (" & ct.triple &
+      ") needs the directory of the cross_zig wrappers, whose `cc` is the " &
+      "build's CC")
   let t = zigCrossTarget(ct.triple)
   result.configureOptions = @[
     t.opensslTarget,
@@ -220,9 +246,9 @@ proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
     # (`buildinf.h`) into `libcrypto.a`, and a consumer links them into
     # its binary. The prefix is the convention's checkout-independent
     # `/usr` (installed through DESTDIR), the OpenSSL directory is where
-    # the target's distribution keeps it, the compiler is spelled by bare
-    # name (`zig cc -target …`), and the atomic stub is reached by a path
-    # relative to the build directory. The last thing that names the
+    # the target's distribution keeps it, and the compiler (the `cc`
+    # wrapper) and the atomic stub are reached by paths relative to the
+    # build directory. The last thing that names the
     # checkout is debug information: zig's driver emits DWARF by default,
     # and each compile unit's `DW_AT_comp_dir` is the build directory (932
     # in `libcrypto.a`, measured at 8d4f448). `CC` therefore carries `-g0`.
@@ -232,7 +258,7 @@ proc opensslBuildPlan*(ct: CrossTarget; atomicStubDir = ""): OpensslBuildPlan =
     "--release",
   ]
   result.extraEnv = @[
-    ("CC", zigCrossCc(t) & " -g0"),
+    ("CC", zigCrossCc(wrapperDir) & " -g0"),
     ("AR", "zig ar"),
     ("RANLIB", "zig ranlib"),
     # `util/mkbuildinf.pl` writes `built on: <gmtime>` into `buildinf.h`
@@ -374,9 +400,14 @@ package opensslSource:
       # The stub directory is RELATIVE to the build directory (where
       # configure and make run): an absolute path here would be recorded
       # in `libcrypto.a`'s command line and name the checkout.
-      let plan = opensslBuildPlan(activeCrossTarget(),
-        atomicStubDir = "zig-atomic-stub")
+      # The wrappers are reached the same way, for the same reason.
+      let ct = activeCrossTarget()
+      let plan = opensslBuildPlan(ct, atomicStubDir = "zig-atomic-stub",
+        wrapperDir = (if isZigCrossTarget(ct):
+          opensslZigWrapperDir(activeProviderProjectRoot(), ct.triple)
+          else: ""))
       let pkg = autotools_package(srcDir = "./src",
+                                  buildDir = OpensslBuildDir,
                                   configureOptions = plan.configureOptions,
                                   configureScriptName = "Configure",
                                   extraEnv = plan.extraEnv,
